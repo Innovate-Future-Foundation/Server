@@ -6,7 +6,7 @@ namespace InnovateFuture.Application.Orders.Queries
 {
     public class GetOrderQuery : IRequest<OrderDto>
     {
-        [Required]
+
         public Guid OrderId { get; set; }
     }
 }

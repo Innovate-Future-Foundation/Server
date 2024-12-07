@@ -31,7 +31,7 @@ public static class SwaggerInitExtension
 
                 // config summery comments into each action in swagger
                 var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                option.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName), true);
+                //option.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName), true);
 
                 // config auth
                 option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

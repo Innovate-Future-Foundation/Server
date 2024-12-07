@@ -37,7 +37,7 @@ namespace InnovateFuture.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetOrder([FromQuery]Guid id)
+        public async Task<IActionResult> GetOrder(Guid id)
         {
             var query = new GetOrderQuery { OrderId = id };
             var order = await _mediator.Send(query);
