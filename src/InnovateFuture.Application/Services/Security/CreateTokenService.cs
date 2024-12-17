@@ -22,7 +22,7 @@ public class CreateTokenService
         foreach (var item in playBody)
             claims.Add(new Claim(item.Key, item.Value));
 
-        var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jWTConfig.SecrectKey));
+        var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jWTConfig.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(

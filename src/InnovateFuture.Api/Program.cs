@@ -1,4 +1,5 @@
 using FluentValidation;
+using HealthChecks.UI.Client;
 using InnovateFuture.Api.Filters;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Api.Middleware;
@@ -11,6 +12,7 @@ using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Orders.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Orders.Persistence.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -24,8 +26,10 @@ namespace InnovateFuture.Api
         {
             var logger = LogManager.Setup().LoadConfigurationFromFile("nLog.config").GetCurrentClassLogger();
             var policyName = "defalutPolicy";
-
+            
             var builder = WebApplication.CreateBuilder(args);
+            
+            var connectionString = builder.Configuration["DBConnection"];
             
             #region filter
             builder.Services.AddControllers(option =>
@@ -51,12 +55,13 @@ namespace InnovateFuture.Api
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(CreateOrderCommandValidator).Assembly);
+            builder.Services.AddHealthChecks()
+                .AddNpgSql(connectionString)
+                .AddDbContextCheck<ApplicationDbContext>();
             #endregion
             
             #region DB connection
             builder.Services.Configure<DBConnectionConfig>(builder.Configuration);
-
-            var connectionString = builder.Configuration["DBConnection"];
             
             builder.Services.AddDbContext<ApplicationDbContext>(
                 dbContextOptions => dbContextOptions
@@ -135,6 +140,11 @@ namespace InnovateFuture.Api
             }
             
             app.UseMiddleware<GlobalExceptionMiddleware>();
+            
+            app.MapHealthChecks("health",new HealthCheckOptions
+            {
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
             
             app.UseAuthentication();
 
