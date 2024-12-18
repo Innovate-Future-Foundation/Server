@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS migration
+
+RUN dotnet tool install --global dotnet-ef --version 9.0.0
+
+WORKDIR /
+COPY . .
+
+ENV ConnectionStrings__DBConnection="Your_DB_Connection_String_Here"
+ENV ASPNETCORE_ENVIRONMENT=Development
+# PATH for dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+WORKDIR /src
+ENTRYPOINT ["dotnet", "ef", "database", "update", \
+  "--project", "InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj", \
+  "--startup-project", "InnovateFuture.Api/InnovateFuture.Api.csproj"]
