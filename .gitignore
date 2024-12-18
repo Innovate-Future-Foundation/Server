@@ -483,3 +483,6 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 src/InnovateFuture.Api/appsettings.Development.json
+
+# Ignore build and publish content
+app/
