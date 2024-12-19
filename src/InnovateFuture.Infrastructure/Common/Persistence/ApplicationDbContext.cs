@@ -7,6 +7,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
 
+    public DbSet<User> Users { get; set; }
+
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
