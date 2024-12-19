@@ -91,8 +91,6 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                // Add your deployment steps here
-                // Example: Deploy to EC2 using SSH or AWS CLI
                 sh '''
                     echo "Deploying to EC2..."
                     # Add your deployment commands
@@ -103,9 +101,7 @@ pipeline {
 
     post {
         always {
-            node('any') {
-                cleanWs()
-            }
+            cleanWs()
         }
         success {
             echo 'Pipeline completed successfully!'
