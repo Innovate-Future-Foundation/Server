@@ -13,6 +13,9 @@ pipeline {
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 'true'
         DOTNET_NOLOGO = 'true'
         DOTNET_CLI_TELEMETRY_OPTOUT = 'true'
+        DOTNET_CLI_HOME = "/var/lib/jenkins/.dotnet"
+        DOTNET_NOLOGO = '1'
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
     }
 
     options {
@@ -33,7 +36,13 @@ pipeline {
             steps {
                 sh '''
                     echo "Starting build process..."
+
+                    # First restore NuGet packages
+                    dotnet restore --verbosity normal
+
+                    # Then build
                     dotnet build --configuration Release --no-restore --verbosity detailed | tee build.log
+
                     echo "Build process completed."
                 '''
             }
