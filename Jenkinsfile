@@ -44,17 +44,53 @@ pipeline {
             parallel {
                 stage('API Tests') {
                     steps {
-                        sh 'dotnet test tests/InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj --configuration Release --no-build'
+                        timeout(time: 5, unit: 'MINUTES') {
+                            sh '''
+                                echo "Starting API Tests..."
+                                dotnet test tests/InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj \
+                                    --configuration Release \
+                                    --no-build \
+                                    --verbosity normal \
+                                    --logger "console;verbosity=detailed" \
+                                    --results-directory ./testresults \
+                                    --blame-hang-timeout 60s
+                                echo "API Tests completed."
+                            '''
+                        }
                     }
                 }
                 stage('Application Tests') {
                     steps {
-                        sh 'dotnet test tests/InnovateFuture.Application.Tests/InnovateFuture.Application.Tests.csproj --configuration Release --no-build'
+                        timeout(time: 5, unit: 'MINUTES') {
+                            sh '''
+                                echo "Starting Application Tests..."
+                                dotnet test tests/InnovateFuture.Application.Tests/InnovateFuture.Application.Tests.csproj \
+                                    --configuration Release \
+                                    --no-build \
+                                    --verbosity normal \
+                                    --logger "console;verbosity=detailed" \
+                                    --results-directory ./testresults \
+                                    --blame-hang-timeout 60s
+                                echo "Application Tests completed."
+                            '''
+                        }
                     }
                 }
                 stage('Domain Tests') {
                     steps {
-                        sh 'dotnet test tests/InnovateFuture.Domain.Tests/InnovateFuture.Domain.Tests.csproj --configuration Release --no-build'
+                        timeout(time: 5, unit: 'MINUTES') {
+                            sh '''
+                                echo "Starting Domain Tests..."
+                                dotnet test tests/InnovateFuture.Domain.Tests/InnovateFuture.Domain.Tests.csproj \
+                                    --configuration Release \
+                                    --no-build \
+                                    --verbosity normal \
+                                    --logger "console;verbosity=detailed" \
+                                    --results-directory ./testresults \
+                                    --blame-hang-timeout 60s
+                                echo "Domain Tests completed."
+                            '''
+                        }
                     }
                 }
             }
