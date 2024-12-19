@@ -14,8 +14,6 @@ pipeline {
         DOTNET_NOLOGO = 'true'
         DOTNET_CLI_TELEMETRY_OPTOUT = 'true'
         DOTNET_CLI_HOME = "/var/lib/jenkins/.dotnet"
-        DOTNET_NOLOGO = '1'
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
     }
 
     options {
