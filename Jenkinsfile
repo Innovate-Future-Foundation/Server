@@ -25,20 +25,67 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Restore') {
             steps {
-                sh '''
-                    echo "Starting build process..."
-                    dotnet restore --verbosity minimal
-                    dotnet build --configuration Release --no-restore
-                '''
+                sh 'dotnet restore --verbosity minimal'
             }
             options {
                 timeout(time: 5, unit: 'MINUTES')
             }
         }
 
-        stage('Test') {
+        stage('Build Projects') {
+            parallel {
+                stage('Build Domain') {
+                    steps {
+                        sh 'dotnet build src/InnovateFuture.Domain/InnovateFuture.Domain.csproj --configuration Release --no-restore'
+                    }
+                }
+                stage('Build Application') {
+                    steps {
+                        sh 'dotnet build src/InnovateFuture.Application/InnovateFuture.Application.csproj --configuration Release --no-restore'
+                    }
+                }
+                stage('Build Infrastructure') {
+                    steps {
+                        sh 'dotnet build src/InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj --configuration Release --no-restore'
+                    }
+                }
+                stage('Build API') {
+                    steps {
+                        sh 'dotnet build src/InnovateFuture.Api/InnovateFuture.Api.csproj --configuration Release --no-restore'
+                    }
+                }
+            }
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
+        }
+
+        stage('Build Tests') {
+            parallel {
+                stage('Build API Tests') {
+                    steps {
+                        sh 'dotnet build tests/InnovateFuture.Api.Tests --configuration Release --no-restore'
+                    }
+                }
+                stage('Build Application Tests') {
+                    steps {
+                        sh 'dotnet build tests/InnovateFuture.Application.Tests --configuration Release --no-restore'
+                    }
+                }
+                stage('Build Domain Tests') {
+                    steps {
+                        sh 'dotnet build tests/InnovateFuture.Domain.Tests --configuration Release --no-restore'
+                    }
+                }
+            }
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
+        }
+
+        stage('Run Tests') {
             parallel {
                 stage('API Tests') {
                     steps {
