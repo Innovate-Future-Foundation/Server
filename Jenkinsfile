@@ -10,6 +10,15 @@ pipeline {
         DOCKER_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         DOCKER_CREDENTIALS_ID = 'ecr-credentials'
         DB_CONNECTION_STRING = credentials('db-connection-string')
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 'true'
+        DOTNET_NOLOGO = 'true'
+        DOTNET_CLI_TELEMETRY_OPTOUT = 'true'
+    }
+
+    options {
+        skipDefaultCheckout()
+        timestamps()
+        parallelsAlwaysFailFast()
     }
 
     stages {
@@ -19,55 +28,53 @@ pipeline {
             }
         }
 
-        stage('Restore Dependencies') {
-            steps {
-                sh 'dotnet restore'
-            }
-        }
+        stage('Build and Test') {
+            parallel {
+                stage('Build') {
+                    steps {
+                        sh '''
+                            dotnet restore --force-evaluate
+                            dotnet build --configuration Release --no-restore
+                        '''
+                    }
+                }
 
-        stage('Build') {
-            steps {
-                sh 'dotnet build --configuration Release --no-restore'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh '''
-                    dotnet test tests/InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj --no-restore
-                    dotnet test tests/InnovateFuture.Application.Tests/InnovateFuture.Application.Tests.csproj --no-restore
-                    dotnet test tests/InnovateFuture.Domain.Tests/InnovateFuture.Domain.Tests.csproj --no-restore
-                '''
-            }
-        }
-
-        stage('Publish') {
-            steps {
-                sh 'dotnet publish src/InnovateFuture.Api/InnovateFuture.Api.csproj -c Release -o publish'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}")
+                stage('Test') {
+                    steps {
+                        sh '''
+                            dotnet test tests/InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj --configuration Release --no-build
+                            dotnet test tests/InnovateFuture.Application.Tests/InnovateFuture.Application.Tests.csproj --configuration Release --no-build
+                            dotnet test tests/InnovateFuture.Domain.Tests/InnovateFuture.Domain.Tests.csproj --configuration Release --no-build
+                        '''
+                    }
                 }
             }
         }
 
-        stage('Docker Login') {
+        stage('Publish and Docker') {
+            parallel {
+                stage('Publish') {
+                    steps {
+                        sh 'dotnet publish src/InnovateFuture.Api/InnovateFuture.Api.csproj -c Release -o publish --no-restore --no-build'
+                    }
+                }
+
+                stage('Docker Build') {
+                    steps {
+                        script {
+                            docker.build("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}", '--no-cache .')
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Docker Push') {
             steps {
                 script {
                     sh """
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${DOCKER_REGISTRY}
                     """
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
                     docker.withRegistry("https://${DOCKER_REGISTRY}") {
                         docker.image("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}").push()
                         docker.image("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}").push('latest')
@@ -81,7 +88,7 @@ pipeline {
                 script {
                     sh '''
                         cd src/InnovateFuture.Api
-                        dotnet tool install --global dotnet-ef --version 8.0.0
+                        dotnet tool install --global dotnet-ef --version 8.0.0 --no-cache
                         export PATH="$PATH:$HOME/.dotnet/tools"
                         dotnet ef database update --connection "${DB_CONNECTION_STRING}"
                     '''
