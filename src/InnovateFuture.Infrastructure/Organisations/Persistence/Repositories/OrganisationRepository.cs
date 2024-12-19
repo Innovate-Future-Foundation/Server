@@ -18,13 +18,7 @@ namespace InnovateFuture.Infrastructure.Organisations.Persistence.Repositories
         public async Task<Organisation> GetByIdAsync(Guid id)
         {
             var organisation = await _dbContext.Organisations
-                .FirstOrDefaultAsync(o => o.Id == id);
-                
-            if (organisation == null)
-            {
-                throw new IFEntityNotFoundException("Organisation", id);
-            }
-            
+                .FirstOrDefaultAsync(o => o.OrgId == id);
             return organisation;
         }
 

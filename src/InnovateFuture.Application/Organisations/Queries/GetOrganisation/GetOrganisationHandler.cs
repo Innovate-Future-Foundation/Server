@@ -3,7 +3,7 @@ using System.Threading;
 using MediatR;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
-using InnovateFuture.Api.Exceptions;
+using InnovateFuture.Infrastructure.Exceptions;
 
 namespace InnovateFuture.Application.Organisations.Queries.GetOrganisation
 {

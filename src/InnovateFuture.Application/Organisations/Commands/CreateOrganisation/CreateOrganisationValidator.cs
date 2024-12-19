@@ -1,4 +1,5 @@
 using FluentValidation;
+using InnovateFuture.Domain.Entities;
 
 namespace InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 public class CreateOrganisationValidator : AbstractValidator<CreateOrganisationCommand>

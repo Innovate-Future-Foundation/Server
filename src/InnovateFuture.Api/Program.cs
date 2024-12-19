@@ -4,6 +4,7 @@ using InnovateFuture.Api.Configs;
 using InnovateFuture.Api.Middleware;
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Orders.Commands.CreateOrder;
+using InnovateFuture.Application.Orders.Queries.GetOrder;
 using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
 using InnovateFuture.Application.Services.Security;

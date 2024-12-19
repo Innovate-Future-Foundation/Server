@@ -15,17 +15,13 @@ namespace InnovateFuture.Application.Organisations.Commands.CreateOrganisation
 
         public async Task<Guid> Handle(CreateOrganisationCommand command, CancellationToken cancellationToken)
         {
-            var organisation = new Organisation(
-                command.OrgName,
-                command.Email,
-                command.Address,
-                command.LogoUrl,
-                command.WebsiteUrl,
-                command.Subscription
-            );
+            var organisation = new Organisation(command.OrgName, command.Email);
+            
+            organisation.UpdateProfile(command.LogoUrl, command.WebsiteUrl, command.Address);
+            organisation.UpdateSubscription(command.Subscription);
 
             await _organisationRepository.AddAsync(organisation);
-            return organisation.Id;
+            return organisation.OrgId;
         }
     }
 }

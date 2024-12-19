@@ -8,7 +8,7 @@ public class OrganisationConfig : IEntityTypeConfiguration<Organisation>
 {
     public void Configure(EntityTypeBuilder<Organisation> builder)
     {
-        builder.HasKey(o => o.Id);
+        builder.HasKey(o => o.OrgId);
 
         builder.Property(o => o.OrgName)
             .IsRequired()
