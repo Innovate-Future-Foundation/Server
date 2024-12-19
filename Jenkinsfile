@@ -32,8 +32,9 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    dotnet restore --force-evaluate
-                    dotnet build --configuration Release --no-restore
+                    echo "Starting build process..."
+                    dotnet build --configuration Release --no-restore --verbosity detailed | tee build.log
+                    echo "Build process completed."
                 '''
             }
         }
