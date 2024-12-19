@@ -28,24 +28,32 @@ pipeline {
             }
         }
 
-        stage('Build and Test') {
+        // First build the solution
+        stage('Build') {
+            steps {
+                sh '''
+                    dotnet restore --force-evaluate
+                    dotnet build --configuration Release --no-restore
+                '''
+            }
+        }
+
+        // Then run tests in parallel
+        stage('Test') {
             parallel {
-                stage('Build') {
+                stage('API Tests') {
                     steps {
-                        sh '''
-                            dotnet restore --force-evaluate
-                            dotnet build --configuration Release --no-restore
-                        '''
+                        sh 'dotnet test tests/InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj --configuration Release --no-build'
                     }
                 }
-
-                stage('Test') {
+                stage('Application Tests') {
                     steps {
-                        sh '''
-                            dotnet test tests/InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj --configuration Release --no-build
-                            dotnet test tests/InnovateFuture.Application.Tests/InnovateFuture.Application.Tests.csproj --configuration Release --no-build
-                            dotnet test tests/InnovateFuture.Domain.Tests/InnovateFuture.Domain.Tests.csproj --configuration Release --no-build
-                        '''
+                        sh 'dotnet test tests/InnovateFuture.Application.Tests/InnovateFuture.Application.Tests.csproj --configuration Release --no-build'
+                    }
+                }
+                stage('Domain Tests') {
+                    steps {
+                        sh 'dotnet test tests/InnovateFuture.Domain.Tests/InnovateFuture.Domain.Tests.csproj --configuration Release --no-build'
                     }
                 }
             }
