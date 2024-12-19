@@ -6,14 +6,10 @@ pipeline {
         PROJECT_NAME = 'InnovateFuture'
         DOCKER_IMAGE_NAME = 'innovatefuture-api'
         AWS_REGION = 'us-east-1'
-        AWS_ACCOUNT_ID = credentials('aws-account-id')
-        DOCKER_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        DOCKER_CREDENTIALS_ID = 'ecr-credentials'
-        DB_CONNECTION_STRING = credentials('db-connection-string')
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 'true'
+        DOTNET_CLI_HOME = "/var/lib/jenkins/.dotnet"
         DOTNET_NOLOGO = 'true'
         DOTNET_CLI_TELEMETRY_OPTOUT = 'true'
-        DOTNET_CLI_HOME = "/var/lib/jenkins/.dotnet"
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 'true'
     }
 
     options {
@@ -29,77 +25,39 @@ pipeline {
             }
         }
 
-        // First build the solution
         stage('Build') {
             steps {
                 sh '''
                     echo "Starting build process..."
-
-                    # First restore NuGet packages
-                    dotnet restore --verbosity normal
-
-                    # Then build
-                    dotnet build --configuration Release --no-restore --verbosity detailed | tee build.log
-
-                    echo "Build process completed."
+                    dotnet restore --verbosity minimal
+                    dotnet build --configuration Release --no-restore
                 '''
+            }
+            options {
+                timeout(time: 5, unit: 'MINUTES')
             }
         }
 
-        // Then run tests in parallel
         stage('Test') {
             parallel {
                 stage('API Tests') {
                     steps {
-                        timeout(time: 5, unit: 'MINUTES') {
-                            sh '''
-                                echo "Starting API Tests..."
-                                dotnet test tests/InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj \
-                                    --configuration Release \
-                                    --no-build \
-                                    --verbosity normal \
-                                    --logger "console;verbosity=detailed" \
-                                    --results-directory ./testresults \
-                                    --blame-hang-timeout 60s
-                                echo "API Tests completed."
-                            '''
-                        }
+                        sh 'dotnet test tests/InnovateFuture.Api.Tests --configuration Release --no-build'
                     }
                 }
                 stage('Application Tests') {
                     steps {
-                        timeout(time: 5, unit: 'MINUTES') {
-                            sh '''
-                                echo "Starting Application Tests..."
-                                dotnet test tests/InnovateFuture.Application.Tests/InnovateFuture.Application.Tests.csproj \
-                                    --configuration Release \
-                                    --no-build \
-                                    --verbosity normal \
-                                    --logger "console;verbosity=detailed" \
-                                    --results-directory ./testresults \
-                                    --blame-hang-timeout 60s
-                                echo "Application Tests completed."
-                            '''
-                        }
+                        sh 'dotnet test tests/InnovateFuture.Application.Tests --configuration Release --no-build'
                     }
                 }
                 stage('Domain Tests') {
                     steps {
-                        timeout(time: 5, unit: 'MINUTES') {
-                            sh '''
-                                echo "Starting Domain Tests..."
-                                dotnet test tests/InnovateFuture.Domain.Tests/InnovateFuture.Domain.Tests.csproj \
-                                    --configuration Release \
-                                    --no-build \
-                                    --verbosity normal \
-                                    --logger "console;verbosity=detailed" \
-                                    --results-directory ./testresults \
-                                    --blame-hang-timeout 60s
-                                echo "Domain Tests completed."
-                            '''
-                        }
+                        sh 'dotnet test tests/InnovateFuture.Domain.Tests --configuration Release --no-build'
                     }
                 }
+            }
+            options {
+                timeout(time: 10, unit: 'MINUTES')
             }
         }
 
