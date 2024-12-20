@@ -23,8 +23,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-ENV DBConnection="Your_DB_Connection_String_Here"
-ENV JWTConfig__SecrectKey="Your_JWT_Secrect_Key_Here"
 ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:5091/
 ENTRYPOINT ["dotnet", "InnovateFuture.Api.dll"]

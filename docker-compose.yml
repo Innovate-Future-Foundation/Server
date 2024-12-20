@@ -7,7 +7,7 @@ services:
       - "5091:5091"
     environment:
       - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
-      - JWTConfig__SecrectKey=${JWT_SECRET}
+      - JWTConfig__SecretKey=${JWT_SECRET}
       - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
       - ASPNETCORE_URLS=http://+:5091/
     depends_on:
