@@ -40,11 +40,18 @@ pipeline {
 
         stage('Build Solution') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
+                timeout(time: 7, unit: 'MINUTES') {
                     sh '''
-                        # Restore and build the entire solution
+                        # Restore with minimal verbosity
                         dotnet restore InnovateFuture.sln --verbosity minimal
-                        dotnet build InnovateFuture.sln --configuration Release --no-restore
+
+                        # Build with optimizations
+                        dotnet build InnovateFuture.sln \
+                            --configuration Release \
+                            --no-restore \
+                            --verbosity minimal \
+                            /p:ContinuousIntegrationBuild=true \
+                            /maxcpucount:1
                     '''
                 }
             }
@@ -52,9 +59,12 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                timeout(time: 3, unit: 'MINUTES') {
+                timeout(time: 1, unit: 'MINUTES') {
                     sh '''
-                        dotnet test InnovateFuture.sln --configuration Release --no-build
+                        dotnet test InnovateFuture.sln \
+                            --configuration Release \
+                            --no-build \
+                            --verbosity minimal
                     '''
                 }
             }
