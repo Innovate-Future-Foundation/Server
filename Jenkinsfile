@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    options {
+        timeout(time: 10, unit: 'MINUTES')
+        cleanWs()
+    }
+
     environment {
         DOTNET_SDK_VERSION = '8.0'
         PROJECT_NAME = 'InnovateFuture'
@@ -10,18 +15,24 @@ pipeline {
         DOTNET_NOLOGO = 'true'
         DOTNET_CLI_TELEMETRY_OPTOUT = 'true'
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 'true'
-    }
-
-    options {
-        skipDefaultCheckout()
-        timestamps()
-        parallelsAlwaysFailFast()
+        PATH = "$PATH:$HOME/.dotnet/tools"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Setup') {
             steps {
-                checkout scm
+                timeout(time: 2, unit: 'MINUTES') {
+                    sh '''
+                        # Install EF Core tools if not present
+                        if ! command -v dotnet-ef &> /dev/null; then
+                            dotnet tool install --global dotnet-ef --version 9.0.0
+                        fi
+
+                        # Verify installations
+                        dotnet --version
+                        dotnet ef --version
+                    '''
+                }
             }
         }
 
@@ -58,7 +69,7 @@ pipeline {
                 }
             }
             options {
-                timeout(time: 10, unit: 'MINUTES')
+                timeout(time: 3, unit: 'MINUTES')
             }
         }
 
@@ -81,7 +92,7 @@ pipeline {
                 }
             }
             options {
-                timeout(time: 10, unit: 'MINUTES')
+                timeout(time: 3, unit: 'MINUTES')
             }
         }
 
@@ -104,74 +115,38 @@ pipeline {
                 }
             }
             options {
-                timeout(time: 10, unit: 'MINUTES')
-            }
-        }
-
-        stage('Publish and Docker') {
-            parallel {
-                stage('Publish') {
-                    steps {
-                        sh 'dotnet publish src/InnovateFuture.Api/InnovateFuture.Api.csproj -c Release -o publish --no-restore --no-build'
-                    }
-                }
-
-                stage('Docker Build') {
-                    steps {
-                        script {
-                            docker.build("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}", '--no-cache .')
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                script {
-                    sh """
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${DOCKER_REGISTRY}
-                    """
-                    docker.withRegistry("https://${DOCKER_REGISTRY}") {
-                        docker.image("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}").push()
-                        docker.image("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}").push('latest')
-                    }
-                }
+                timeout(time: 3, unit: 'MINUTES')
             }
         }
 
         stage('Database Migration') {
             steps {
-                script {
-                    sh '''
-                        cd src/InnovateFuture.Api
-                        dotnet tool install --global dotnet-ef --version 8.0.0 --no-cache
-                        export PATH="$PATH:$HOME/.dotnet/tools"
-                        dotnet ef database update --connection "${DB_CONNECTION_STRING}"
-                    '''
-                }
-            }
-        }
+                timeout(time: 3, unit: 'MINUTES') {
+                    script {
+                        def infrastructureProject = "${WORKSPACE}/src/InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj"
+                        def apiProject = "${WORKSPACE}/src/InnovateFuture.Api/InnovateFuture.Api.csproj"
 
-        stage('Deploy') {
-            steps {
-                sh '''
-                    echo "Deploying to EC2..."
-                    # Add your deployment commands
-                '''
+                        sh """
+                            dotnet ef database update \
+                                --project "${infrastructureProject}" \
+                                --startup-project "${apiProject}" \
+                                -- --environment "Development"
+                        """
+                    }
+                }
             }
         }
     }
 
     post {
-        always {
-            cleanWs()
-        }
         success {
-            echo 'Pipeline completed successfully!'
+            echo '✅ Build successful! All stages completed.'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo '❌ Build failed! Check the logs above for errors.'
+        }
+        always {
+            cleanWs()
         }
     }
 }
