@@ -27,119 +27,42 @@ pipeline {
 
         stage('Setup') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
+                timeout(time: 1, unit: 'MINUTES') {
                     sh '''
-                        # Ensure .NET tools directory exists
                         mkdir -p /var/lib/jenkins/.dotnet/tools
-
-                        # Install EF Core tools
                         dotnet tool uninstall --global dotnet-ef || true
                         dotnet tool install --global dotnet-ef --version 9.0.0
-
-                        # Verify installations
                         dotnet --version
-                        ls -la /var/lib/jenkins/.dotnet/tools
-                        export PATH="/var/lib/jenkins/.dotnet/tools:$PATH"
-                        dotnet ef --version || echo "EF Tools not found in PATH"
-
-                        # List workspace contents
-                        ls -la
                     '''
                 }
             }
         }
 
-        stage('Restore') {
+        stage('Build Solution') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     sh '''
-                        # List solution files
-                        find . -name "*.sln"
-
-                        # Restore dependencies
+                        # Restore and build the entire solution
                         dotnet restore InnovateFuture.sln --verbosity minimal
+                        dotnet build InnovateFuture.sln --configuration Release --no-restore
                     '''
                 }
-            }
-        }
-
-        stage('Build Projects') {
-            parallel {
-                stage('Build Domain') {
-                    steps {
-                        sh 'dotnet build src/InnovateFuture.Domain/InnovateFuture.Domain.csproj --configuration Release --no-restore'
-                    }
-                }
-                stage('Build Application') {
-                    steps {
-                        sh 'dotnet build src/InnovateFuture.Application/InnovateFuture.Application.csproj --configuration Release --no-restore'
-                    }
-                }
-                stage('Build Infrastructure') {
-                    steps {
-                        sh 'dotnet build src/InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj --configuration Release --no-restore'
-                    }
-                }
-                stage('Build API') {
-                    steps {
-                        sh 'dotnet build src/InnovateFuture.Api/InnovateFuture.Api.csproj --configuration Release --no-restore'
-                    }
-                }
-            }
-            options {
-                timeout(time: 3, unit: 'MINUTES')
-            }
-        }
-
-        stage('Build Tests') {
-            parallel {
-                stage('Build API Tests') {
-                    steps {
-                        sh 'dotnet build tests/InnovateFuture.Api.Tests --configuration Release --no-restore'
-                    }
-                }
-                stage('Build Application Tests') {
-                    steps {
-                        sh 'dotnet build tests/InnovateFuture.Application.Tests --configuration Release --no-restore'
-                    }
-                }
-                stage('Build Domain Tests') {
-                    steps {
-                        sh 'dotnet build tests/InnovateFuture.Domain.Tests --configuration Release --no-restore'
-                    }
-                }
-            }
-            options {
-                timeout(time: 3, unit: 'MINUTES')
             }
         }
 
         stage('Run Tests') {
-            parallel {
-                stage('API Tests') {
-                    steps {
-                        sh 'dotnet test tests/InnovateFuture.Api.Tests --configuration Release --no-build'
-                    }
+            steps {
+                timeout(time: 3, unit: 'MINUTES') {
+                    sh '''
+                        dotnet test InnovateFuture.sln --configuration Release --no-build
+                    '''
                 }
-                stage('Application Tests') {
-                    steps {
-                        sh 'dotnet test tests/InnovateFuture.Application.Tests --configuration Release --no-build'
-                    }
-                }
-                stage('Domain Tests') {
-                    steps {
-                        sh 'dotnet test tests/InnovateFuture.Domain.Tests --configuration Release --no-build'
-                    }
-                }
-            }
-            options {
-                timeout(time: 3, unit: 'MINUTES')
             }
         }
 
         stage('Database Migration') {
             steps {
-                timeout(time: 3, unit: 'MINUTES') {
+                timeout(time: 1, unit: 'MINUTES') {
                     script {
                         def infrastructureProject = "${WORKSPACE}/src/InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj"
                         def apiProject = "${WORKSPACE}/src/InnovateFuture.Api/InnovateFuture.Api.csproj"
