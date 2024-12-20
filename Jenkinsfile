@@ -3,7 +3,6 @@ pipeline {
 
     options {
         timeout(time: 10, unit: 'MINUTES')
-        cleanWs()
     }
 
     environment {
@@ -19,6 +18,12 @@ pipeline {
     }
 
     stages {
+        stage('Cleanup Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
         stage('Setup') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
