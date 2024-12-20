@@ -14,7 +14,7 @@ pipeline {
         DOTNET_NOLOGO = 'true'
         DOTNET_CLI_TELEMETRY_OPTOUT = 'true'
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 'true'
-        PATH = "$PATH:$HOME/.dotnet/tools"
+        PATH = "$HOME/.dotnet/tools:$PATH"
     }
 
     stages {
@@ -33,8 +33,12 @@ pipeline {
                             dotnet tool install --global dotnet-ef --version 9.0.0
                         fi
 
+                        # Add dotnet tools to PATH
+                        export PATH="$HOME/.dotnet/tools:$PATH"
+
                         # Verify installations
                         dotnet --version
+                        which dotnet-ef
                         dotnet ef --version
                     '''
                 }
