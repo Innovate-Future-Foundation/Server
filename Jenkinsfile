@@ -18,9 +18,10 @@ pipeline {
     }
 
     stages {
-        stage('Cleanup Workspace') {
+        stage('Checkout') {
             steps {
                 cleanWs()
+                checkout scm
             }
         }
 
@@ -40,6 +41,9 @@ pipeline {
                         ls -la /var/lib/jenkins/.dotnet/tools
                         export PATH="/var/lib/jenkins/.dotnet/tools:$PATH"
                         dotnet ef --version || echo "EF Tools not found in PATH"
+
+                        # List workspace contents
+                        ls -la
                     '''
                 }
             }
@@ -47,10 +51,15 @@ pipeline {
 
         stage('Restore') {
             steps {
-                sh 'dotnet restore --verbosity minimal'
-            }
-            options {
-                timeout(time: 5, unit: 'MINUTES')
+                timeout(time: 5, unit: 'MINUTES') {
+                    sh '''
+                        # List solution files
+                        find . -name "*.sln"
+
+                        # Restore dependencies
+                        dotnet restore InnovateFuture.sln --verbosity minimal
+                    '''
+                }
             }
         }
 
