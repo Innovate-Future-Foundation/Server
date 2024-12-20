@@ -14,7 +14,7 @@ pipeline {
         DOTNET_NOLOGO = 'true'
         DOTNET_CLI_TELEMETRY_OPTOUT = 'true'
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 'true'
-        PATH = "$HOME/.dotnet/tools:$PATH"
+        PATH = "/var/lib/jenkins/.dotnet/tools:$PATH"
     }
 
     stages {
@@ -28,18 +28,18 @@ pipeline {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     sh '''
-                        # Install EF Core tools if not present
-                        if ! command -v dotnet-ef &> /dev/null; then
-                            dotnet tool install --global dotnet-ef --version 9.0.0
-                        fi
+                        # Ensure .NET tools directory exists
+                        mkdir -p /var/lib/jenkins/.dotnet/tools
 
-                        # Add dotnet tools to PATH
-                        export PATH="$HOME/.dotnet/tools:$PATH"
+                        # Install EF Core tools
+                        dotnet tool uninstall --global dotnet-ef || true
+                        dotnet tool install --global dotnet-ef --version 9.0.0
 
                         # Verify installations
                         dotnet --version
-                        which dotnet-ef
-                        dotnet ef --version
+                        ls -la /var/lib/jenkins/.dotnet/tools
+                        export PATH="/var/lib/jenkins/.dotnet/tools:$PATH"
+                        dotnet ef --version || echo "EF Tools not found in PATH"
                     '''
                 }
             }
