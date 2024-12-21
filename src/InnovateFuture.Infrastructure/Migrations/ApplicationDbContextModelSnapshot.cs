@@ -171,9 +171,6 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("role_id");
 
-                    b.Property<Guid?>("RoleId1")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid?>("SupervisedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("supervised_by");
@@ -194,8 +191,6 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.HasIndex("OrgId");
 
                     b.HasIndex("RoleId");
-
-                    b.HasIndex("RoleId1");
 
                     b.HasIndex("SupervisedBy")
                         .IsUnique();
@@ -304,21 +299,6 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ProfileProfile", b =>
-                {
-                    b.Property<Guid>("InvitedProfilesProfileId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SupervisedProfilesProfileId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("InvitedProfilesProfileId", "SupervisedProfilesProfileId");
-
-                    b.HasIndex("SupervisedProfilesProfileId");
-
-                    b.ToTable("ProfileProfile");
-                });
-
             modelBuilder.Entity("InnovateFuture.Domain.Entities.OrderItem", b =>
                 {
                     b.HasOne("InnovateFuture.Domain.Entities.Order", null)
@@ -347,10 +327,6 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InnovateFuture.Domain.Entities.Role", null)
-                        .WithMany("Profiles")
-                        .HasForeignKey("RoleId1");
-
                     b.HasOne("InnovateFuture.Domain.Entities.Profile", "SupervisedByProfile")
                         .WithOne()
                         .HasForeignKey("InnovateFuture.Domain.Entities.Profile", "SupervisedBy")
@@ -373,32 +349,12 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ProfileProfile", b =>
-                {
-                    b.HasOne("InnovateFuture.Domain.Entities.Profile", null)
-                        .WithMany()
-                        .HasForeignKey("InvitedProfilesProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("InnovateFuture.Domain.Entities.Profile", null)
-                        .WithMany()
-                        .HasForeignKey("SupervisedProfilesProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Order", b =>
                 {
                     b.Navigation("Items");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>
-                {
-                    b.Navigation("Profiles");
-                });
-
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.Role", b =>
                 {
                     b.Navigation("Profiles");
                 });

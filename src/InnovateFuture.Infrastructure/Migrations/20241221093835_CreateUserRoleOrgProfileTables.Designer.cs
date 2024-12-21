@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InnovateFuture.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241220033943_RefactorContriantsOfTables")]
-    partial class RefactorContriantsOfTables
+    [Migration("20241221093835_CreateUserRoleOrgProfileTables")]
+    partial class CreateUserRoleOrgProfileTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -191,16 +191,12 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.HasIndex("InvitedBy")
                         .IsUnique();
 
-                    b.HasIndex("OrgId")
-                        .HasDatabaseName("IX_Profiles_org_id");
+                    b.HasIndex("OrgId");
 
                     b.HasIndex("RoleId");
 
                     b.HasIndex("SupervisedBy")
                         .IsUnique();
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_Profiles_user_id");
 
                     b.HasIndex("UserId", "RoleId", "OrgId")
                         .IsUnique()
@@ -264,7 +260,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("DefaultProfile")
+                    b.Property<Guid?>("DefaultProfile")
                         .HasColumnType("uuid")
                         .HasColumnName("default_profile");
 
@@ -295,6 +291,14 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("CognitoUuid")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Users_cognito_uuid");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Users_email");
+
                     b.ToTable("Users");
                 });
 
@@ -312,7 +316,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.HasOne("InnovateFuture.Domain.Entities.Profile", "InvitedByProfile")
                         .WithOne()
                         .HasForeignKey("InnovateFuture.Domain.Entities.Profile", "InvitedBy")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("InnovateFuture.Domain.Entities.Organisation", "Organisation")
                         .WithMany("Profiles")
@@ -323,13 +327,13 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.HasOne("InnovateFuture.Domain.Entities.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InnovateFuture.Domain.Entities.Profile", "SupervisedByProfile")
                         .WithOne()
                         .HasForeignKey("InnovateFuture.Domain.Entities.Profile", "SupervisedBy")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("InnovateFuture.Domain.Entities.User", "User")
                         .WithMany("Profiles")
