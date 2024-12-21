@@ -23,8 +23,7 @@ public class UserConfig : IEntityTypeConfiguration<User>
         
         // Column Mappings
         builder.Property(u => u.UserId).HasColumnType("uuid").HasColumnName("user_id").IsRequired();
-        // todo: cognito_uuid -> char(x)
-        builder.Property(u => u.CognitoUuid).HasColumnName("cognito_uuid").HasMaxLength(500).IsRequired();
+        builder.Property(u => u.CognitoUuid).HasColumnType("uuid").HasColumnName("cognito_uuid").IsRequired();
         builder.Property(u => u.DefaultProfile).HasColumnType("uuid").HasColumnName("default_profile");
         builder.Property(u => u.GivenName).HasColumnName("given_name").HasMaxLength(100);
         builder.Property(u => u.FamilyName).HasColumnName("family_name").HasMaxLength(100);
