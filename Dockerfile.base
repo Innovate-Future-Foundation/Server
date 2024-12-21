@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+WORKDIR /
+
+# Copy solution and project files
+COPY ["InnovateFuture.sln", "."]
+COPY ["src/InnovateFuture.Api/*.csproj", "src/InnovateFuture.Api/"]
+COPY ["src/InnovateFuture.Application/*.csproj", "src/InnovateFuture.Application/"]
+COPY ["src/InnovateFuture.Domain/*.csproj", "src/InnovateFuture.Domain/"]
+COPY ["src/InnovateFuture.Infrastructure/*.csproj", "src/InnovateFuture.Infrastructure/"]
+
+# Restore dependencies
+RUN dotnet restore "src/InnovateFuture.Api/InnovateFuture.Api.csproj"
+
+# Copy all source code to allow builds
+COPY . .
+
+# Build the entire project (to make DLLs available for following)
+RUN dotnet build "src/InnovateFuture.Api/InnovateFuture.Api.csproj" -c Release -o /app/build

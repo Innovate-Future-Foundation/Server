@@ -1,8 +1,13 @@
 services:
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    image: inff-built-be-base
   api:
     build:
       context: .
-      dockerfile: Dockerfile.be
+      dockerfile: Dockerfile.api
     ports:
       - "5091:5091"
     environment:
@@ -21,6 +26,7 @@ services:
       - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
       - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
     depends_on:
+      - base
       - postgres
 
   postgres:
