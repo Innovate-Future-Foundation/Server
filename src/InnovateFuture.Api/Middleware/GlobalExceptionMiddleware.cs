@@ -1,6 +1,7 @@
 using System.Text.Json;
-using InnovateFuture.Api.Exceptions;
 using InnovateFuture.Api.Models;
+using InnovateFuture.Domain.Exceptions;
+using InnovateFuture.Infrastructure.Exceptions;
 
 namespace InnovateFuture.Api.Middleware;
 
@@ -38,7 +39,6 @@ public class GlobalExceptionMiddleware
         {
             FluentValidation.ValidationException validationException =>
                 HandleValidationException(response, validationException),
-            IFAggregateNotInitializedException => StatusCodes.Status400BadRequest,
             IFBusinessRuleViolationException => StatusCodes.Status400BadRequest,
             IFConcurrencyException => StatusCodes.Status409Conflict,
             IFDatabaseException => StatusCodes.Status500InternalServerError,
