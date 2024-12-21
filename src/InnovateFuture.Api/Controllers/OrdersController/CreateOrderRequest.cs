@@ -1,6 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 
-namespace InnovateFuture.Api.Controllers.OrderController;
+namespace InnovateFuture.Api.Controllers.OrdersController;
 
 public class CreateOrderRequest
 {
