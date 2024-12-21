@@ -7,7 +7,7 @@
   },
   "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=password",
   "JWTConfig": {
-      "SecrectKey": "SecrectKeyExample",
+      "SecretKey": "SecretKeyExample",
       "Issuer": "innovateFuture",
       "Audience": "innovateFuture",
       "ExpireSeconds": 7200
