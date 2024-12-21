@@ -6,10 +6,19 @@ using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Orders.Commands.CreateOrder;
 using InnovateFuture.Application.Orders.Queries.GetOrder;
 using InnovateFuture.Application.Services.Security;
+using InnovateFuture.Application.Users.Commands.CreateUser;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Orders.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Orders.Persistence.Repositories;
+using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Organisations.Persistence.Repositories;
+using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Profiles.Persistence.Repositories;
+using InnovateFuture.Infrastructure.Roles.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Roles.Persistence.Repositories;
+using InnovateFuture.Infrastructure.Users.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Users.Persistence.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -49,8 +58,15 @@ namespace InnovateFuture.Api
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+            builder.Services.AddScoped<IOrgRepository, OrgRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(CreateOrderCommandValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
+
             #endregion
             
             #region DB connection

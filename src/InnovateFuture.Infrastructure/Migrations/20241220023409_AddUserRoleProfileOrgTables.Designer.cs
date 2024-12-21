@@ -3,6 +3,7 @@ using System;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InnovateFuture.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241220023409_AddUserRoleProfileOrgTables")]
+    partial class AddUserRoleProfileOrgTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,12 +84,12 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnName("address");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("email");
 
                     b.Property<string>("LogoUrl")
@@ -100,8 +103,8 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("org_name");
 
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
                         .HasColumnName("status");
 
                     b.Property<string>("Subscription")
@@ -110,7 +113,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnName("subscription");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
                     b.Property<string>("WebsiteUrl")
@@ -136,13 +139,13 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnName("avatar");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("email");
 
                     b.Property<Guid?>("InvitedBy")
@@ -154,8 +157,8 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnName("is_active");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
                     b.Property<Guid>("OrgId")
@@ -176,7 +179,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnName("supervised_by");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
                     b.Property<Guid>("UserId")
@@ -188,20 +191,15 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.HasIndex("InvitedBy")
                         .IsUnique();
 
-                    b.HasIndex("OrgId")
-                        .HasDatabaseName("IX_Profiles_org_id");
+                    b.HasIndex("OrgId");
 
                     b.HasIndex("RoleId");
 
                     b.HasIndex("SupervisedBy")
                         .IsUnique();
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_Profiles_user_id");
-
                     b.HasIndex("UserId", "RoleId", "OrgId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
+                        .IsUnique();
 
                     b.ToTable("Profiles");
                 });
@@ -213,12 +211,12 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("role_id");
 
-                    b.Property<short>("CodeName")
-                        .HasColumnType("smallint")
+                    b.Property<int>("CodeName")
+                        .HasColumnType("integer")
                         .HasColumnName("code_name");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
@@ -228,12 +226,12 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
                         .HasColumnName("name");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("RoleId");
@@ -249,16 +247,15 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnName("user_id");
 
                     b.Property<DateTime?>("Birthday")
-                        .HasColumnType("date")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("birthday");
 
                     b.Property<Guid>("CognitoUuid")
-                        .HasMaxLength(500)
                         .HasColumnType("uuid")
                         .HasColumnName("cognito_uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("DefaultProfile")
@@ -267,27 +264,27 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("email");
 
                     b.Property<string>("FamilyName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("family_name");
 
                     b.Property<string>("GivenName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("given_name");
 
                     b.Property<string>("Phone")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("phone");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("UserId");

@@ -1,12 +1,13 @@
 using AutoMapper;
 using InnovateFuture.Api.Configs;
+using InnovateFuture.Api.Controllers.OrderController;
 using InnovateFuture.Application.Orders.Commands.CreateOrder;
 using InnovateFuture.Application.Orders.Queries.GetOrder;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 
-namespace InnovateFuture.Api.Controllers.OrderController;
+namespace InnovateFuture.Api.Controllers.OrdersController;
 
 [ApiExplorerSettings(IgnoreApi = false, GroupName = nameof(ApiVersion.V1))]
 [ApiController]
