@@ -7,8 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\tests\InnovateFuture.Api.Tests\InnovateFuture.Api.Tests.csproj" />
-    <ProjectReference Include="..\..\tests\InnovateFuture.Domain.Tests\InnovateFuture.Domain.Tests.csproj" />
   </ItemGroup>
 
 </Project>
