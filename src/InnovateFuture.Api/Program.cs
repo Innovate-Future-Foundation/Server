@@ -46,6 +46,7 @@ namespace InnovateFuture.Api
                 //global filter register, working for all actions
                 option.Filters.Add<CommonResultFilter>();
                 option.Filters.Add<ModelValidationFilter>();
+                // option.Filters.Add<ExceptionFilter>();
             }).AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;

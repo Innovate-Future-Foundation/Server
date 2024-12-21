@@ -25,7 +25,7 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
         builder.Property(p => p.InvitedBy).HasColumnType("uuid").HasColumnName("invited_by");
         builder.Property(p => p.SupervisedBy).HasColumnType("uuid").HasColumnName("supervised_by");
         builder.Property(p => p.Name).HasColumnName("name").HasMaxLength(100);
-        builder.Property(p => p.Email).HasColumnName("email").HasMaxLength(100).IsRequired();
+        builder.Property(p => p.Email).HasColumnName("email").HasMaxLength(100);
         builder.Property(p => p.Phone).HasColumnName("phone").HasMaxLength(50);
         builder.Property(p => p.Avatar).HasColumnName("avatar").HasMaxLength(500);
         builder.Property(p => p.IsActive).HasColumnType("boolean").HasColumnName("is_active").IsRequired();
