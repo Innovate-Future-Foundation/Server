@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace InnovateFuture.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUserRoleProfileOrgTables : Migration
+    public partial class CreateUserRoleOrgProfileTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,11 +20,11 @@ namespace InnovateFuture.Infrastructure.Migrations
                     logo_url = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     website_url = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     subscription = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    status = table.Column<short>(type: "smallint", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,11 +36,11 @@ namespace InnovateFuture.Infrastructure.Migrations
                 columns: table => new
                 {
                     role_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    code_name = table.Column<int>(type: "integer", nullable: false),
+                    name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    code_name = table.Column<short>(type: "smallint", nullable: false),
                     description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -52,15 +52,15 @@ namespace InnovateFuture.Infrastructure.Migrations
                 columns: table => new
                 {
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    cognito_uuid = table.Column<Guid>(type: "uuid", nullable: false),
-                    default_profile = table.Column<Guid>(type: "uuid", nullable: false),
-                    given_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    family_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    birthday = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    cognito_uuid = table.Column<Guid>(type: "uuid", maxLength: 500, nullable: false),
+                    email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    default_profile = table.Column<Guid>(type: "uuid", nullable: true),
+                    given_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    family_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    phone = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    birthday = table.Column<DateTime>(type: "date", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -75,15 +75,15 @@ namespace InnovateFuture.Infrastructure.Migrations
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     org_id = table.Column<Guid>(type: "uuid", nullable: false),
                     role_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     invited_by = table.Column<Guid>(type: "uuid", nullable: true),
                     supervised_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     phone = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     avatar = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    is_active = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -99,19 +99,19 @@ namespace InnovateFuture.Infrastructure.Migrations
                         column: x => x.invited_by,
                         principalTable: "Profiles",
                         principalColumn: "profile_id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Profiles_Profiles_supervised_by",
                         column: x => x.supervised_by,
                         principalTable: "Profiles",
                         principalColumn: "profile_id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Profiles_Roles_role_id",
                         column: x => x.role_id,
                         principalTable: "Roles",
                         principalColumn: "role_id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Profiles_Users_user_id",
                         column: x => x.user_id,
@@ -146,6 +146,18 @@ namespace InnovateFuture.Infrastructure.Migrations
                 name: "IX_Profiles_user_id_role_id_org_id",
                 table: "Profiles",
                 columns: new[] { "user_id", "role_id", "org_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_cognito_uuid",
+                table: "Users",
+                column: "cognito_uuid",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_email",
+                table: "Users",
+                column: "email",
                 unique: true);
         }
 

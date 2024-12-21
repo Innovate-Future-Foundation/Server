@@ -20,9 +20,6 @@ public class Profile
     public Organisation Organisation { get; private set; }
     public Profile? InvitedByProfile { get; private set; }
     public Profile? SupervisedByProfile { get; private set; }
-
-    public ICollection<Profile>? InvitedProfiles { get; private set; } = new List<Profile>();
-    public ICollection<Profile>? SupervisedProfiles { get; private set; } = new List<Profile>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 

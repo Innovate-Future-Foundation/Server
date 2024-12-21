@@ -38,8 +38,7 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
             .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.SetNull);
         builder.HasOne(p => p.Role)
-            .WithMany() // todo: add navigation properties
-            .HasForeignKey(p => p.RoleId)
+            .WithMany()
             .OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(p => p.Organisation)
             .WithMany(o => o.Profiles)

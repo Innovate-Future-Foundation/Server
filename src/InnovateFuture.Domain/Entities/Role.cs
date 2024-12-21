@@ -11,7 +11,6 @@ public class Role
     public string? Description { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
 
     public Role(string name, RoleEnum codeName, string? description)
     {
