@@ -66,7 +66,7 @@ namespace InnovateFuture.Api
             builder.Services.AddDbContext<ApplicationDbContext>(
                 dbContextOptions => dbContextOptions
                     .UseNpgsql(connectionString,
-                        npgsqlOptions => npgsqlOptions.SetPostgresVersion(new Version(17, 2)))
+                        npgsqlOptions => npgsqlOptions.SetPostgresVersion(new Version(16, 6)))
                     // The following three options help with debugging, but should
                     // be changed or removed for production.
                     .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
