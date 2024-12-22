@@ -19,9 +19,11 @@ services:
       - migration
   
   migration:
-    build: 
-      context: .
-      dockerfile: Dockerfile.migration
+    image: inff-built-be-base
+    command: >
+      sh -c "dotnet ef database update
+      --project InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj
+      --startup-project InnovateFuture.Api/InnovateFuture.Api.csproj"
     environment:
       - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
       - ASPNETCORE_ENVIRONMENT=${DEP_ENV}

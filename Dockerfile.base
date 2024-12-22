@@ -1,8 +1,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 WORKDIR /src
 
+# Install dotnet-ef tool and setup env path
+RUN dotnet tool install --global dotnet-ef --version 9.0.0
+ENV PATH="$PATH:/root/.dotnet/tools"
+
 # Copy solution, project files and restore dependencies
-COPY ["InnovateFuture.sln", "."]
+COPY ["InnovateFuture.sln", "../"]
 COPY ["src/InnovateFuture.Api/*.csproj", "InnovateFuture.Api/"]
 COPY ["src/InnovateFuture.Application/*.csproj", "InnovateFuture.Application/"]
 COPY ["src/InnovateFuture.Domain/*.csproj", "InnovateFuture.Domain/"]

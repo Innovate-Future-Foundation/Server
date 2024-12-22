@@ -1,0 +1,5 @@
+FROM inff-built-be-base
+
+WORKDIR /
+COPY ./tests .
+ENTRYPOINT ["dotnet", "test", "--no-build"]
