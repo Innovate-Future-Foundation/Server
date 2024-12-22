@@ -52,11 +52,7 @@ pipeline {
                 script {
                     // Start Postgres database
                     sh '''
-                    echo "DB_HOST=$DB_HOST"
-                    echo "DB_PORT=$DB_PORT"
-                    echo "DB_NAME=$DB_NAME"
-                    echo "DB_USER=$DB_USER"
-                    echo "DB_PASS=$DB_PASS"
+                    docker network create app-network || true
                     docker run -d --name container-postgres \
                         -e POSTGRES_USER=$DB_USER \
                         -e POSTGRES_PASSWORD=$DB_PASS \
@@ -71,8 +67,17 @@ pipeline {
                 script {
                     // Build and run migration container
                     sh '''
+                    for i in {1..30}; do
+                        if docker exec container-postgres pg_isready -U $DB_USER; then
+                            echo "Database is ready!"
+                            break
+                        fi
+                        echo "Waiting for database to be ready..."
+                        sleep 2
+                    done
                     docker build -t migration-service:latest -f Dockerfile.migration .
                     docker run --rm --name migration-service \
+                        --network app-network \
                         --env "DBConnection=Host=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS;" \
                         --env "ASPNETCORE_ENVIRONMENT=$DEP_ENV" \
                         migration-service:latest
