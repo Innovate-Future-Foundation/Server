@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace InnovateFuture.Infrastructure.Profiles.Persistence.Modelconfigs
 {
-    public class ProfileConfiguration : IEntityTypeConfiguration<Profile>
+    public class ProfileConfiguration : IEntityTypeConfiguration<UserProfile>
     {
-        public void Configure(EntityTypeBuilder<Profile> builder)
+        public void Configure(EntityTypeBuilder<UserProfile> builder)
         {
             builder.HasKey(p => p.ProfileId);
 

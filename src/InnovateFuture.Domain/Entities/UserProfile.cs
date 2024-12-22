@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InnovateFuture.Domain.Entities
 {
-    public class Profile
+    public class UserProfile
     {
         // Key
         public long ProfileId { get; set; }
