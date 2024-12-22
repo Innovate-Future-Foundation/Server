@@ -1,4 +1,4 @@
-FROM inff-built-be-base
+FROM inff-api-build
 
 WORKDIR /
 COPY ./tests .

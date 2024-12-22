@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.base
-    image: inff-built-be-base
+    image: inff-api-build
   api:
     build:
       context: .
@@ -19,7 +19,7 @@ services:
       - migration
   
   migration:
-    image: inff-built-be-base
+    image: inff-api-build
     command: >
       sh -c "dotnet ef database update
       --project InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj

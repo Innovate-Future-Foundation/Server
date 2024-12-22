@@ -1,4 +1,4 @@
-FROM inff-built-be-base AS publish
+FROM inff-api-build AS publish
 WORKDIR /src
 # Publish the application for production
 RUN dotnet publish "InnovateFuture.Api/InnovateFuture.Api.csproj" \
