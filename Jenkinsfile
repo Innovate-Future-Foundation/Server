@@ -37,6 +37,17 @@ pipeline {
                 }
             }
         }
+        stage('Clean Up Previous Containers') {
+            steps {
+                script {
+                    sh '''
+                    echo "Cleaning up old containers and images..."
+                    docker rm -f backend-service container-postgres container-pgadmin migration-service || true
+                    docker rmi backend-service:latest migration-service:latest || true
+                    '''
+                }
+            }
+        }
         stage('Build API Docker Image') {
             steps {
                 script {
@@ -53,8 +64,10 @@ pipeline {
                     // Start Postgres database
                     sh '''
                     docker network create app-network || true
+                    docker volume create postgres-data || true
                     docker run -d --name container-postgres \
                         --network app-network \
+                        -v postgres-data:/var/lib/postgresql/data \
                         -e POSTGRES_USER=$DB_USER \
                         -e POSTGRES_PASSWORD=$DB_PASS \
                         -e POSTGRES_DB=$DB_NAME \
