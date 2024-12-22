@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_IMAGE = '376129846478.dkr.ecr.ap-southeast-2.amazonaws.com/inff/dotnet-api-server'
+        AWS_REGION = 'ap-southeast-2'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
+                }
+            }
+        }
+        
+        stage('Push to ECR') {
+            steps {
+                script {
+                    withAWS(credentials: 'aws-credentials', region: "${AWS_REGION}") {
+                        def login = ecrLogin()
+                        sh "${login}"
+                        sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
