@@ -24,11 +24,13 @@ pipeline {
                 script {
                     // Rename appsettings.Development.json.sample to appsettings.Development.json
                     sh '''
-                    if [ -f appsettings.Development.json.sample ]; then
-                        mv appsettings.Development.json.sample appsettings.Development.json
-                        echo "Renamed appsettings.Development.json.sample to appsettings.Development.json"
+                    CONFIG_SAMPLE_PATH="src/InnovateFuture.Api/appsettings.Development.json.sample"
+                    CONFIG_PATH="src/InnovateFuture.Api/appsettings.Development.json"
+                    if [ -f "$CONFIG_SAMPLE_PATH" ]; then
+                        mv "$CONFIG_SAMPLE_PATH" "$CONFIG_PATH"
+                        echo "Renamed $CONFIG_SAMPLE_PATH to $CONFIG_PATH"
                     else
-                        echo "File appsettings.Development.json.sample not found!"
+                        echo "File $CONFIG_SAMPLE_PATH not found!"
                         exit 1
                     fi
                     '''
