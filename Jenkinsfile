@@ -94,10 +94,10 @@ pipeline {
                     docker run -d --name backend-service \
                         -p 5091:5091 \
                         --network app-network \
-                        --env DBConnection=Host=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS; \
-                        --env JWTConfig__SecretKey=$JWT_SECRET \
-                        --env ASPNETCORE_ENVIRONMENT=$DEP_ENV \
-                        --env ASPNETCORE_URLS=http://+:5091/ \
+                        --env "DBConnection=Host=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS;" \
+                        --env "JWTConfig__SecretKey=$JWT_SECRET" \
+                        --env "ASPNETCORE_ENVIRONMENT=$DEP_ENV" \
+                        --env "ASPNETCORE_URLS=http://+:5091/" \
                         backend-service:latest
                     '''
                 }
