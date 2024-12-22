@@ -54,6 +54,7 @@ pipeline {
                     sh '''
                     docker network create app-network || true
                     docker run -d --name container-postgres \
+                        --network app-network \
                         -e POSTGRES_USER=$DB_USER \
                         -e POSTGRES_PASSWORD=$DB_PASS \
                         -e POSTGRES_DB=$DB_NAME \
@@ -92,6 +93,7 @@ pipeline {
                     sh '''
                     docker run -d --name backend-service \
                         -p 5091:5091 \
+                        --network app-network \
                         --env DBConnection=Host=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS; \
                         --env JWTConfig__SecretKey=$JWT_SECRET \
                         --env ASPNETCORE_ENVIRONMENT=$DEP_ENV \
@@ -107,6 +109,7 @@ pipeline {
                     // Start pgAdmin
                     sh '''
                     docker run -d --name container-pgadmin \
+                        --network app-network \
                         -p 5050:80 \
                         -e PGADMIN_DEFAULT_EMAIL=$PG_USER \
                         -e PGADMIN_DEFAULT_PASSWORD=$PG_PASS \
