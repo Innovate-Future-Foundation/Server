@@ -1,7 +1,6 @@
 using FluentValidation;
-using HealthChecks.UI.Client;
-using InnovateFuture.Api.Filters;
 using InnovateFuture.Api.Configs;
+using InnovateFuture.Api.Filters;
 using InnovateFuture.Api.Middleware;
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Orders.Commands.CreateOrder;
@@ -11,8 +10,9 @@ using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Orders.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Orders.Persistence.Repositories;
+using InnovateFuture.Roles.Persistence.Interfaces;
+using InnovateFuture.Roles.Persistence.Repositories;
 using MediatR;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -22,137 +22,158 @@ namespace InnovateFuture.Api
 {
     public class Program
     {
-        public static void Main(string[] args) 
+        public static void Main(string[] args)
         {
-            var logger = LogManager.Setup().LoadConfigurationFromFile("nLog.config").GetCurrentClassLogger();
-            var policyName = "defalutPolicy";
-            
-            var builder = WebApplication.CreateBuilder(args);
-            
-            var connectionString = builder.Configuration["DBConnection"];
-            
-            #region filter
-            builder.Services.AddControllers(option =>
-            {
-                //global filter register, working for all actions
-                option.Filters.Add<CommonResultFilter>();
-                // option.Filters.Add<ExceptionFilter>();
-            }).AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-            });
-            #endregion
-            
-            #region service instances
-            builder.Services.AddMediatR(configuration =>
-            {
-                configuration.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(GetOrderHandler).Assembly);
-            });
-            // auto mapper instance
-            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            // customized instances
-            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-            builder.Services.AddValidatorsFromAssembly(typeof(CreateOrderCommandValidator).Assembly);
-            builder.Services.AddHealthChecks()
-                .AddNpgSql(connectionString)
-                .AddDbContextCheck<ApplicationDbContext>();
-            #endregion
-            
-            #region DB connection
-            builder.Services.Configure<DBConnectionConfig>(builder.Configuration);
-            
-            builder.Services.AddDbContext<ApplicationDbContext>(
-                dbContextOptions => dbContextOptions
-                    .UseNpgsql(connectionString,
-                        npgsqlOptions => npgsqlOptions.SetPostgresVersion(new Version(17, 2)))
-                    // The following three options help with debugging, but should
-                    // be changed or removed for production.
-                    .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
-                    .EnableSensitiveDataLogging()
-                    .EnableDetailedErrors()
-            );
-            #endregion
-            
-            // Disable auto model validation
-            builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
-            
-            #region JWT
-            // get jwt config values from appsettings and create an obj using JWTConfig model class, IOC will handle dependency injection
-            builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection(JWTConfig.Section));
-            // directly get jwt config value from appsettings and construct into an obj
-            var jwtConfig = builder.Configuration.GetSection(JWTConfig.Section).Get<JWTConfig>();
-            if (jwtConfig == null)
-            {
-                throw new InvalidOperationException("JWT configuration is missing in appsettings.");
-            }
-            builder.Services.AddJWTEXT(jwtConfig);
+            var logger = LogManager
+                .Setup()
+                .LoadConfigurationFromFile("nLog.config")
+                .GetCurrentClassLogger();
+            var policyName = "defaultPolicy";
 
-            builder.Services.AddTransient<CreateTokenService>();
-
-            #endregion
-            
-            #region cors
-            // cors
-            builder.Services.AddCors(option =>
+            try
             {
-                option.AddPolicy(policyName, policy =>
-                {
+                var builder = WebApplication.CreateBuilder(args);
 
-                    policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                });
-            });
-            #endregion
-            
-            // swagger config => see more details in swagger config extension
-            builder.Services.AddSwaggerEXT();
+                #region Logging and NLog setup
+                // NLog: Setup NLog for Dependency injection
+                builder.Logging.ClearProviders();
+                builder.Host.UseNLog();
+                #endregion
 
-            #region fluent validators
-            builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderCommandValidator>();
-            #endregion
-
-            #region NLog
-            // NLog: Setup NLog for Dependency injection
-            builder.Logging.ClearProviders();
-            builder.Host.UseNLog();
-            #endregion
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwaggerEXT();
-            }else
-            {
-                builder.Services.AddCors(option =>
-                {
-                    option.AddPolicy(policyName, policy =>
+                #region Controllers and Filters
+                builder
+                    .Services.AddControllers(options =>
                     {
-                        policy.WithOrigins("https://your-frontend-domain.com")
-                            .AllowAnyMethod()
-                            .AllowAnyHeader();
+                        // Register global filters
+                        options.Filters.Add<CommonResultFilter>();
+                    })
+                    .AddJsonOptions(options =>
+                    {
+                        options.JsonSerializerOptions.ReferenceHandler = System
+                            .Text
+                            .Json
+                            .Serialization
+                            .ReferenceHandler
+                            .IgnoreCycles;
                     });
+                #endregion
+
+                #region MediatR and Application Services
+                builder.Services.AddMediatR(configuration =>
+                {
+                    configuration.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly);
+                    configuration.RegisterServicesFromAssembly(typeof(GetOrderHandler).Assembly);
                 });
+
+                builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+                builder.Services.AddValidatorsFromAssembly(
+                    typeof(CreateOrderCommandValidator).Assembly
+                );
+
+                // Register custom services
+                builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+                builder.Services.AddScoped<IRoleRepository, RoleRepository>(); // Add RoleRepository
+                builder.Services.AddTransient(
+                    typeof(IPipelineBehavior<,>),
+                    typeof(ValidationBehavior<,>)
+                );
+                builder.Services.AddTransient<CreateTokenService>();
+                #endregion
+
+                #region Database Connection
+                var connectionString = builder.Configuration.GetConnectionString(
+                    "DefaultConnection"
+                );
+
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                    options
+                        .UseNpgsql(
+                            connectionString,
+                            npgsqlOptions => npgsqlOptions.SetPostgresVersion(new Version(17, 2))
+                        )
+                        .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
+                        .EnableSensitiveDataLogging()
+                        .EnableDetailedErrors()
+                );
+                #endregion
+
+                #region CORS
+                builder.Services.AddCors(options =>
+                {
+                    options.AddPolicy(
+                        policyName,
+                        policy =>
+                        {
+                            policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                        }
+                    );
+                });
+                #endregion
+
+                #region JWT Authentication
+                builder.Services.Configure<JWTConfig>(
+                    builder.Configuration.GetSection(JWTConfig.Section)
+                );
+                var jwtConfig = builder
+                    .Configuration.GetSection(JWTConfig.Section)
+                    .Get<JWTConfig>();
+                if (jwtConfig == null)
+                {
+                    throw new InvalidOperationException(
+                        "JWT configuration is missing in appsettings."
+                    );
+                }
+                builder.Services.AddJWTEXT(jwtConfig);
+                #endregion
+
+                #region Swagger
+                builder.Services.AddSwaggerEXT();
+                #endregion
+
+                var app = builder.Build();
+
+                #region Configure HTTP Pipeline
+                if (app.Environment.IsDevelopment())
+                {
+                    app.UseSwaggerEXT();
+                }
+                else
+                {
+                    builder.Services.AddCors(options =>
+                    {
+                        options.AddPolicy(
+                            policyName,
+                            policy =>
+                            {
+                                policy
+                                    .WithOrigins("https://your-frontend-domain.com")
+                                    .AllowAnyMethod()
+                                    .AllowAnyHeader();
+                            }
+                        );
+                    });
+                }
+
+                app.UseMiddleware<GlobalExceptionMiddleware>();
+
+                app.UseHttpsRedirection();
+                app.UseCors(policyName);
+                app.UseAuthentication();
+                app.UseAuthorization();
+                app.MapControllers();
+                #endregion
+
+                app.Run();
             }
-            
-            app.UseMiddleware<GlobalExceptionMiddleware>();
-            
-            app.MapHealthChecks("health",new HealthCheckOptions
+            catch (Exception ex)
             {
-                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
-            
-            app.UseAuthentication();
-
-            app.UseAuthorization();
-
-            app.MapControllers();
-            
-            app.Run();
+                logger.Error(ex, "An error occurred during application startup.");
+                throw;
+            }
+            finally
+            {
+                LogManager.Shutdown();
+            }
         }
     }
 }
