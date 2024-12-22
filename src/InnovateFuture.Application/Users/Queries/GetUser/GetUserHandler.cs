@@ -5,15 +5,15 @@ using InnovateFuture.Infrastructure.Users.Persistence.Interfaces;
 namespace InnovateFuture.Application.Users.Queries.GetUser;
 public class GetUserHandler : IRequestHandler<GetUserQuery, User>
 {
-    private readonly IUserRepository _UserRepository;
-    public GetUserHandler(IUserRepository UserRepository)
+    private readonly IUserRepository _userRepository;
+    public GetUserHandler(IUserRepository userRepository)
     {
-        _UserRepository = UserRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<User> Handle(GetUserQuery query, CancellationToken cancellationToken)
     {
-        var user = await _UserRepository.GetByIdAsync(query.UserId);
+        var user = await _userRepository.GetByIdAsync(query.UserId);
         return user;
     }
 }

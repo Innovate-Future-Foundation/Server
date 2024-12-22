@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Exceptions;
@@ -14,11 +15,10 @@ public class RoleRepository:IRoleRepository
     {
         _dbContext = dbContext;
     }
+
     public async Task<Role> GetByIdAsync(Guid id)
     {
-        var role = await _dbContext.Roles
-            .FirstOrDefaultAsync(r => r.RoleId == id);
-
+        var role = await _dbContext.Roles.FirstOrDefaultAsync(r=>r.RoleId == id);
         if (role == null)
         {
             throw new IFEntityNotFoundException("Role", id);
@@ -26,15 +26,9 @@ public class RoleRepository:IRoleRepository
         return role;
     }
 
-    public async Task<IEnumerable<Role>> GetAllAsync()
+    public async Task<IEnumerable<Role>> GetAnyAsync(Expression<Func<Role, bool>> predicate)
     {
-        var roles = await _dbContext.Roles
-            .ToListAsync();
-
-        if (!roles.Any())
-        {
-            throw new IFDatabaseException("There are no roles set in the database.");
-        }
+        var roles = await _dbContext.Roles.Where(predicate).ToListAsync();
         return roles;
     }
 }

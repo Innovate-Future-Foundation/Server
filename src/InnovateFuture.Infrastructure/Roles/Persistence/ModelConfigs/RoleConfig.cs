@@ -11,6 +11,16 @@ public class RoleConfig : IEntityTypeConfiguration<Role>
     public void Configure(EntityTypeBuilder<Role> builder)
     {
         builder.HasKey(p => p.RoleId);
+        
+        // Set indexes
+        builder.HasIndex(u => u.Name)
+            .IsUnique()
+            .HasDatabaseName("IX_Roles_name");
+        
+        builder.HasIndex(u => u.CodeName)
+            .IsUnique()
+            .HasDatabaseName("IX_Roles_code_name");
+        
         // Column Mappings
         builder.Property(r => r.RoleId).HasColumnType("uuid").HasColumnName("role_id").IsRequired();
         builder.Property(r => r.Name).HasColumnName("name").HasMaxLength(50).IsRequired();
