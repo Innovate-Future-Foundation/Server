@@ -9,7 +9,7 @@ pipeline {
                 script {
                     // add .env
                     sh '''
-                    echo "$ENV_FILE" > .env
+                    echo "$ENV_FILE" | tr ' ' '\n' > .env
                     '''
                     def envVars = readFile('.env').split('\n')
                     envVars.each { line ->
@@ -55,7 +55,7 @@ pipeline {
                     sh '''
                     docker build -t migration-service:latest -f Dockerfile.migration .
                     docker run --rm --name migration-service \
-                        --env "DBConnection=Host=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS;" \
+                        --env DBConnection=Host=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS; \
                         --env "ASPNETCORE_ENVIRONMENT=$DEP_ENV" \
                         migration-service:latest
                     '''
