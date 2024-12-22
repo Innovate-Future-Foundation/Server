@@ -127,7 +127,7 @@ pipeline {
             echo "Pipeline executed successfully."
         }
         failure {
-            echo "Pipeline failed. Cleaning up..."
+            echo "Pipeline failed. Cleaning up.."
             // Clean up all related containers and images
             sh '''
             docker rm -f backend-service container-postgres container-pgadmin migration-service || true
