@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'worker-node-inff-server' }
+    agent { label 'woker-node-inff-server' }
     environment {
         ENV_FILE = credentials('env-file') // 
     }
@@ -7,7 +7,7 @@ pipeline {
         stage('Prepare Environment') {
             steps {
                 script {
-                    // 将 ENV_FILE 写入 .env 文件并加载
+                    // add .env
                     sh '''
                     echo "$ENV_FILE" > .env
                     export $(cat .env | xargs)
