@@ -33,9 +33,6 @@ public class AutoMapperProfile: Profile
         CreateMap<UpdateProfileRequest, UpdateProfileCommand>();
 
         CreateMap<InnovateFuture.Domain.Entities.Profile, GetProfileResponse>()
-            .ForMember(dest => dest.UserFullName,
-                opt => opt.MapFrom(
-                    src => ($"{src.User.GivenName} {src.User.FamilyName}")))
             .ForMember(dest => dest.Role,
                 opt => opt.MapFrom(
                     src => (src.Role.Name)))
@@ -43,10 +40,10 @@ public class AutoMapperProfile: Profile
                 opt => opt.MapFrom(
                     src => (src.Organisation.OrgName)))
             .ForMember(dest => dest.InvitedBy, opt => opt.MapFrom(
-                src => (src.InvitedByProfile != null ? src.InvitedByProfile.Name : string.Empty)
+                src => (src.InvitedByProfile != null ? src.InvitedByProfile.Name : null)
             ))
             .ForMember(dest => dest.SupervisedBy, opt => opt.MapFrom(
-                src => (src.SupervisedByProfile != null ? src.SupervisedByProfile.Name : string.Empty)
+                src => (src.SupervisedByProfile != null ? src.SupervisedByProfile.Name : null)
             ));
     }
 }

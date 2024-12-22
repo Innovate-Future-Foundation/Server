@@ -4,7 +4,6 @@ namespace InnovateFuture.Api.Controllers.ProfilesController;
 public class GetProfileResponse
 {
     public Guid ProfileId { get; set; }
-    public string UserFullName { get; private set; }
     public string OrgName { get; private set; }
     public string Role { get; private set; }
     public string? InvitedBy { get; set; }
