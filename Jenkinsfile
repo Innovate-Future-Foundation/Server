@@ -19,6 +19,22 @@ pipeline {
                 }
             }
         }
+        stage('Rename Configuration File') {
+            steps {
+                script {
+                    // Rename appsettings.Development.json.sample to appsettings.Development.json
+                    sh '''
+                    if [ -f appsettings.Development.json.sample ]; then
+                        mv appsettings.Development.json.sample appsettings.Development.json
+                        echo "Renamed appsettings.Development.json.sample to appsettings.Development.json"
+                    else
+                        echo "File appsettings.Development.json.sample not found!"
+                        exit 1
+                    fi
+                    '''
+                }
+            }
+        }
         stage('Build API Docker Image') {
             steps {
                 script {
