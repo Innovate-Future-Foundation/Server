@@ -1,7 +1,9 @@
 FROM inff-built-be-base AS publish
 WORKDIR /src
 # Publish the application for production
-RUN dotnet publish "InnovateFuture.Api/InnovateFuture.Api.csproj" -c Release -o /app/publish
+RUN dotnet publish "InnovateFuture.Api/InnovateFuture.Api.csproj" \
+  -c Release -o /app/publish \
+  --no-restore --no-build
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
