@@ -1,6 +1,8 @@
-namespace InnovateFuture.Api.Controllers.ProfilesController;
+using System.ComponentModel.DataAnnotations;
+using MediatR;
 
-public class UpdateProfileRequest
+namespace InnovateFuture.Application.Profiles.Commands.UpdateProfile;
+public class UpdateProfileCommand : IRequest<Guid>
 {
     public Guid ProfileId { get; set; }
     public string? Name { get; set; }
@@ -9,3 +11,4 @@ public class UpdateProfileRequest
     public string? Avatar { get; set; } 
     public bool? IsActive { get; set; }
 }
+

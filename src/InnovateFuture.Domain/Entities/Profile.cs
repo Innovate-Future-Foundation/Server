@@ -41,19 +41,13 @@ public class Profile
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
-    
-    public void UpdateProfile(string? email, string? name, string?phone, string? avatar)
+    public void UpdateProfile(string? email, string? name, string?phone, string? avatar,Boolean? isActive)
     {
         Email = string.IsNullOrWhiteSpace(email)?Email:email;
         Name = string.IsNullOrWhiteSpace(name)?Name:name;
         Phone = string.IsNullOrWhiteSpace(phone)?Phone:phone;
         Avatar = string.IsNullOrWhiteSpace(avatar)?Avatar:avatar;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void DisableProfile()
-    {
-        IsActive = false;
+        IsActive = isActive??IsActive;
         UpdatedAt = DateTime.UtcNow;
     }
 }

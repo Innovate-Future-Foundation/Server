@@ -32,13 +32,12 @@ public class ProfileRepository:IProfileRepository
 
     public async Task AddAsync(Profile profile)
     {
-        await _dbContext.AddAsync(profile);
+        await _dbContext.Profiles.AddAsync(profile);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Profile profile)
+    public async Task UpdateAsync()
     {
-        _dbContext.Profiles.Update(profile);
         await _dbContext.SaveChangesAsync();
     }
 }

@@ -6,5 +6,5 @@ public interface IProfileRepository
 {
     Task<Profile> GetByIdAsync(Guid id);
     Task AddAsync(Profile profile);
-    Task UpdateAsync(Profile profile);
+    Task UpdateAsync();
 }
