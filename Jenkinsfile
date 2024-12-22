@@ -30,6 +30,11 @@ pipeline {
                 script {
                     // Start Postgres database
                     sh '''
+                    echo "DB_HOST=$DB_HOST"
+                    echo "DB_PORT=$DB_PORT"
+                    echo "DB_NAME=$DB_NAME"
+                    echo "DB_USER=$DB_USER"
+                    echo "DB_PASS=$DB_PASS"
                     docker run -d --name container-postgres \
                         -e POSTGRES_USER=$DB_USER \
                         -e POSTGRES_PASSWORD=$DB_PASS \
