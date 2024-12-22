@@ -41,7 +41,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    echo "test webhook // Cleaning up old containers and images..."
+                    echo "test webhook2 // Cleaning up old containers and images..."
                     docker rm -f backend-service container-postgres container-pgadmin migration-service || true
                     docker rmi backend-service:latest migration-service:latest || true
                     '''
