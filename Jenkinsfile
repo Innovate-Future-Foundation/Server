@@ -46,8 +46,8 @@ pipeline {
                     sh '''
                     docker build -t migration-service:latest -f Dockerfile.migration .
                     docker run --rm --name migration-service \
-                        --env DBConnection=Host=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS; \
-                        --env ASPNETCORE_ENVIRONMENT=$DEP_ENV \
+                        --env "DBConnection=Host=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS;" \
+                        --env "ASPNETCORE_ENVIRONMENT=$DEP_ENV" \
                         migration-service:latest
                     '''
                 }
