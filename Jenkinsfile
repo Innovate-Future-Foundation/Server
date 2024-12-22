@@ -10,8 +10,12 @@ pipeline {
                     // add .env
                     sh '''
                     echo "$ENV_FILE" > .env
-                    export $(cat .env | xargs)
                     '''
+                    def envVars = readFile('.env').split('\n')
+                    envVars.each { line ->
+                        def (key, value) = line.split('=')
+                        env[key.trim()] = value.trim()
+                    }
                 }
             }
         }
