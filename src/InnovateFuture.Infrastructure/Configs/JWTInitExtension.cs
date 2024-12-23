@@ -20,7 +20,7 @@ public static class JWTInitExtension
                     ValidAudience = jWTConfig.Audience,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jWTConfig.SecrectKey))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jWTConfig.SecretKey))
                 };
             });
     }
