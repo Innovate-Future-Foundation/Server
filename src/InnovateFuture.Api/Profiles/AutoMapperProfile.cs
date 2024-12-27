@@ -1,9 +1,6 @@
-using InnovateFuture.Api.Controllers.OrderController;
-using InnovateFuture.Api.Controllers.OrdersController;
 using InnovateFuture.Api.Controllers.ProfilesController;
 using InnovateFuture.Api.Controllers.RolesController;
 using InnovateFuture.Api.Controllers.UsersController;
-using InnovateFuture.Application.Orders.Commands.CreateOrder;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Roles.Queries.GetRoles;
 using InnovateFuture.Application.Users.Commands.CreateUser;
@@ -18,12 +15,6 @@ public class AutoMapperProfile: Profile
 {
     public AutoMapperProfile()
     {
-        CreateMap<CreateOrderRequest, CreateOrderCommand>();
-
-        CreateMap<CreateOrderRequest.CreateOrderItem, CreateOrderCommand.CreateOrderItem>();
-
-        CreateMap<Order,GetOrderResponse>();
-        
         CreateMap<CreateUserRequest, CreateUserCommand>();
         
         CreateMap<UpdateUserRequest, UpdateUserCommand>();

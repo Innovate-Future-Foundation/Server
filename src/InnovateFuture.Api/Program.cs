@@ -4,14 +4,17 @@ using InnovateFuture.Api.Filters;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Api.Middleware;
 using InnovateFuture.Application.Behaviors;
-using InnovateFuture.Application.Orders.Commands.CreateOrder;
-using InnovateFuture.Application.Orders.Queries.GetOrder;
+using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
+using InnovateFuture.Application.Profiles.Queries.GetProfile;
+using InnovateFuture.Application.Roles.Queries.GetRole;
+using InnovateFuture.Application.Roles.Queries.GetRoles;
 using InnovateFuture.Application.Services.Security;
 using InnovateFuture.Application.Users.Commands.CreateUser;
+using InnovateFuture.Application.Users.Commands.UpdateUser;
+using InnovateFuture.Application.Users.Queries.GetUser;
+using InnovateFuture.Application.Users.Queries.GetUsers;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
-using InnovateFuture.Infrastructure.Orders.Persistence.Interfaces;
-using InnovateFuture.Infrastructure.Orders.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
@@ -56,21 +59,33 @@ namespace InnovateFuture.Api
             #region service instances
             builder.Services.AddMediatR(configuration =>
             {
-                configuration.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(GetOrderHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(GetUsersHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(GetUserHandler).Assembly);
+                
+                configuration.RegisterServicesFromAssembly(typeof(UpdateProfileHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(GetProfileHandler).Assembly);
+                
+                configuration.RegisterServicesFromAssembly(typeof(GetRoleHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(GetRolesHandler).Assembly);
             });
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
-            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<IOrgRepository, OrgRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-            builder.Services.AddValidatorsFromAssembly(typeof(CreateOrderCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(UpdateUserCommandValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(GetUsersQueryValidator).Assembly);
+            
+            builder.Services.AddValidatorsFromAssembly(typeof(GetRolesQueryValidator).Assembly);
+            
+            builder.Services.AddValidatorsFromAssembly(typeof(UpdateProfileCommandValidator).Assembly);
 
             builder.Services.AddHealthChecks()
                 .AddNpgSql(connectionString)
@@ -128,7 +143,11 @@ namespace InnovateFuture.Api
             builder.Services.AddSwaggerEXT();
 
             #region fluent validators
-            builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<GetUsersQueryValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<GetRolesQueryValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileCommandValidator>();
             #endregion
 
             #region NLog
