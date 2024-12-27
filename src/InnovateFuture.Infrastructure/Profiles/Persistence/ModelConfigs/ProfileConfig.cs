@@ -1,5 +1,3 @@
-
-
 using InnovateFuture.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -15,7 +13,7 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
         // Set indexes
         builder.HasIndex(p=> new {p.UserId, p.RoleId, p.OrgId})
             .IsUnique()
-            .HasDatabaseName("IX_Profiles_user_id_role_id_org_id"); 
+            .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
         
         // Column Mappings
         builder.Property(p => p.ProfileId).HasColumnType("uuid").HasColumnName("profile_id").IsRequired();
