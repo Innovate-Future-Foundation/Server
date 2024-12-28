@@ -20,17 +20,17 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
 
     public async Task<Guid> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
-        // validate OrgId, RoleId 
+        // Validate OrgId, RoleId 
         await _roleRepository.GetByIdAsync(command.RoleId);
         await _orgRepository.GetByIdAsync(command.OrgId);
         
-        // create user
+        // Create user
         var user = new User(
             command.CognitoUuid,
             command.Email
             );
         
-        // create profile
+        // Create profile
         var profile = new Profile(
             user.UserId,
             command.OrgId,
@@ -39,13 +39,13 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
             command.SupervisedByProfile
             );
         
-        // add profile to user's navigaton property
+        // Add profile to user's navigation property
         user.AddProfile(profile);
         
-        // fill profile id
+        // Fill profile id
         user.UpdateDefaultProfile(profile.ProfileId);
         
-        await _userRepository.AddAsync(user); // this will make sure user and its profile be created at the same time
+        await _userRepository.AddAsync(user); // This will make sure user and its profile be created at the same time
 
         return user.UserId;
     }

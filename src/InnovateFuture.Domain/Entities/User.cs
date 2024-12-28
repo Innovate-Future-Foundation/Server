@@ -15,8 +15,6 @@ public class User
     public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-
-    // todo: common usage about ...
     public User(Guid cognitoUuid, string email)
     {
         UserId = Guid.NewGuid();
