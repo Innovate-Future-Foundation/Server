@@ -22,21 +22,26 @@ public class Profile
     public Profile? SupervisedByProfile { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-
+    public Profile() { } 
     public Profile(
-        Guid userId, 
-        Guid orgId, 
-        Guid roleId, 
-        Guid? invitedBy, 
-        Guid? supervisedBy
+        User user, 
+        Role role, 
+        Organisation organisation, 
+        Profile? invitedByProfile, 
+        Profile? supervisedByProfile
         )
     {
         ProfileId = Guid.NewGuid();
-        UserId = userId;
-        OrgId = orgId;
-        RoleId = roleId;
-        InvitedBy = invitedBy;
-        SupervisedBy = supervisedBy;
+        User = user;
+        UserId = user.UserId;
+        Role = role;
+        RoleId = role.RoleId;
+        Organisation = organisation;
+        OrgId = Organisation.OrgId;
+        InvitedByProfile = invitedByProfile;
+        SupervisedByProfile = supervisedByProfile;
+        InvitedBy = invitedByProfile?.ProfileId;
+        SupervisedBy = supervisedByProfile?.ProfileId;
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;

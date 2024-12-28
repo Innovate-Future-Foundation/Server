@@ -25,20 +25,10 @@ public class AutoMapperProfile: Profile
         
         CreateMap<UpdateProfileRequest, UpdateProfileCommand>();
 
-        CreateMap<InnovateFuture.Domain.Entities.Profile, GetProfileResponse>()
-            .ForMember(dest => dest.Role,
-                opt => opt.MapFrom(
-                    src => (src.Role.Name)))
-            .ForMember(dest => dest.OrgName,
-                opt => opt.MapFrom(
-                    src => (src.Organisation.OrgName)))
-            .ForMember(dest => dest.InvitedBy, opt => opt.MapFrom(
-                src => (src.InvitedByProfile != null ? src.InvitedByProfile.Name : null)
-            ))
-            .ForMember(dest => dest.SupervisedBy, opt => opt.MapFrom(
-                src => (src.SupervisedByProfile != null ? src.SupervisedByProfile.Name : null)
-            ));
+        CreateMap<InnovateFuture.Domain.Entities.Profile, GetProfileResponse>();
+        
         CreateMap<QueryRolesRequest, GetRolesQuery>();
+        
         CreateMap<Role,GetRoleResponse>();
     }
 }
