@@ -12,10 +12,11 @@ public class GetUsersHandler : IRequestHandler<GetUsersQuery, IEnumerable<User>>
         _userRepository = userRepository;
     }
 
-    public async Task<IEnumerable<User>> Handle(GetUsersQuery? query, CancellationToken cancellationToken)
+    public async Task<IEnumerable<User>> Handle(GetUsersQuery query, CancellationToken cancellationToken)
     {
         Expression<Func<User, bool>> queryPredicate;
-        if (query == null)
+        var queriesEmpty = query.GetType().GetProperties().All(p=>p.GetValue(query)==null);
+        if (queriesEmpty)
         {
             queryPredicate = u => true; // Fetch all users
         }

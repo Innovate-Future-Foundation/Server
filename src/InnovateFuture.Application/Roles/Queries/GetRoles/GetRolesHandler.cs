@@ -12,10 +12,11 @@ public class GetRolesHandler : IRequestHandler<GetRolesQuery, IEnumerable<Role>>
         _roleRepository = roleRepository;
     }
 
-    public async Task<IEnumerable<Role>> Handle(GetRolesQuery? query, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Role>> Handle(GetRolesQuery query, CancellationToken cancellationToken)
     {
         Expression<Func<Role, bool>> queryPredicate;
-        if (query == null)
+        var queriesEmpty = query.GetType().GetProperties().All(p => p.GetValue(query)==null);
+        if (queriesEmpty)
         {
             queryPredicate = r => true; // Fetch all Roles
         }

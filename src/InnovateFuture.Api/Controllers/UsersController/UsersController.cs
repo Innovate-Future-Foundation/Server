@@ -72,7 +72,7 @@ public class UsersController : ControllerBase
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetUsers([FromQuery] QueryUsersRequest? queries)
+    public async Task<IActionResult> GetUsers([FromQuery] QueryUsersRequest queries)
     {
         var query = _mapper.Map<GetUsersQuery>(queries);
         var users = await _mediator.Send(query);
