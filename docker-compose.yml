@@ -1,0 +1,53 @@
+services:
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    image: inff-api-build
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "5091:5091"
+    environment:
+      - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
+      - JWTConfig__SecretKey=${JWT_SECRET}
+      - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
+      - ASPNETCORE_URLS=http://+:5091/
+    depends_on:
+      - migration
+  
+  migration:
+    image: inff-api-build
+    command: >
+      sh -c "dotnet ef database update
+      --project InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj
+      --startup-project InnovateFuture.Api/InnovateFuture.Api.csproj"
+    environment:
+      - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
+      - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
+    depends_on:
+      - base
+      - postgres
+
+  postgres:
+    container_name: container-postgres
+    image: postgres:17.2
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: container-pgadmin
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PG_USER}
+      PGADMIN_DEFAULT_PASSWORD: ${PG_PASS}
+    restart: unless-stopped
