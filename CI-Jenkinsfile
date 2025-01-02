@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'worker-node-inff-server' }
+    agent { label 'woker-node-inff-server' }
     environment {
         ENV_FILE = credentials('env-file')
         AWS_DEFAULT_REGION = 'us-east-1'
