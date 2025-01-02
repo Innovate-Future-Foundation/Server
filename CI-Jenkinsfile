@@ -2,8 +2,8 @@ pipeline {
     agent { label 'woker-node-inff-server' }
     environment {
         ENV_FILE = credentials('env-file')
-        AWS_DEFAULT_REGION = 'us-east-1'
-        ECR_REPOSITORY = '123456789012.dkr.ecr.us-east-1.amazonaws.com'
+        AWS_DEFAULT_REGION = 'ap-southeast-2'
+        ECR_REPOSITORY = '585008057681.dkr.ecr.ap-southeast-2.amazonaws.com/inff-backend'
     }
     stages {
         stage('Prepare Environment') {
