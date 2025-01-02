@@ -2,9 +2,11 @@ using System.ComponentModel.DataAnnotations;
 using MediatR;
 
 namespace InnovateFuture.Application.Orders.Commands.CreateOrder;
+
 public class CreateOrderCommand : IRequest<Guid>
 {
     public string CustomerName { get; set; }
+
     [Required]
     public List<CreateOrderItem> Items { get; set; }
 
@@ -15,4 +17,3 @@ public class CreateOrderCommand : IRequest<Guid>
         public decimal UnitPrice { get; set; }
     }
 }
-
