@@ -1,0 +1,86 @@
+pipeline {
+    agent { label 'worker-node-inff-server' }
+    environment {
+        ENV_FILE = credentials('env-file')
+        AWS_DEFAULT_REGION = 'us-east-1'
+        ECR_REPOSITORY = '123456789012.dkr.ecr.us-east-1.amazonaws.com'
+    }
+    stages {
+        stage('Prepare Environment') {
+            steps {
+                script {
+                    sh '''
+                    echo "$ENV_FILE" | tr ' ' '\n' > .env
+                    '''
+                    def envVars = readFile('.env').split('\n')
+                    envVars.each { line ->
+                        def (key, value) = line.split('=')
+                        env[key.trim()] = value.trim()
+                    }
+                }
+            }
+        }
+        stage('Rename Configuration File') {
+            steps {
+                script {
+                    sh '''
+                    CONFIG_SAMPLE_PATH="src/InnovateFuture.Api/appsettings.Development.json.sample"
+                    CONFIG_PATH="src/InnovateFuture.Api/appsettings.Development.json"
+                    if [ -f "$CONFIG_SAMPLE_PATH" ]; then
+                        mv "$CONFIG_SAMPLE_PATH" "$CONFIG_PATH"
+                        echo "Renamed $CONFIG_SAMPLE_PATH to $CONFIG_PATH"
+                    else
+                        echo "File $CONFIG_SAMPLE_PATH not found!"
+                        exit 1
+                    fi
+                    '''
+                }
+            }
+        }
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    sh '''
+                    # Build backend service image
+                    docker build -t backend-service:latest -f Dockerfile.be .
+                    
+                    # Build migration service image
+                    docker build -t migration-service:latest -f Dockerfile.migration .
+                    '''
+                }
+            }
+        }
+        stage('Push Images to ECR') {
+            steps {
+                script {
+                    sh '''
+                    # Step 1: Login to AWS ECR
+                    aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY
+                    
+                    # Step 2: Define the images to push
+                    IMAGES=("backend-service" "migration-service")
+                    
+                    # Step 3: Loop through each image and push to ECR
+                    for IMAGE in "${IMAGES[@]}"; do
+                        IMAGE_TAG="$IMAGE:$(date +%Y%m%d%H%M%S)"
+                        docker tag $IMAGE:latest $ECR_REPOSITORY/$IMAGE_TAG
+                        docker push $ECR_REPOSITORY/$IMAGE_TAG
+                        echo "$IMAGE image pushed to ECR with tag: $IMAGE_TAG"
+                    done
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo "Pipeline execution complete."
+        }
+        success {
+            echo "Pipeline executed successfully."
+        }
+        failure {
+            echo "Pipeline failed."
+        }
+    }
+}
