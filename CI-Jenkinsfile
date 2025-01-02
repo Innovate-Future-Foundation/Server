@@ -59,12 +59,15 @@ pipeline {
                     
                     # Step 2: Define the images to push
                     IMAGES=("backend-service" "migration-service")
-                    
-                    # Step 3: Loop through each image and push to ECR
                     for IMAGE in "${IMAGES[@]}"; do
-                        IMAGE_TAG="$IMAGE:$(date +%Y%m%d%H%M%S)"
-                        docker tag $IMAGE:latest $ECR_REPOSITORY/$IMAGE_TAG
-                        docker push $ECR_REPOSITORY/$IMAGE_TAG
+                        # Create a unique tag for each image
+                        TIMESTAMP=$(date +%Y%m%d%H%M%S)
+                        IMAGE_TAG="${IMAGE}-${TIMESTAMP}"
+                        
+                        # Tag and push the image to the shared ECR repository
+                        docker tag $IMAGE:latest $ECR_REPOSITORY:$IMAGE_TAG
+                        docker push $ECR_REPOSITORY:$IMAGE_TAG
+                        
                         echo "$IMAGE image pushed to ECR with tag: $IMAGE_TAG"
                     done
                     '''
