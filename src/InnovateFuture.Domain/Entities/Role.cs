@@ -1,28 +1,25 @@
+using System;
+
 public class Role
 {
     public Guid RoleId { get; private set; }
     public string Name { get; private set; }
     public short CodeName { get; private set; }
     public string Description { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime UpdatedAt { get; private set; }
-s
+
     private Role() { }
 
     public Role(string name, short codeName, string description)
     {
         RoleId = Guid.NewGuid();
-        Name = name;
+        Name = name ?? throw new ArgumentNullException(nameof(name));
         CodeName = codeName;
-        Description = description;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+        Description = description ?? throw new ArgumentNullException(nameof(description));
     }
 
     public void Update(string name, string description)
     {
-        Name = name;
-        Description = description;
-        UpdatedAt = DateTime.UtcNow;
+        Name = name ?? throw new ArgumentNullException(nameof(name));
+        Description = description ?? throw new ArgumentNullException(nameof(description));
     }
 }

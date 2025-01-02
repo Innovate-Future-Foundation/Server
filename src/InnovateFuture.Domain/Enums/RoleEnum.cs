@@ -1,10 +1,11 @@
-namespace InnovateFuture.Domain.Enums;
-
-public enum RoleEnum
+namespace InnovateFuture.Domain.Enums
 {
-    SUPERADMIN,
-    ADMIN,
-    TEACHER,
-    PARENT,
-    STUDENT
+    public enum RoleEnum
+    {
+        PLATFORMADMIN,
+        ORGANISATIONADMIN,
+        ORGANISATIONTEACHER,
+        PARENT,
+        STUDENT,
+    }
 }
