@@ -18,7 +18,7 @@ pipeline {
                 script {
                     sh '''
                         echo "Starting base image build..."
-                        docker build --progress=plain -t inff-api-build -f Dockerfile.base . 2>&1 | tee build.log
+                        docker build --progress=plain -t inff-api-build:latest -f Dockerfile.base . 2>&1 | tee build.log
                         echo "Build completed. Log saved to build.log"
                         cat build.log
                     '''
