@@ -34,12 +34,14 @@ pipeline {
                 script {
                     sh '''
                         # Cleanup running containers and resources
-                        if [ -f "docker-compose.yml" ]; then
-                            docker compose down --remove-orphans -v || true
-                            docker system prune -f --filter "until=24h"
-                            docker volume prune -f
-                            docker network prune -f
-                        fi
+                        echo "Cleaning up existing containers..."
+                        docker ps -a | grep -E 'container-postgres|container-pgadmin' | awk '{print $1}' | xargs -r docker rm -f
+                        docker-compose down --remove-orphans -v || true
+
+                        # Optional: clean up unused resources
+                        docker system prune -f --filter "until=24h"
+                        docker volume prune -f
+                        docker network prune -f
                     '''
                 }
             }
@@ -174,12 +176,11 @@ pipeline {
 
                             echo "\n=== Container Network Details ==="
                             # Get the network name dynamically
-                            NETWORK_NAME=$(docker inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{end}}' container-postgres)
+                            NETWORK_NAME=$(docker network ls | grep ${COMPOSE_PROJECT_NAME} | awk '{print $2}')
                             echo "Network name: ${NETWORK_NAME}"
                             docker network inspect ${NETWORK_NAME}
 
                             echo "\n=== Container Connectivity Test ==="
-                            # Test network connectivity between containers
                             docker-compose exec -T api ping -c 2 container-postgres
 
                             echo "\n=== Database Connection Test ==="
@@ -216,6 +217,7 @@ pipeline {
                 sh '''
                     echo "\n=== Deployment Summary ==="
                     echo "API URL: ${API_URL}"
+                    echo "Swagger UI: ${API_URL}/swagger"
                     echo "PgAdmin URL: ${PGADMIN_URL}"
 
                     echo "\n=== Running Containers ==="
