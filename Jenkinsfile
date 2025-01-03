@@ -35,7 +35,7 @@ pipeline {
                     sh '''
                         # Cleanup running containers and resources
                         if [ -f "docker-compose.yml" ]; then
-                            docker-compose down --remove-orphans -v || true
+                            docker compose down --remove-orphans -v || true
                             docker system prune -f --filter "until=24h"
                             docker volume prune -f
                             docker network prune -f
@@ -68,7 +68,7 @@ pipeline {
                     try {
                         sh '''
                             # Build with cache optimization using global env
-                            docker-compose build --parallel base api
+                            docker compose build --parallel base api
 
                             # Use project name in verification
                             if ! docker images | grep -q "${COMPOSE_PROJECT_NAME}"; then
@@ -88,11 +88,11 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            docker-compose up -d postgres
+                            docker compose up -d postgres
 
                             echo "Waiting for database to be ready..."
                             for i in $(seq 1 ${DB_INIT_TIMEOUT}); do
-                                if docker-compose exec -T postgres pg_isready -h localhost; then
+                                if docker compose exec -T postgres pg_isready -h localhost; then
                                     echo "Database is ready"
                                     break
                                 fi
@@ -117,13 +117,13 @@ pipeline {
                     try {
                         sh '''
                             echo "Running database migrations..."
-                            docker-compose up -d migration
+                            docker compose up -d migration
 
                             # Monitor migration logs
                             sleep 10
-                            if docker-compose logs migration | grep -E "error|Error|ERROR|failed|Failed|FAILED"; then
+                            if docker compose logs migration | grep -E "error|Error|ERROR|failed|Failed|FAILED"; then
                                 echo "ERROR: Migration failed"
-                                docker-compose logs migration
+                                docker compose logs migration
                                 exit 1
                             fi
                         '''
@@ -139,7 +139,7 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            docker-compose up -d api pgadmin
+                            docker compose up -d api pgadmin
 
                             echo "Verifying deployment..."
                             sleep 10
@@ -170,17 +170,17 @@ pipeline {
                     try {
                         sh '''
                             echo "=== Checking Container Status ==="
-                            docker-compose ps
+                            docker compose ps
 
                             echo "\n=== API Container Logs ==="
-                            docker-compose logs api
+                            docker compose logs api
 
                             echo "\n=== Database Container Logs ==="
-                            docker-compose logs postgres
+                            docker compose logs postgres
 
                             echo "\n=== Database Connection Test ==="
                             source .env
-                            docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
+                            docker compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
 
                             echo "\n=== API Health Check ==="
                             curl -v ${API_URL}/health || true
@@ -208,7 +208,7 @@ pipeline {
                     echo "PgAdmin URL: ${PGADMIN_URL}"
 
                     echo "\n=== Running Containers ==="
-                    docker-compose ps
+                    docker compose ps
                 '''
             }
         }
@@ -216,8 +216,8 @@ pipeline {
             script {
                 sh '''
                     echo "=== Failure Debug Information ==="
-                    docker-compose ps
-                    docker-compose logs
+                    docker compose ps
+                    docker compose logs
                 '''
             }
         }
@@ -225,7 +225,7 @@ pipeline {
             script {
                 sh '''
                     echo "Cleaning up resources..."
-                    docker-compose down --remove-orphans -v || true
+                    docker compose down --remove-orphans -v || true
                     docker system prune -f --filter "until=${DOCKER_CACHE_TTL}"
                 '''
             }
