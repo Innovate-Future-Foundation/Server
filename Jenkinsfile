@@ -168,19 +168,22 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh '''
+                        sh '''#!/bin/bash
                             echo "=== Checking Container Status ==="
-                            docker compose ps
+                            docker-compose ps
 
                             echo "\n=== API Container Logs ==="
-                            docker compose logs api
+                            docker-compose logs api
 
                             echo "\n=== Database Container Logs ==="
-                            docker compose logs postgres
+                            docker-compose logs postgres
 
                             echo "\n=== Database Connection Test ==="
-                            source .env
-                            docker compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
+                            # Load environment variables from .env file
+                            set -a
+                            . ./.env
+                            set +a
+                            docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
 
                             echo "\n=== API Health Check ==="
                             curl -v ${API_URL}/health || true
