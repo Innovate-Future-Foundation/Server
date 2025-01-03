@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME = 'inff-api'
+        APP_NAME = 'inff-api-build'
         CONTAINER_NAME = 'inff-api-container'
     }
 
