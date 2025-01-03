@@ -12,11 +12,9 @@ pipeline {
     }
 
     options {
-        // Pipeline specific options
-        timestamps()  // Add timestamps to console output
-        timeout(time: 30, unit: 'MINUTES')  // Set timeout
-        disableConcurrentBuilds()  // Prevent parallel execution
-        ansiColor('xterm')  // Colored output
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
     }
 
     stages {
@@ -164,19 +162,6 @@ pipeline {
     }
 
     post {
-        success {
-            script {
-                echo "Pipeline completed successfully"
-            }
-        }
-        failure {
-            script {
-                sh '''
-                    echo "Collecting failure logs..."
-                    docker-compose logs || true
-                '''
-            }
-        }
         always {
             script {
                 sh '''
