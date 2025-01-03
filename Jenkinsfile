@@ -145,7 +145,7 @@ pipeline {
                             sleep 10
 
                             for i in $(seq 1 ${HEALTH_CHECK_RETRIES}); do
-                                if curl -sf http://localhost:5091/health; then
+                                if curl -sf ${API_URL}/health; then
                                     echo "API is healthy"
                                     break
                                 fi
@@ -179,16 +179,17 @@ pipeline {
                             docker-compose logs postgres
 
                             echo "\n=== Database Connection Test ==="
-                            docker-compose exec -T postgres psql -U ${DB_USER} -d ${DB_NAME} -c "\\l"
+                            source .env
+                            docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
 
                             echo "\n=== API Health Check ==="
-                            curl -v ${API_URL}/health
+                            curl -v ${API_URL}/health || true
 
                             echo "\n=== Container Network Info ==="
-                            docker network inspect ${COMPOSE_PROJECT_NAME}_default
+                            docker network inspect ${COMPOSE_PROJECT_NAME}_default || true
 
                             echo "\n=== Resource Usage ==="
-                            docker stats --no-stream
+                            docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
                         '''
                     } catch (Exception e) {
                         error "Verification failed: ${e.message}"
