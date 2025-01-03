@@ -7,6 +7,12 @@ pipeline {
     }
 
     stages {
+        stage('Clean') {
+            steps {
+                cleanWs()
+            }
+        }
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -38,6 +44,8 @@ pipeline {
                     // Build new image
                     sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} -f Dockerfile.api .'
 
+                    sh 'mv .env.example .env'
+
                     // Start new container
                     sh '''
                         docker run -d \
@@ -53,7 +61,6 @@ pipeline {
 
     post {
         always {
-            cleanWs()
             sh '''
                 docker images -q -f "dangling=true" | xargs -r docker rmi
             '''
