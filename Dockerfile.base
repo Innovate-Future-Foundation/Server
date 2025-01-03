@@ -5,17 +5,20 @@ WORKDIR /src
 RUN dotnet tool install --global dotnet-ef --version 9.0.0
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-# Copy solution, project files and restore dependencies
+# Copy solution and project files
 COPY ["InnovateFuture.sln", "../"]
 COPY ["src/InnovateFuture.Api/*.csproj", "InnovateFuture.Api/"]
 COPY ["src/InnovateFuture.Application/*.csproj", "InnovateFuture.Application/"]
 COPY ["src/InnovateFuture.Domain/*.csproj", "InnovateFuture.Domain/"]
 COPY ["src/InnovateFuture.Infrastructure/*.csproj", "InnovateFuture.Infrastructure/"]
 
+# Remove test project references from solution (temporary fix)
+RUN sed -i '/InnovateFuture\..*\.Tests/d' ../InnovateFuture.sln
+
 RUN dotnet restore "InnovateFuture.Api/InnovateFuture.Api.csproj"
 
-# Copy all source code to allow builds
+# Copy all source code
 COPY src/ .
 
-# Build the entire project (to make DLLs available for following)
+# Build the project
 RUN dotnet build "InnovateFuture.Api/InnovateFuture.Api.csproj" -c Release

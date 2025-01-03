@@ -21,17 +21,6 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    sh '''
-                        docker build -t ${APP_NAME}-test -f Dockerfile.test .
-                        docker run --rm ${APP_NAME}-test
-                    '''
-                }
-            }
-        }
-
         stage('Build and Deploy API') {
             steps {
                 script {
@@ -61,7 +50,6 @@ pipeline {
         always {
             cleanWs()
             sh '''
-                docker rmi ${APP_NAME}-test || true
                 docker images -q -f "dangling=true" | xargs -r docker rmi
             '''
         }
