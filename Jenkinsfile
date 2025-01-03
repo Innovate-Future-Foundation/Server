@@ -11,7 +11,6 @@ pipeline {
         stage('Clean') {
             steps {
                 script {
-                    // Kill any process using port 5091
                     sh '''
                         if lsof -Pi :5091 -sTCP:LISTEN -t >/dev/null ; then
                             lsof -Pi :5091 -sTCP:LISTEN -t | xargs kill -9 || true
@@ -50,41 +49,56 @@ pipeline {
                                 echo "docker-compose.yml not found"
                                 exit 1
                             fi
-                        '''
 
-                        // Build and start services in the correct order
-                        sh '''
-                            # Build base and api images
+                            # Build images
                             docker-compose build --no-cache base
                             docker-compose build --no-cache api
 
-                            # Start postgres first
+                            # Start postgres and wait for it to be ready
                             docker-compose up -d postgres
-                            sleep 15
 
-                            # Verify postgres is ready
-                            until docker-compose exec -T postgres pg_isready -h localhost -p 5432; do
-                                echo "Waiting for postgres..."
-                                sleep 5
+                            # Wait for postgres to be fully initialized
+                            echo "Waiting for postgres to be ready..."
+                            RETRIES=30
+                            until docker-compose exec -T postgres pg_isready -h localhost -U ${DB_USER} -d ${DB_NAME} || [ $RETRIES -eq 0 ]; do
+                                echo "Waiting for postgres server, $((RETRIES--)) remaining attempts..."
+                                sleep 2
                             done
 
+                            if [ $RETRIES -eq 0 ]; then
+                                echo "Failed to connect to postgres"
+                                exit 1
+                            fi
+
                             # Run migrations
+                            echo "Running database migrations..."
                             docker-compose up -d migration
 
                             # Wait for migration to complete
-                            docker-compose logs -f migration &
-                            MIGRATION_PID=$!
                             sleep 10
-                            kill $MIGRATION_PID || true
 
-                            # Start API and pgAdmin
+                            # Check migration logs for success
+                            if docker-compose logs migration | grep -q "Build failed"; then
+                                echo "Migration failed"
+                                exit 1
+                            fi
+
+                            # Start remaining services
                             docker-compose up -d api pgadmin
 
-                            # Verify all services are running
+                            # Verify all services
+                            echo "Verifying services..."
                             docker-compose ps
+
+                            # Wait for API to be ready
+                            echo "Waiting for API to be ready..."
+                            sleep 10
                         '''
                     } catch (Exception e) {
-                        sh 'docker-compose logs'
+                        sh '''
+                            echo "Deployment failed. Collecting logs..."
+                            docker-compose logs
+                        '''
                         throw e
                     }
                 }
@@ -95,13 +109,17 @@ pipeline {
     post {
         failure {
             script {
-                sh 'docker-compose logs || true'
+                sh '''
+                    echo "Pipeline failed. Collecting logs..."
+                    docker-compose logs || true
+                '''
             }
         }
         always {
             script {
                 sh '''
                     if [ -f "docker-compose.yml" ]; then
+                        echo "Cleaning up resources..."
                         docker-compose down --remove-orphans -v || true
                         docker images -q -f "dangling=true" | xargs -r docker rmi || true
                     fi
