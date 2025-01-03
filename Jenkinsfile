@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        APP_NAME = 'inff-api-build'
-        CONTAINER_NAME = 'inff-api-container'
-    }
-
     stages {
         stage('Clean') {
             steps {
@@ -19,53 +14,50 @@ pipeline {
             }
         }
 
-        stage('Build Base Image') {
+        stage('Setup Environment') {
             steps {
                 script {
-                    sh '''
-                        echo "Starting base image build..."
-                        docker build --progress=plain -t inff-api-build:latest -f Dockerfile.base . 2>&1 | tee build.log
-                        echo "Build completed. Log saved to build.log"
-                        cat build.log
-                    '''
+                    sh 'cp .env.example .env'
                 }
             }
         }
 
-        stage('Build and Deploy API') {
+        stage('Build and Deploy') {
             steps {
                 script {
-                    // Stop and remove existing container if it exists
+                    // Stop any existing containers and remove them
+                    sh 'docker-compose down --remove-orphans'
+
+                    // Build and start all services defined in docker-compose.yml
                     sh '''
-                        docker stop ${CONTAINER_NAME} || true
-                        docker rm ${CONTAINER_NAME} || true
+                        docker-compose build --no-cache base
+                        docker-compose build --no-cache api
+                        docker-compose up -d postgres
+                        sleep 10  # Give postgres time to initialize
+                        docker-compose up -d migration
+                        docker-compose up -d api pgadmin
                     '''
 
-                    // Build new image
-                    sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} -f Dockerfile.api .'
-
-                    sh 'mv .env.example .env'
-
-                    // Start new container with additional environment variables
-                    sh '''
-                        docker run -d \
-                            --name ${CONTAINER_NAME} \
-                            -p 5091:5091 \
-                            --env-file .env \
-                            -e DBConnection="Host=postgres;Port=5432;Database=InnovateFuture;Username=db_admin;Password=123321abb;" \
-                            -e JWTConfig__SecretKey="u68-03Pn4n_@w@fM" \
-                            ${APP_NAME}:${BUILD_NUMBER}
-                    '''
+                    // Verify containers are running
+                    sh 'docker-compose ps'
                 }
             }
         }
     }
 
     post {
+        failure {
+            script {
+                sh 'docker-compose logs'  // Print logs if something fails
+            }
+        }
         always {
-            sh '''
-                docker images -q -f "dangling=true" | xargs -r docker rmi
-            '''
+            script {
+                // Clean up dangling images
+                sh '''
+                    docker images -q -f "dangling=true" | xargs -r docker rmi || true
+                '''
+            }
         }
     }
 }
