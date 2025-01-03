@@ -45,54 +45,52 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            if [ ! -f "docker-compose.yml" ]; then
-                                echo "docker-compose.yml not found"
-                                exit 1
-                            fi
-
                             # Build images
                             docker-compose build --no-cache base
                             docker-compose build --no-cache api
 
-                            # Start postgres and wait for it to be ready
+                            # Start postgres
                             docker-compose up -d postgres
 
-                            # Wait for postgres to be fully initialized
+                            # Wait for postgres to be ready
                             echo "Waiting for postgres to be ready..."
-                            RETRIES=30
-                            until docker-compose exec -T postgres pg_isready -h localhost -U ${DB_USER} -d ${DB_NAME} || [ $RETRIES -eq 0 ]; do
-                                echo "Waiting for postgres server, $((RETRIES--)) remaining attempts..."
+                            for i in $(seq 1 30); do
+                                if docker-compose exec -T postgres pg_isready; then
+                                    echo "Postgres is ready!"
+                                    break
+                                fi
+                                echo "Waiting for postgres... $i/30"
                                 sleep 2
+                                if [ $i -eq 30 ]; then
+                                    echo "Timeout waiting for postgres"
+                                    exit 1
+                                fi
                             done
-
-                            if [ $RETRIES -eq 0 ]; then
-                                echo "Failed to connect to postgres"
-                                exit 1
-                            fi
 
                             # Run migrations
                             echo "Running database migrations..."
                             docker-compose up -d migration
 
-                            # Wait for migration to complete
+                            # Wait for migration to complete and check logs
                             sleep 10
-
-                            # Check migration logs for success
-                            if docker-compose logs migration | grep -q "Build failed"; then
+                            if docker-compose logs migration | grep -q "error\|Error\|ERROR"; then
                                 echo "Migration failed"
+                                docker-compose logs migration
                                 exit 1
                             fi
 
                             # Start remaining services
+                            echo "Starting API and pgAdmin..."
                             docker-compose up -d api pgadmin
 
-                            # Verify all services
+                            # Final verification
                             echo "Verifying services..."
                             docker-compose ps
 
-                            # Wait for API to be ready
-                            echo "Waiting for API to be ready..."
+                            # Wait for services to be ready
                             sleep 10
+
+                            echo "Deployment completed successfully"
                         '''
                     } catch (Exception e) {
                         sh '''
