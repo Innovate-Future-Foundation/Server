@@ -45,6 +45,7 @@ pipeline {
                     sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} -f Dockerfile.api .'
 
                     sh 'mv .env.example .env'
+                    sh 'echo "DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};" >> .env'
 
                     // Start new container
                     sh '''
