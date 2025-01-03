@@ -169,30 +169,38 @@ pipeline {
                 script {
                     try {
                         sh '''#!/bin/bash
-                            echo "=== Checking Container Status ==="
-                            docker-compose ps
+                            echo "=== Current Docker Networks ==="
+                            docker network ls
 
-                            echo "\n=== API Container Logs ==="
-                            docker-compose logs api
+                            echo "\n=== Container Network Details ==="
+                            # Get the network name dynamically
+                            NETWORK_NAME=$(docker inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{end}}' container-postgres)
+                            echo "Network name: ${NETWORK_NAME}"
+                            docker network inspect ${NETWORK_NAME}
 
-                            echo "\n=== Database Container Logs ==="
-                            docker-compose logs postgres
+                            echo "\n=== Container Connectivity Test ==="
+                            # Test network connectivity between containers
+                            docker-compose exec -T api ping -c 2 container-postgres
 
                             echo "\n=== Database Connection Test ==="
-                            # Load environment variables from .env file
                             set -a
                             . ./.env
                             set +a
                             docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
 
+                            echo "\n=== API Environment Variables ==="
+                            docker-compose exec -T api env | grep DB
+
+                            echo "\n=== Container Status ==="
+                            docker-compose ps
+
                             echo "\n=== API Health Check ==="
                             curl -v ${API_URL}/health || true
 
-                            echo "\n=== Container Network Info ==="
-                            docker network inspect ${COMPOSE_PROJECT_NAME}_default || true
-
-                            echo "\n=== Resource Usage ==="
-                            docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
+                            echo "\n=== Service URLs ==="
+                            echo "API URL: ${API_URL}"
+                            echo "Swagger UI: ${API_URL}/swagger"
+                            echo "PgAdmin URL: ${PGADMIN_URL}"
                         '''
                     } catch (Exception e) {
                         error "Verification failed: ${e.message}"
