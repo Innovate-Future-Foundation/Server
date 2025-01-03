@@ -73,7 +73,7 @@ pipeline {
 
                             # Wait for migration to complete and check logs
                             sleep 10
-                            if docker-compose logs migration | grep -q "error\|Error\|ERROR"; then
+                            if docker-compose logs migration | grep -E "error|Error|ERROR"; then
                                 echo "Migration failed"
                                 docker-compose logs migration
                                 exit 1
