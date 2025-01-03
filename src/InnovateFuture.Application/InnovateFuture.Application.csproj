@@ -7,17 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\tests\InnovateFuture.Application.Tests\InnovateFuture.Application.Tests.csproj" />
     <ProjectReference Include="..\InnovateFuture.Infrastructure\InnovateFuture.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
-    <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.15" />
-    <PackageReference Include="Owls.ErrorOr.Core" Version="1.2.0" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
   </ItemGroup>
 
   <ItemGroup>

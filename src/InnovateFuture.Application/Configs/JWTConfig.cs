@@ -1,4 +1,4 @@
-namespace InnovateFuture.Infrastructure.Configs;
+namespace InnovateFuture.Api.Configs;
 
 public class JWTConfig
 {
