@@ -46,12 +46,14 @@ pipeline {
 
                     sh 'mv .env.example .env'
 
-                    // Start new container
+                    // Start new container with additional environment variables
                     sh '''
                         docker run -d \
                             --name ${CONTAINER_NAME} \
                             -p 5091:5091 \
                             --env-file .env \
+                            -e DBConnection="Host=postgres;Port=5432;Database=InnovateFuture;Username=db_admin;Password=123321abb;" \
+                            -e JWTConfig__SecretKey="u68-03Pn4n_@w@fM" \
                             ${APP_NAME}:${BUILD_NUMBER}
                     '''
                 }
