@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         APP_NAME = 'inff-api'
+        CONTAINER_NAME = 'inff-api-container'
     }
 
     stages {
@@ -31,10 +32,26 @@ pipeline {
             }
         }
 
-        stage('Build API Image') {
+        stage('Build and Deploy API') {
             steps {
                 script {
+                    // Stop and remove existing container if it exists
+                    sh '''
+                        docker stop ${CONTAINER_NAME} || true
+                        docker rm ${CONTAINER_NAME} || true
+                    '''
+
+                    // Build new image
                     sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} -f Dockerfile.api .'
+
+                    // Start new container
+                    sh '''
+                        docker run -d \
+                            --name ${CONTAINER_NAME} \
+                            -p 5091:5091 \
+                            --env-file .env \
+                            ${APP_NAME}:${BUILD_NUMBER}
+                    '''
                 }
             }
         }
@@ -45,7 +62,7 @@ pipeline {
             cleanWs()
             sh '''
                 docker rmi ${APP_NAME}-test || true
-                docker rmi ${APP_NAME}:${BUILD_NUMBER} || true
+                docker images -q -f "dangling=true" | xargs -r docker rmi
             '''
         }
     }
