@@ -211,7 +211,7 @@ pipeline {
                     echo "PgAdmin URL: ${PGADMIN_URL}"
 
                     echo "\n=== Running Containers ==="
-                    docker compose ps
+                    docker-compose ps
                 '''
             }
         }
@@ -219,17 +219,8 @@ pipeline {
             script {
                 sh '''
                     echo "=== Failure Debug Information ==="
-                    docker compose ps
-                    docker compose logs
-                '''
-            }
-        }
-        always {
-            script {
-                sh '''
-                    echo "Cleaning up resources..."
-                    docker compose down --remove-orphans -v || true
-                    docker system prune -f --filter "until=${DOCKER_CACHE_TTL}"
+                    docker-compose ps
+                    docker-compose logs
                 '''
             }
         }
