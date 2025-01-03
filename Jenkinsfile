@@ -9,6 +9,10 @@ pipeline {
         HEALTH_CHECK_RETRIES = '5'
         HEALTH_CHECK_INTERVAL = '5'
         DB_INIT_TIMEOUT = '30'
+        // Add EC2 environment variables
+        EC2_HOST = '98.85.41.63' // or public IP
+        API_URL = "http://${EC2_HOST}:5091"
+        PGADMIN_URL = "http://${EC2_HOST}:5050"
     }
 
     options {
@@ -159,9 +163,63 @@ pipeline {
                 }
             }
         }
+
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            echo "=== Checking Container Status ==="
+                            docker-compose ps
+
+                            echo "\n=== API Container Logs ==="
+                            docker-compose logs api
+
+                            echo "\n=== Database Container Logs ==="
+                            docker-compose logs postgres
+
+                            echo "\n=== Database Connection Test ==="
+                            docker-compose exec -T postgres psql -U ${DB_USER} -d ${DB_NAME} -c "\\l"
+
+                            echo "\n=== API Health Check ==="
+                            curl -v ${API_URL}/health
+
+                            echo "\n=== Container Network Info ==="
+                            docker network inspect ${COMPOSE_PROJECT_NAME}_default
+
+                            echo "\n=== Resource Usage ==="
+                            docker stats --no-stream
+                        '''
+                    } catch (Exception e) {
+                        error "Verification failed: ${e.message}"
+                    }
+                }
+            }
+        }
     }
 
     post {
+        success {
+            script {
+                sh '''
+                    echo "\n=== Deployment Summary ==="
+                    echo "API URL: ${API_URL}"
+                    echo "PgAdmin URL: ${PGADMIN_URL}"
+
+                    echo "\n=== Running Containers ==="
+                    docker-compose ps
+                '''
+            }
+        }
+        failure {
+            script {
+                sh '''
+                    echo "=== Failure Debug Information ==="
+                    docker-compose ps
+                    docker-compose logs
+                '''
+            }
+        }
         always {
             script {
                 sh '''
