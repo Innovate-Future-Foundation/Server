@@ -11,8 +11,12 @@ pipeline {
         stage('Clean') {
             steps {
                 script {
-                    // Clean workspace but preserve checked out files
+                    // Kill any process using port 5091
                     sh '''
+                        if lsof -Pi :5091 -sTCP:LISTEN -t >/dev/null ; then
+                            lsof -Pi :5091 -sTCP:LISTEN -t | xargs kill -9 || true
+                        fi
+
                         if [ -f "docker-compose.yml" ]; then
                             docker-compose down --remove-orphans -v || true
                             docker system prune -f
@@ -41,7 +45,6 @@ pipeline {
             steps {
                 script {
                     try {
-                        // Verify docker-compose file exists
                         sh '''
                             if [ ! -f "docker-compose.yml" ]; then
                                 echo "docker-compose.yml not found"
@@ -49,32 +52,39 @@ pipeline {
                             fi
                         '''
 
-                        // Build and start all services
+                        // Build and start services in the correct order
                         sh '''
+                            # Build base and api images
                             docker-compose build --no-cache base
                             docker-compose build --no-cache api
+
+                            # Start postgres first
                             docker-compose up -d postgres
                             sleep 15
 
-                            # Check if postgres is ready
-                            docker-compose exec -T postgres pg_isready -h localhost -p 5432
+                            # Verify postgres is ready
+                            until docker-compose exec -T postgres pg_isready -h localhost -p 5432; do
+                                echo "Waiting for postgres..."
+                                sleep 5
+                            done
 
-                            if [ $? -eq 0 ]; then
-                                docker-compose up -d migration
-                                docker-compose up -d api pgadmin
-                            else
-                                echo "Postgres is not ready. Aborting."
-                                exit 1
-                            fi
-                        '''
+                            # Run migrations
+                            docker-compose up -d migration
 
-                        // Verify containers
-                        sh '''
+                            # Wait for migration to complete
+                            docker-compose logs -f migration &
+                            MIGRATION_PID=$!
+                            sleep 10
+                            kill $MIGRATION_PID || true
+
+                            # Start API and pgAdmin
+                            docker-compose up -d api pgadmin
+
+                            # Verify all services are running
                             docker-compose ps
-                            docker-compose logs migration
                         '''
                     } catch (Exception e) {
-                        sh 'docker-compose logs || true'
+                        sh 'docker-compose logs'
                         throw e
                     }
                 }
