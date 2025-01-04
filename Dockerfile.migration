@@ -11,7 +11,12 @@ ENV ASPNETCORE_ENVIRONMENT=Development
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 WORKDIR /src
-ENTRYPOINT ["dotnet", "ef", "database", "update", \
-  "--project", "InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj", \
-  "--startup-project", "InnovateFuture.Api/InnovateFuture.Api.csproj", \
-  "--verbose"]
+ENTRYPOINT ["/bin/bash", "-c", "\
+  echo 'Building the project...' && \
+  dotnet build InnovateFuture.Api/InnovateFuture.Api.csproj --verbosity:diagnostic && \
+  dotnet build InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj --verbosity:diagnostic && \
+  echo 'Running database migrations...' && \
+  dotnet ef database update \
+  --project InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj \
+  --startup-project InnovateFuture.Api/InnovateFuture.Api.csproj \
+  --verbose"]
