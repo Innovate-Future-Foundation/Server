@@ -21,7 +21,6 @@ public class CreateUserHandlerTest
         var handler = new CreateUserHandler(mockedUserRepository.Object, mockedRoleRepository.Object, mockedOrgRepository.Object,mockedProfileRepository.Object);
         var command = new CreateUserCommand
         {
-            CognitoUuid = Guid.NewGuid(),
             Email = "test@example.com",
             RoleId = Guid.NewGuid(),
             OrgId = Guid.NewGuid(),
@@ -42,7 +41,6 @@ public class CreateUserHandlerTest
         mockedOrgRepository.Verify(o => o.GetByIdAsync(command.OrgId), Times.Once);
         
         mockedUserRepository.Verify(u => u.AddAsync(It.Is<User>(user =>
-            user.CognitoUuid == command.CognitoUuid &&
             user.Email == command.Email &&
             user.Profiles.Count == 1 &&
             user.Profiles.First().UserId == user.UserId &&

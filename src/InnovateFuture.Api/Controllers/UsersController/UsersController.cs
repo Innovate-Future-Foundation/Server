@@ -25,29 +25,31 @@ public class UsersController : ControllerBase
     }
     
     /// <summary>
-    /// Create a new User.
+    /// Creates a new user.
     /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
+    /// <param name="request">The details of the user to create.</param>
+    /// <returns>A response containing the ID of the created user.</returns>
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
         var command = _mapper.Map<CreateUserCommand>(request);
         var userId = await _mediator.Send(command);
-        return Ok(new { UserId = userId });
+        return CreatedAtAction(nameof(GetUser),new{id = userId},new { UserId = userId });
     }
     
     /// <summary>
-    /// Update user details by its specified ID.
+    /// Updates user details by its specified ID.
     /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
+    /// <param name="id">The ID of the user to update.</param>
+    /// <param name="request">The updated user details.</param>
+    /// <returns>A response containing the ID of the updated user.</returns>
     [AllowAnonymous]
-    [HttpPut]
-    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest request)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequest request)
     {
         var command = _mapper.Map<UpdateUserCommand>(request);
+        command.UserId = id;
         var userId = await _mediator.Send(command);
         return Ok(new { UserId = userId });
     }
@@ -55,8 +57,8 @@ public class UsersController : ControllerBase
     /// <summary>
     /// Retrieves a user by its specified ID.
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
+    /// <param name="id">The ID of the user to retrieve.</param>
+    /// <returns>The details of the specified user.</returns>
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUser(Guid id)
@@ -66,10 +68,12 @@ public class UsersController : ControllerBase
         var userResponse =  _mapper.Map<GetUserResponse>(user);
         return Ok(userResponse);
     }
+    
     /// <summary>
-    /// Retrieves users by specified queries.
+    /// Retrieves a list of users based on specified query parameters.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="queries">The query parameters to filter users.</param>
+    /// <returns>A list of users that match the query parameters.</returns>
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetUsers([FromQuery] QueryUsersRequest queries)

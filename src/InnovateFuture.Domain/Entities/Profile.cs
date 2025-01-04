@@ -4,7 +4,7 @@ public class Profile
 {
     public Guid ProfileId { get; private set; }
     public Guid UserId { get; private set; }
-    public Guid OrgId { get; private set; }
+    public Guid? OrgId { get; private set; }
     public Guid RoleId { get; private set; }
     public Boolean IsActive { get; private set; }
     public string? Email { get; private set; }
@@ -17,7 +17,7 @@ public class Profile
     // navigation properties
     public User User { get; private set; }
     public Role Role { get; private set; }
-    public Organisation Organisation { get; private set; }
+    public Organisation? Organisation { get; private set; }
     public Profile? InvitedByProfile { get; private set; }
     public Profile? SupervisedByProfile { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -26,7 +26,7 @@ public class Profile
     public Profile(
         User user, 
         Role role, 
-        Organisation organisation, 
+        Organisation? organisation, 
         Profile? invitedByProfile, 
         Profile? supervisedByProfile
         )
@@ -37,7 +37,7 @@ public class Profile
         Role = role;
         RoleId = role.RoleId;
         Organisation = organisation;
-        OrgId = Organisation.OrgId;
+        OrgId = Organisation?.OrgId;
         InvitedByProfile = invitedByProfile;
         SupervisedByProfile = supervisedByProfile;
         InvitedBy = invitedByProfile?.ProfileId;

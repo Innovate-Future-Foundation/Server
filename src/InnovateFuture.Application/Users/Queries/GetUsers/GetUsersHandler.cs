@@ -26,8 +26,7 @@ public class GetUsersHandler : IRequestHandler<GetUsersQuery, IEnumerable<User>>
             queryPredicate = u =>
                 (query.CognitoUuid == null || u.CognitoUuid == query.CognitoUuid) &&
                 (string.IsNullOrEmpty(query.Email) || u.Email == query.Email) &&
-                (string.IsNullOrEmpty(query.GivenName) || u.GivenName == query.GivenName) &&
-                (string.IsNullOrEmpty(query.FamilyName) || u.FamilyName == query.FamilyName) &&
+                (string.IsNullOrEmpty(query.FullName) || u.FullName == query.FullName) &&
                 (string.IsNullOrEmpty(query.Phone) || u.Phone == query.Phone) &&
                 (!query.Birthday.HasValue || u.Birthday == query.Birthday);
         }

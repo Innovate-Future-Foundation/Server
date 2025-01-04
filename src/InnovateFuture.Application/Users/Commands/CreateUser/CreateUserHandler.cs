@@ -28,15 +28,8 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         
         // Create user
         var user = new User(
-            command.CognitoUuid,
-            command.Email
-            );
-        // Add other details if provided
-        user.UpdateUserDetails(
-            null,
             command.Email,
-            command.GivenName,
-            command.FamilyName,
+            command.FullName,
             command.Phone,
             command.Birthday
             );

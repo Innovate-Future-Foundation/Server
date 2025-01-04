@@ -23,10 +23,9 @@ public class UserConfig : IEntityTypeConfiguration<User>
         
         // Column Mappings
         builder.Property(u => u.UserId).HasColumnType("uuid").HasColumnName("user_id").IsRequired();
-        builder.Property(u => u.CognitoUuid).HasColumnType("uuid").HasColumnName("cognito_uuid").IsRequired();
+        builder.Property(u => u.CognitoUuid).HasColumnType("uuid").HasColumnName("cognito_uuid");
         builder.Property(u => u.DefaultProfile).HasColumnType("uuid").HasColumnName("default_profile");
-        builder.Property(u => u.GivenName).HasColumnName("given_name").HasMaxLength(100);
-        builder.Property(u => u.FamilyName).HasColumnName("family_name").HasMaxLength(100);
+        builder.Property(u => u.FullName).HasColumnName("full_name").HasMaxLength(100);
         builder.Property(u => u.Email).HasColumnName("email").HasMaxLength(255).IsRequired();
         builder.Property(u => u.Phone).HasColumnName("phone").HasMaxLength(50);
         builder.Property(u => u.Birthday).HasColumnType("date").HasColumnName("birthday");
