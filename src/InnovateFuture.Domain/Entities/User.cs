@@ -30,7 +30,7 @@ public class User
         UpdatedAt = DateTime.UtcNow;
     }
     
-    public void UpdateUserDetails(Guid? updatedDefaultProfile, Guid? cognitoUuid, string? email, string? fullName, string? phone, DateTime? birthday)
+    public void UpdateUserDetails(Guid? cognitoUuid, Guid? updatedDefaultProfile, string? email, string? fullName, string? phone, DateTime? birthday)
     {
         CognitoUuid = cognitoUuid??CognitoUuid;
         DefaultProfile = updatedDefaultProfile??DefaultProfile;
