@@ -6,7 +6,6 @@ public class Organisation
 {
     public Guid OrgId { get; private set; }
     public string OrgName { get; private set; }
-    // todo: to ask: ? || default value
     public string? LogoUrl { get; private set; }
     public string? WebsiteUrl { get; private set; }
     public string? Address { get; private set; }

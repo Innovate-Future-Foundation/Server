@@ -4,22 +4,23 @@ namespace InnovateFuture.Domain.Entities;
 public class User
 {
     public Guid UserId { get; private set; }
-    public Guid CognitoUuid { get; private set; }
     public string Email { get; private set; }
+    public Guid? CognitoUuid { get; private set; }
     public Guid? DefaultProfile { get; private set; }
-    public string? GivenName { get; private set; }
-    public string? FamilyName { get; private set; }
+    public string? FullName { get; private set; }
     public string? Phone { get; private set; }
     public DateTime? Birthday { get; private set; }
     // navigation properties
     public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public User(Guid cognitoUuid, string email)
+    public User(string email,string? fullName, string? phone, DateTime? birthday)
     {
         UserId = Guid.NewGuid();
-        CognitoUuid = cognitoUuid;
         Email = email;
+        FullName = fullName;
+        Phone = phone;
+        Birthday = birthday;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -28,12 +29,13 @@ public class User
         DefaultProfile = updatedDefaultProfile;
         UpdatedAt = DateTime.UtcNow;
     }
-    public void UpdateUserDetails(Guid? updatedDefaultProfile, string? email, string? givenName, string? familyName,  string? phone, DateTime? birthday)
+    
+    public void UpdateUserDetails(Guid? updatedDefaultProfile, Guid? cognitoUuid, string? email, string? fullName, string? phone, DateTime? birthday)
     {
+        CognitoUuid = cognitoUuid??CognitoUuid;
         DefaultProfile = updatedDefaultProfile??DefaultProfile;
         Email = string.IsNullOrWhiteSpace(email)?Email:email;
-        GivenName = string.IsNullOrWhiteSpace(givenName)?GivenName:givenName;
-        FamilyName =  string.IsNullOrWhiteSpace(familyName)?FamilyName:familyName;
+        FullName = string.IsNullOrWhiteSpace(fullName)?fullName:FullName;
         Phone = string.IsNullOrWhiteSpace(phone)?Phone:phone;
         Birthday = birthday??Birthday;
         UpdatedAt = DateTime.UtcNow;

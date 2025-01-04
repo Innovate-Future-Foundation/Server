@@ -8,8 +8,7 @@ public class QueryUsersRequest
     public Guid? InvitedByProfile { get; set; }
     public Guid? SupervisedByProfile { get; set; }
     public string? Email { get; set; }
-    public string? GivenName { get; set; }
-    public string? FamilyName { get; set; }
+    public string? FullName { get; set; }
     public string? Phone { get; set; }
     public DateTime? Birthday { get; set; } 
 }

@@ -24,8 +24,8 @@ public class GetUsersHandlerTest
         var query = new GetUsersQuery();
         var expectedUsers = new List<User>
         {
-            new User (Guid.NewGuid(),"test1@example.com" ),
-            new User (Guid.NewGuid(),"test2@example.com" ),
+            new User ("test1@example.com",null,null,null ),
+            new User ("test2@example.com",null,null,null ),
         };
 
         _mockedUserRepository
@@ -55,29 +55,26 @@ public class GetUsersHandlerTest
 
         // Assert
         _mockedUserRepository.Verify(repo => repo.GetAnyAsync(It.Is<Expression<Func<User, bool>>>(predicate =>
-            predicate.Compile().Invoke(new User (Guid.NewGuid(),"test@example.com" )
+            predicate.Compile().Invoke(new User ("test@example.com",null,null,null )
                ) &&
-            !predicate.Compile().Invoke( new User (Guid.NewGuid(),"other@example.com" ))
+            !predicate.Compile().Invoke( new User ("other@example.com" ,null,null,null))
         )), Times.Once);
     }
     
     [Fact]
-    public async Task Handle_ShouldFilterUsersByGivenNameNFamilyName_WhenMultipleMixedConditionsProvided()
+    public async Task Handle_ShouldFilterUsersByFullName_WhenMultipleMixedConditionsProvided()
     {
         // Arrange
         var query = new GetUsersQuery
         {
             Email = "test@example.com",
-            GivenName = "John",
-            FamilyName = "Doe"
+            FullName = "John Doe"
         };
         
         var correctUser = new User
-            (Guid.NewGuid(),"test@example.com");
-        correctUser.UpdateUserDetails(null,null,"John","Doe",null,null);
+            ("test@example.com","John Doe",null,null);
         var wrongUser = new User
-            (Guid.NewGuid(),"wrong@example.com");
-        wrongUser.UpdateUserDetails(null,null,"Mary","Green",null,null);
+            ("wrong@example.com","Mary Green",null,null);
 
         _mockedUserRepository
             .Setup(repo => repo.GetAnyAsync(It.IsAny<Expression<Func<User, bool>>>()))
