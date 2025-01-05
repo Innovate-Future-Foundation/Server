@@ -43,12 +43,12 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
             .HasForeignKey(p => p.OrgId)
             .OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(p => p.InvitedByProfile)
-            .WithOne()
-            .HasForeignKey<Profile>(p => p.InvitedBy)
+            .WithMany()
+            .HasForeignKey(p => p.InvitedBy)
             .OnDelete(DeleteBehavior.SetNull);
         builder.HasOne(p => p.SupervisedByProfile)
-            .WithOne()
-            .HasForeignKey<Profile>(p => p.SupervisedBy)
+            .WithMany()
+            .HasForeignKey(p => p.SupervisedBy)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

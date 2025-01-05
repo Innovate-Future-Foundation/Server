@@ -34,14 +34,14 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
             command.Birthday
             );
 
-        Profile invitedByProfile = null;
-        Profile supervisedByProfile = null;
+        Profile? invitedByProfile = null;
+        Profile? supervisedByProfile = null;
         
         if (command.InvitedBy.HasValue)
         {
             invitedByProfile = await _profileRepository.GetByIdAsync(command.InvitedBy.Value);
         }
-        else if (command.SupervisedBy.HasValue)
+        if (command.SupervisedBy.HasValue)
         {
             supervisedByProfile = await _profileRepository.GetByIdAsync(command.SupervisedBy.Value);
         }

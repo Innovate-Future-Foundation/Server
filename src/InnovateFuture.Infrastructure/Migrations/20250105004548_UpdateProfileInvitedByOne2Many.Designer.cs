@@ -3,6 +3,7 @@ using System;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InnovateFuture.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250105004548_UpdateProfileInvitedByOne2Many")]
+    partial class UpdateProfileInvitedByOne2Many
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -144,7 +147,8 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("SupervisedBy");
+                    b.HasIndex("SupervisedBy")
+                        .IsUnique();
 
                     b.HasIndex("UserId", "RoleId", "OrgId")
                         .IsUnique()
@@ -271,8 +275,8 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("InnovateFuture.Domain.Entities.Profile", "SupervisedByProfile")
-                        .WithMany()
-                        .HasForeignKey("SupervisedBy")
+                        .WithOne()
+                        .HasForeignKey("InnovateFuture.Domain.Entities.Profile", "SupervisedBy")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("InnovateFuture.Domain.Entities.User", "User")
