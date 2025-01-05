@@ -1,0 +1,200 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_BUILDKIT = '1'
+        COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${env.BUILD_ID}"
+        AWS_CREDENTIALS = credentials('aws-credentials')
+        S3_BUCKET_NAME = 'devops-fan'
+        NGROK = '5e11-163-53-144-72.ngrok-free.app'
+        API_URL = "http://${NGROK}:5091"
+        PGADMIN_URL = "http://${NGROK}:5050"
+    }
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                checkout scm
+            }
+        }
+
+        stage('Pre-build Cleanup') {
+            steps {
+                script {
+                    sh '''
+                    echo "Cleaning up existing containers..."
+                    docker ps -a | grep -E 'container-postgres|container-pgadmin' | awk '{print $1}' | xargs -r docker rm -f
+                    docker-compose down --remove-orphans -v || true
+                    docker system prune -f --filter "until=24h"
+                    docker volume prune -f
+                    docker network prune -f
+                    '''
+                }
+            }
+        }
+
+        stage('Environment Setup') {
+            steps {
+                script {
+                    sh '''
+                    if [ ! -f ".env.example" ]; then
+                        echo "ERROR: .env.example file not found"
+                        exit 1
+                    fi
+                    cp .env.example .env
+                    '''
+                }
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                        docker compose build --parallel base api
+                        if ! docker images | grep -q "${COMPOSE_PROJECT_NAME}"; then
+                            echo "ERROR: Build failed - image not found"
+                            exit 1
+                        fi
+                        '''
+                    } catch (Exception e) {
+                        error "Build failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Database Setup') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                        docker compose up -d postgres
+                        echo "Waiting for database to be ready..."
+                        for i in $(seq 1 30); do
+                            if docker compose exec -T postgres pg_isready -h localhost; then
+                                echo "Database is ready"
+                                break
+                            fi
+                            echo "Attempt $i/30: Database not ready yet..."
+                            sleep 2
+                        done || { echo "ERROR: Database failed to start"; exit 1; }
+                        '''
+                    } catch (Exception e) {
+                        error "Database setup failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Migration') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                        echo "Running database migrations..."
+                        docker compose up -d migration
+                        sleep 10
+                        if docker compose logs migration | grep -E "error|Error|ERROR"; then
+                            echo "ERROR: Migration failed"
+                            exit 1
+                        fi
+                        '''
+                    } catch (Exception e) {
+                        error "Migration failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                        docker compose up -d api pgadmin
+                        echo "Verifying deployment..."
+                        sleep 10
+                        for i in $(seq 1 5); do
+                            if curl -sf ${API_URL}/health; then
+                                echo "API is healthy"
+                                break
+                            fi
+                            echo "Attempt $i/5: API not healthy yet..."
+                            sleep 5 || { echo "ERROR: API health check failed"; exit 1; }
+                        done
+                        '''
+                    } catch (Exception e) {
+                        error "Deployment failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                        echo "=== Current Docker Networks ==="
+                        docker network ls
+
+                        NETWORK_NAME=$(docker network ls | grep ${COMPOSE_PROJECT_NAME} | awk '{print $2}')
+                        echo "Network name: ${NETWORK_NAME}"
+                        docker network inspect ${NETWORK_NAME}
+
+                        echo "\n=== Container Connectivity Test ==="
+                        docker-compose exec -T api ping -c 2 container-postgres
+
+                        echo "\n=== Database Connection Test ==="
+                        set -a . ./.env set +a 
+                        docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
+
+                        echo "\n=== API Health Check ==="
+                        curl -v ${API_URL}/health || true
+
+                        echo "\n=== Service URLs ==="
+                        echo "API URL: ${API_URL}"
+                        echo "Swagger UI: ${API_URL}/swagger"
+                        echo "PgAdmin URL: ${PGADMIN_URL}"
+                        '''
+                    } catch (Exception e) {
+                        error "Verification failed: ${e.message}"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            script { 
+                sh '''
+                echo "\n=== Deployment Summary ==="
+                echo "API URL: ${API_URL}"
+                echo "Swagger UI: ${API_URL}/swagger"
+                echo "PgAdmin URL: ${PGADMIN_URL}"
+                echo "\n=== Running Containers ==="
+                docker-compose ps 
+                '''
+            }
+        }
+        failure { 
+            script { 
+                sh '''
+                echo "Failure Info"
+                docker-compose ps 
+                docker-compose logs 
+                ''' 
+            } 
+        } 
+    } 
+}
