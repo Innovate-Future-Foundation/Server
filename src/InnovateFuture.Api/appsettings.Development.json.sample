@@ -5,7 +5,7 @@
       "Microsoft.AspNetCore": "Warning"
     }
   },
-  "DBConnection": "Host=container-postgres;Database=inff_database;Username=postgres;Password=postgres",
+  "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=password",
   "JWTConfig": {
       "SecretKey": "SecretKeyExample",
       "Issuer": "innovateFuture",
