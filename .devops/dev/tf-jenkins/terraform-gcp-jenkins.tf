@@ -68,7 +68,9 @@ resource "google_compute_instance" "jenkins_vm" {
     ssh-keys = var.my_ssh_key
   }
 
-  metadata_startup_script = file("startup.sh")
+  metadata_startup_script = templatefile("startup.sh", {
+    docker_host = "tcp://localhost:2375"
+  })
 
   scheduling {
     preemptible       = false
