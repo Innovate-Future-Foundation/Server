@@ -12,6 +12,8 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 
 WORKDIR /src
 ENTRYPOINT ["/bin/bash", "-c", "\
+  echo 'Service metadata URI:' $ECS_CONTAINER_METADATA_URI && \
+  echo 'DB Connection String:' $ConnectionStrings__DBConnection && \  
   echo 'Building the project...' && \
   dotnet build InnovateFuture.Api/InnovateFuture.Api.csproj --verbosity:diagnostic && \
   dotnet build InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj --verbosity:diagnostic && \
