@@ -1,139 +1,49 @@
 pipeline {
     agent any
-    environment {
-        // CODE_REPO_URL = 'https://github.com/Innovate-Future-Foundation/Server.git'
-        CODE_REPO_URL = 'https://github.com/markma85/Server.git'
-        BRANCH_NAME = 'devops/mark'
-        BASE_DIRECTORY = './.devops/dev'
-        AWS_CONFIGURE_REGION = 'ap-southeast-2'
-        ECR_URL = '842675993907.dkr.ecr.ap-southeast-2.amazonaws.com'
-        ECR_REPO = 'inff-mark/server'
-        DOCKER_IP = '13.211.252.125'
-        DATABASE_PORT = '5432'
-        DATABASE_NAME = 'InnovateFuture'
-        DATABASE_CREDENTIALS = credentials('postgre_user')
-        JWTConfig__SecretKey = 'MY_SECRET_KEY'
-        ASPNETCORE_ENVIRONMENT = 'Development'
-        
+    parameters {
+
     }
-    // parameters {
-        
-    // }
+
     stages {
-        stage ('Prepare') {
+        stage('Cleanup') {
             steps {
-                script {
-                    echo 'Setting up docker host...'
-                    env.DOCKER_HOST = "tcp://${env.DOCKER_IP}:2375"
-                    echo 'Setting up remote Docker host...'
-                    sh "export DOCKER_HOST=${DOCKER_HOST}"
-                    echo 'Setting up database connection...'
-                    env.DATABASE_CONN = "Host=${env.DOCKER_IP};Database=${DATABASE_NAME};Username=${DATABASE_CREDENTIALS_USR};Password=${DATABASE_CREDENTIALS_PSW}"
-                    //DB user: $DATABASE_CREDENTIALS_USR
-                    //DB passwd: $DATABASE_CREDENTIALS_PSW
-                }
+                echo 'Cleaning up..'
             }
         }
         stage('Checkout') {
             steps {
                 script {
-                    echo 'Checking out code from SCM...'
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: "*/${BRANCH_NAME}"]],
-                        doGenerateSubmoduleConfigurations: false,
-                        userRemoteConfigs: [[
-                            url: "${CODE_REPO_URL}"
-                        ]]
-                    ])
+                    echo 'Checking out..'
+                }
+                dir('Server') {
+                    git(
+                        url: 'https://github.com/Innovate-Future-Foundation/Server.git',
+                        branch: 'devops-mark-ma'
+                    )
                 }
             }
         }
-        stage('Setup Container Dependencies') {
+        stage('Build') {
             steps {
                 script {
-                    dir("$BASE_DIRECTORY") {
-                        sh 'docker compose up -d'
-                    }
-                }
-            }
-        }
-        stage('Entity Framework Migrations') {
-            steps {
-                script {
-                    echo 'Running Entity Framework Migrations..'
-                    withEnv(["DBConnection=${env.DATABASE_CONN}"]) {
-                        sh("""dotnet ef database update \
-                        --project "./src/InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj" \
-                        --startup-project "./src/InnovateFuture.Api/InnovateFuture.Api.csproj" \
-                        """)
-                    }
-                }
-            }
-        }
-        stage('Build Image') {
-            steps {
-                script {
-                    echo "Login to ECR ${ECR_URL}"
-                    withAWS(credentials: 'aws_credentials', region: env.AWS_CONFIGURE_REGION) {
-                        sh "aws ecr get-login-password --region ${AWS_CONFIGURE_REGION} | docker login --username AWS --password-stdin ${ECR_URL}"
-                    }
                     echo 'Building..'
-                    sh ("""docker build -t ${ECR_REPO} \
-                    -f ./.devops/dev/Dockerfile \
-                    --build-arg DBConnection="${env.DATABASE_CONN}" \
-                    --build-arg JWTConfig__SecretKey="${JWTConfig__SecretKey}" \
-                    .
-                    """)
-                    echo "Build complete! #${currentBuild.number}"
-                    GIT_COMMIT_HASH = sh (
-                        script: 'git rev-parse --short HEAD',
-                        returnStdout: true
-                    ).trim()
-                    env.CURRENT_TAG = GIT_COMMIT_HASH + '_' + currentBuild.number
-                    echo "Tag: ${env.CURRENT_TAG}"
-                    sh "docker tag ${ECR_REPO}:latest ${ECR_URL}/${ECR_REPO}:${env.CURRENT_TAG}"
-                    echo "Push image to ECR"
-                    sh "docker push ${ECR_URL}/${ECR_REPO}:${env.CURRENT_TAG}"
+                    // build with command `dotnet build "InnovateFuture.Api.csproj" -c Release -o /app/build`
+                    sh 'dotnet build "InnovateFuture.Api.csproj" -c Release -o /app/build'
+                    // build with command `dotnet publish "InnovateFuture.Api.csproj" -c Release -o /app/publish`
+                    sh 'dotnet publish "InnovateFuture.Api.csproj" -c Release -o /app/publish'
+                    // build entity framework
+                    sh 'dotnet ef database update --project "./src/InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj" --startup-project "./src/InnovateFuture.Api/InnovateFuture.Api.csproj"'
                 }
             }
         }
-        stage('Clean Up') {
+        stage('Test') {
             steps {
-                script {
-                    echo "Checking for existing dotnet-app container..."
-                    def containerExists = sh(
-                        script: "docker ps -aq -f name=dotnet-app",
-                        returnStdout: true
-                    ).trim()
-                    
-                    if (containerExists) {
-                        echo "Stopping and removing existing dotnet-app container..."
-                        sh "docker stop dotnet-app"
-                        sh "docker rm dotnet-app"
-                    } else {
-                        echo "No existing dotnet-app container found."
-                    }
-                    echo "Remove image from remote docker host"
-                    sh "docker image rm -f ${ECR_REPO}:latest"
-                    sh "docker image rm -f ${ECR_URL}/${ECR_REPO}:${env.CURRENT_TAG}"
-                }
+                echo 'Testing..'
             }
         }
         stage('Deploy') {
             steps {
-                echo 'Deploying image to remote docker host'
-                sh ("""
-                docker run -d --name inff-server \
-                -p 5091:5091 \
-                --network dev_inff-network-backend \
-                --env "DBConnection=${env.DATABASE_CONN}" \
-                --env "JWTConfig__SecretKey=${JWTConfig__SecretKey}" \
-                --env "ASPNETCORE_URLS=http://+:5091/" \
-                --env "ASPNETCORE_ENVIRONMENT=Development" \
-                --name dotnet-app \
-                ${ECR_URL}/${ECR_REPO}:${env.CURRENT_TAG}
-                """)
+                echo 'Deploying....'
             }
         }
     }

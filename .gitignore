@@ -484,6 +484,8 @@ $RECYCLE.BIN/
 *.swp
 src/InnovateFuture.Api/appsettings.Development.json
 
+# Ignore build and publish content
+app/
 # DevOps
 *.terraform
 .terraform.*

@@ -1,0 +1,247 @@
+import java.text.SimpleDateFormat
+import java.net.URLEncoder
+SimpleDateFormat dayFormat = new SimpleDateFormat('yyyy/MM/dd HH:mm:ss');
+def nowTimesamp = dayFormat.format(new Date());
+
+pipeline {
+    agent any
+    environment {
+        // CODE_REPO_URL = 'https://github.com/Innovate-Future-Foundation/Server'
+        CODE_REPO_URL = 'https://github.com/markma85/Server'
+        BRANCH_NAME = 'devops/mark'
+        BASE_DIRECTORY = './.devops/dev'
+        AWS_CONFIGURE_REGION = 'ap-southeast-2'
+        ECR_URL = '842675993907.dkr.ecr.ap-southeast-2.amazonaws.com'
+        ECR_REPO = 'inff-mark/server'
+        DOCKER_IP = '3.27.16.208'
+        DATABASE_PORT = '5432'
+        DATABASE_NAME = 'InnovateFuture'
+        DATABASE_CREDENTIALS = credentials('postgre_user')
+        JWTConfig__SecretKey = 'MY_SECRET_KEY'
+        ASPNETCORE_ENVIRONMENT = 'Development'
+        
+    }
+    // parameters {
+        
+    // }
+    stages {
+        stage ('Prepare') {
+            steps {
+                script {
+                    echo 'Clean Workspace...'
+                    cleanWs()
+                    
+                    echo 'Setting up docker host...'
+                    env.DOCKER_HOST = "tcp://${env.DOCKER_IP}:2375"
+                    echo 'Setting up remote Docker host...'
+                    sh "export DOCKER_HOST=${DOCKER_HOST}"
+                    echo 'Setting up database connection...'
+                    env.DATABASE_CONN = "Host=${env.DOCKER_IP};Database=${DATABASE_NAME};Username=${DATABASE_CREDENTIALS_USR};Password=${DATABASE_CREDENTIALS_PSW}"
+                    //DB user: $DATABASE_CREDENTIALS_USR
+                    //DB passwd: $DATABASE_CREDENTIALS_PSW
+                }
+            }
+        }
+        stage('Checkout') {
+            steps {
+                script {
+                    echo 'Checking out code from SCM...'
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "*/${BRANCH_NAME}"]],
+                        doGenerateSubmoduleConfigurations: false,
+                        userRemoteConfigs: [[
+                            url: "${CODE_REPO_URL}.git"
+                        ]]
+                    ])
+                }
+            }
+        }
+        stage('Build') {
+            parallel {
+                stage("Compose Build") {
+                    steps {
+                        script {
+                            echo 'Building Docker Compose...'
+                            dir("$BASE_DIRECTORY") {
+                                sh 'docker compose build --no-cache'
+                            }
+                        }
+                    }
+                }
+                stage("App Build") {
+                    steps {
+                        script {
+                            echo "Login to ECR ${ECR_URL}"
+                            withAWS(credentials: 'aws_credentials', region: env.AWS_CONFIGURE_REGION) {
+                                sh "aws ecr get-login-password --region ${AWS_CONFIGURE_REGION} | docker login --username AWS --password-stdin ${ECR_URL}"
+                            }
+                            echo 'Building Docker image...'
+                            sh ("""
+                                docker build -t ${ECR_REPO} \
+                                    -f ./.devops/dev/Dockerfile \
+                                    --build-arg DBConnection="${env.DATABASE_CONN}" \
+                                    --build-arg JWTConfig__SecretKey="${JWTConfig__SecretKey}" \
+                                    .
+                            """)
+                            echo "Build complete! #${currentBuild.number}"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Push Image') {
+            steps {
+                script {
+                    GIT_COMMIT_HASH = sh (
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
+                    env.CURRENT_TAG = GIT_COMMIT_HASH + '_' + currentBuild.number
+                    echo "Tag: ${env.CURRENT_TAG}"
+                    sh "docker tag ${ECR_REPO}:latest ${ECR_URL}/${ECR_REPO}:${env.CURRENT_TAG}"
+                    echo "Push image to ECR"
+                    sh "docker push ${ECR_URL}/${ECR_REPO}:${env.CURRENT_TAG}"
+                }
+            }
+        }
+        stage('Clean Up') {
+            steps {
+                script {
+                    echo "Checking for existing dotnet-app container..."
+                    def containerExists = sh(
+                        script: "docker ps -aq -f name=dotnet-app",
+                        returnStdout: true
+                    ).trim()
+                    
+                    if (containerExists) {
+                        echo "Stopping and removing existing dotnet-app container..."
+                        sh "docker stop dotnet-app"
+                        sh "docker rm dotnet-app"
+                    } else {
+                        echo "No existing dotnet-app container found."
+                    }
+                    echo "Remove image from remote docker host"
+                    sh "docker image rm -f ${ECR_REPO}:latest"
+                    sh "docker image rm -f ${ECR_URL}/${ECR_REPO}:${env.CURRENT_TAG}"
+                }
+            }
+        }
+        stage('Deploy') {
+            parallel {
+                stage ('Dependencies') {
+                    stages {
+                        stage('Compose Up') {
+                            steps {
+                                script {
+                                    dir("$BASE_DIRECTORY") {
+                                        sh 'docker compose up -d'
+                                    }
+                                }
+                            }
+                        }
+                        stage('Entity Framework Migrations') {
+                            steps {
+                                script {
+                                    echo 'Running Entity Framework Migrations..'
+                                    withEnv(["DBConnection=${env.DATABASE_CONN}"]) {
+                                        sh("""
+                                            dotnet ef database update \
+                                                --project "./src/InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj" \
+                                                --startup-project "./src/InnovateFuture.Api/InnovateFuture.Api.csproj" \
+                                        """)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                stage('App') {
+                    steps {
+                        script {
+                            echo 'Deploying image to remote docker host'
+                            env.CONTAINER_ID = sh (
+                                script: """
+                                    docker run -d --name inff-server \
+                                        -p 5091:5091 \
+                                        --network dev_inff-network-backend \
+                                        --env "DBConnection=${env.DATABASE_CONN}" \
+                                        --env "JWTConfig__SecretKey=${JWTConfig__SecretKey}" \
+                                        --env "ASPNETCORE_URLS=http://+:5091/" \
+                                        --env "ASPNETCORE_ENVIRONMENT=Development" \
+                                        --name dotnet-app \
+                                        ${ECR_URL}/${ECR_REPO}:${env.CURRENT_TAG}
+                                """,
+                                returnStdout: true).trim()
+                            echo "Container started with ID: ${env.CONTAINER_ID}"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Verify') {
+            steps {
+                script {
+                    def maxRetries = 10
+                    def retryInterval = 5 // seconds
+                    def containerReady = false
+
+                    for (int i = 0; i < maxRetries; i++) {
+                        echo "Checking if the container is ready (attempt ${i + 1}/${maxRetries})..."
+                        def responseCode = sh(
+                            script: "curl -o /dev/null -s -w '%{http_code}' http://${DOCKER_IP}:5091/swagger/index.html || echo 0",
+                            returnStdout: true
+                        ).trim()
+                        if (responseCode.startsWith('2')) {
+                            echo "Container is ready!"
+                            containerReady = true
+                            break
+                        }
+                        echo "Container not ready yet. Waiting for ${retryInterval} seconds..."
+                        sleep retryInterval
+                    }
+                    echo 'Verifying deployment...'
+                    
+                    if (!containerReady) {
+                        error "Container did not become ready in ${maxRetries * retryInterval} seconds."
+                    }
+                    
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                def jobName = java.net.URLEncoder.encode(env.JOB_NAME, "UTF-8")
+                def blueOceanUrl = "${env.JENKINS_URL}/blue/organizations/jenkins/${jobName}/detail/${jobName}/${env.BUILD_NUMBER}/pipeline/"
+                wrap([$class: 'BuildUser']) {
+                    discordSend(
+                        webhookURL: 'https://discord.com/api/webhooks/1325091913975595080/1U_xTAiCnW3O526iK88OOGTj375WKko-4xwHNSRJDyb-FIT3ZzybTIUx9asCN9YNeslr',
+                        title: "${env.JOB_NAME} Deployment to EC2 Docker Host (${env.DOCKER_IP}) with result [${currentBuild.currentResult}]",
+                        description: """
+## Pipeline Build
+- Job Duration: ${currentBuild.durationString.replace(' and counting', '')}
+- Triggered by: ${env.BUILD_USER} <${env.BUILD_USER_EMAIL}>
+- Triggered at: ${nowTimesamp} UTC
+
+## Git
+- Repository: ${env.CODE_REPO_URL}
+- Branch: ${env.GIT_BRANCH}
+- Commit: `${env.GIT_COMMIT}` by ${env.GIT_AUTHOR_NAME}
+
+## ECR
+- Image Tag: ${env.CURRENT_TAG}
+
+## Instance
+- Health Check: [Swagger](http://${env.DOCKER_IP}:5091/swagger/index.html)
+- Database Admin: [pgAdmin 4](http://${env.DOCKER_IP}:5050)
+                        """,
+                        link: blueOceanUrl,
+                        result: currentBuild.currentResult
+                    )
+                }
+            }
+        }
+    }
+}

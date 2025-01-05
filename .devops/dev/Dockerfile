@@ -24,6 +24,9 @@ COPY --from=publish /app/publish .
 
 ENV DOTNET_USE_POLLING_FILE_WATCHER=1
 ENV DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION=1
+ENV ConnectionStrings__DBConnection=Server=postgres;Database=InnovateFuture;User=admin;Password=root
+ENV JWTConfig__SecretKey="MY_SECRET_KEY"
+ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:5091/
 
 ENTRYPOINT ["dotnet", "InnovateFuture.Api.dll"]

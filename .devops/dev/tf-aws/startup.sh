@@ -25,40 +25,6 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo apt clean
 docker --version || exit_with_error "Docker client verification failed."
 
-# Enable Docker Remote Access on Port 2375
-echo "[INFO] Configuring Docker to enable remote access on port 2375..."
-sudo mkdir -p /etc/docker
-sudo bash -c 'cat << EOF > /etc/docker/daemon.json
-{
-  "hosts": ["unix:///var/run/docker.sock", "tcp://0.0.0.0:2375"]
-}
-EOF'
-
-# Update docker.service to remove the '-H fd://' conflict
-echo "[INFO] Updating Docker service configuration..."
-sudo sed -i "s|-H fd://||g" /usr/lib/systemd/system/docker.service
-
-# Reload systemd and restart Docker
-sudo systemctl daemon-reload
-sudo systemctl restart docker
-
-# Install net-tools if 'netstat' not found
-echo "[INFO] Checking for 'netstat' command..."
-if ! command -v netstat &> /dev/null; then
-    echo "[INFO] 'netstat' not found. Installing net-tools..."
-    sudo apt-get install -y net-tools || exit_with_error "Failed to install net-tools."
-else
-    echo "[INFO] 'netstat' command is already available."
-fi
-
-# Verify if Docker is listening on port 2375
-if sudo netstat -tuln | grep 2375; then
-    echo "[INFO] Docker is now accessible on port 2375."
-else
-    echo "[ERROR] Failed to enable Docker remote access on port 2375."
-    exit 1
-fi
-
 # Install Docker Compose
 echo "[INFO] Installing Docker Compose..."
 sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
