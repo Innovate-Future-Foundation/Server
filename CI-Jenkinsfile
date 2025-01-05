@@ -63,17 +63,15 @@ pipeline {
             steps {
                 script {
                     sh '''#!/bin/bash
-                    # Step 1: Login to AWS ECR
+                    # Login to AWS ECR
                     aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY
                     
-                    # Step 2: Define the images to push
+                    # Define the images to push
                     IMAGES=("backend-service" "migration-service")
-                    for IMAGE in "${IMAGES[@]}"; do
-                        # Create a unique tag for each image
+                    for IMAGE in "${IMAGES[@]}"; do                        
                         TIMESTAMP=$(date +%Y%m%d%H%M%S)
                         IMAGE_TAG="${IMAGE}-${TIMESTAMP}"
-                        
-                        # Tag and push the image to the shared ECR repository
+                                              
                         docker tag $IMAGE:latest $ECR_REPOSITORY:$IMAGE_TAG
                         docker push $ECR_REPOSITORY:$IMAGE_TAG
                         
@@ -83,6 +81,21 @@ pipeline {
                 }
             }
         }
+        stage('update ecs'){
+            steps {
+                script{
+                    sh """
+                    aws ecs update-service \
+                      --cluster inff-backend-cluster \
+                      --service inff-backend-service \
+                      --force-new-deployment \
+                      --region ap-southeast-2
+                    """
+                }
+            }
+
+        }
+
     }
     post {
         always {
