@@ -95,7 +95,6 @@ namespace InnovateFuture.Api
             #region DB connection
             builder.Services.Configure<DBConnectionConfig>(builder.Configuration);
 
-            var connectionString = builder.Configuration["DBConnection"];
             Console.WriteLine($"Connection string: {connectionString}");
             
             builder.Services.AddDbContext<ApplicationDbContext>(
