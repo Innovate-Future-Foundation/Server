@@ -11,13 +11,13 @@ ENV ASPNETCORE_ENVIRONMENT=Development
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 WORKDIR /src
-ENTRYPOINT ["/bin/bash", "-c", "\
-  echo 'Service metadata URI:' $ECS_CONTAINER_METADATA_URI && \
-  echo 'DB Connection String:' $ConnectionStrings__DBConnection && \  
+ENTRYPOINT ["/bin/bash", "-c", "\  
   echo 'Building the project...' && \
   dotnet build InnovateFuture.Api/InnovateFuture.Api.csproj --verbosity:diagnostic && \
   dotnet build InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj --verbosity:diagnostic && \
   echo 'Running database migrations...' && \
+  echo 'Service metadata URI:' $ECS_CONTAINER_METADATA_URI && \
+  echo 'DB Connection String:' $ConnectionStrings__DBConnection && \
   dotnet ef database update \
   --project InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj \
   --startup-project InnovateFuture.Api/InnovateFuture.Api.csproj \
