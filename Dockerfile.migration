@@ -5,6 +5,7 @@ RUN dotnet tool install --global dotnet-ef --version 9.0.0
 WORKDIR /
 COPY . .
 
+ENV
 ENV ConnectionStrings__DBConnection="Host=container-postgres;Database=inff_database;Username=postgres;Password=password"
 ENV ASPNETCORE_ENVIRONMENT=Development
 # PATH for dotnet-ef
@@ -18,6 +19,7 @@ ENTRYPOINT ["/bin/bash", "-c", "\
   echo 'Running database migrations...' && \
   echo 'Service metadata URI:' $ECS_CONTAINER_METADATA_URI && \
   echo 'DB Connection String:' $ConnectionStrings__DBConnection && \
+  echo 'DB Connection String:' $DBConnection && \
   dotnet ef database update \
   --project InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj \
   --startup-project InnovateFuture.Api/InnovateFuture.Api.csproj \
