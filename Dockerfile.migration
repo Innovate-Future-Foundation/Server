@@ -17,7 +17,6 @@ ENTRYPOINT ["/bin/bash", "-c", "\
   dotnet build InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj --verbosity:diagnostic && \
   echo 'Running database migrations...' && \
   echo 'Service metadata URI:' $ECS_CONTAINER_METADATA_URI && \
-  echo 'DB Connection String:' $ConnectionStrings__DBConnection && \
   echo 'DB Connection String:' $DBConnection && \
   dotnet ef database update \
   --project InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj \

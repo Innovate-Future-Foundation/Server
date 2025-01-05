@@ -4,6 +4,15 @@ pipeline {
         ENV_FILE = credentials('env-file')
         AWS_DEFAULT_REGION = 'ap-southeast-2'
         ECR_REPOSITORY = '585008057681.dkr.ecr.ap-southeast-2.amazonaws.com/inff-backend'
+        DB_HOST = 'container-postgres'
+        DB_PORT = '5432'
+        DB_NAME = 'inff_database'
+        DB_USER = 'inff_user'       
+        DEP_ENV = 'Development'
+        PG_USER = 'inff@example.com'
+        DB_PASS = credentials('DB_PASS')
+        JWT_SECRET = credentials('JWT_SECRET')
+        PG_PASS = credentials('PG_PASS')        
     }
     stages {
         stage('Prepare Environment') {
