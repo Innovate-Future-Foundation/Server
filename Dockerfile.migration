@@ -5,7 +5,6 @@ RUN dotnet tool install --global dotnet-ef --version 9.0.0
 WORKDIR /
 COPY . .
 
-ENV
 ENV ConnectionStrings__DBConnection="Host=container-postgres;Database=inff_database;Username=postgres;Password=password"
 ENV ASPNETCORE_ENVIRONMENT=Development
 # PATH for dotnet-ef
