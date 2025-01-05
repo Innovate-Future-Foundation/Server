@@ -6,8 +6,7 @@ def nowTimesamp = dayFormat.format(new Date());
 pipeline {
     agent any
     environment {
-        // CODE_REPO_URL = 'https://github.com/Innovate-Future-Foundation/Server'
-        CODE_REPO_URL = 'https://github.com/markma85/Server'
+        CODE_REPO_URL = 'https://github.com/Innovate-Future-Foundation/Server'
         BRANCH_NAME = 'devops/mark'
         BASE_DIRECTORY = './.devops/dev'
         AWS_CONFIGURE_REGION = 'ap-southeast-2'
