@@ -15,20 +15,20 @@ pipeline {
         PG_PASS = credentials('PG_PASS')        
     }
     stages {
-        stage('Prepare Environment') {
-            steps {
-                script {
-                    sh '''
-                    echo "$ENV_FILE" | tr ' ' '\n' > .env
-                    '''
-                    def envVars = readFile('.env').split('\n')
-                    envVars.each { line ->
-                        def (key, value) = line.split('=')
-                        env[key.trim()] = value.trim()
-                    }
-                }
-            }
-        }
+        // stage('Prepare Environment') {
+        //     steps {
+        //         script {
+        //             sh '''
+        //             echo "$ENV_FILE" | tr ' ' '\n' > .env
+        //             '''
+        //             def envVars = readFile('.env').split('\n')
+        //             envVars.each { line ->
+        //                 def (key, value) = line.split('=')
+        //                 env[key.trim()] = value.trim()
+        //             }
+        //         }
+        //     }
+        // }
         stage('Rename Configuration File') {
             steps {
                 script {
