@@ -22,64 +22,284 @@ namespace InnovateFuture.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.Order", b =>
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("OrgId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("org_id");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Address")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("address");
 
-                    b.Property<string>("CustomerName")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("logo_url");
+
+                    b.Property<string>("OrgName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("org_name");
 
-                    b.HasKey("Id");
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
-                    b.ToTable("Orders");
+                    b.Property<string>("Subscription")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("subscription");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("WebsiteUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("website_url");
+
+                    b.HasKey("OrgId");
+
+                    b.ToTable("Organisations");
                 });
 
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.OrderItem", b =>
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("ProfileId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("profile_id");
 
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Avatar")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("avatar");
 
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
 
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<Guid?>("InvitedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invited_by");
 
-                    b.HasKey("Id");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
-                    b.HasIndex("OrderId");
+                    b.Property<string>("Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
 
-                    b.ToTable("OrderItems");
+                    b.Property<Guid?>("OrgId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("org_id");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("phone");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.Property<Guid?>("SupervisedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("supervised_by");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("ProfileId");
+
+                    b.HasIndex("InvitedBy");
+
+                    b.HasIndex("OrgId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("SupervisedBy");
+
+                    b.HasIndex("UserId", "RoleId", "OrgId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
+
+                    b.ToTable("Profiles");
                 });
 
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.OrderItem", b =>
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Role", b =>
                 {
-                    b.HasOne("InnovateFuture.Domain.Entities.Order", null)
-                        .WithMany("Items")
-                        .HasForeignKey("OrderId")
+                    b.Property<Guid>("RoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.Property<short>("CodeName")
+                        .HasColumnType("smallint")
+                        .HasColumnName("code_name");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("RoleId");
+
+                    b.HasIndex("CodeName")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Roles_code_name");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Roles_name");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<DateTime?>("Birthday")
+                        .HasColumnType("date")
+                        .HasColumnName("birthday");
+
+                    b.Property<Guid?>("CognitoUuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cognito_uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("DefaultProfile")
+                        .HasColumnType("uuid")
+                        .HasColumnName("default_profile");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("full_name");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("phone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("CognitoUuid")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Users_cognito_uuid");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Users_email");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
+                {
+                    b.HasOne("InnovateFuture.Domain.Entities.Profile", "InvitedByProfile")
+                        .WithMany()
+                        .HasForeignKey("InvitedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("InnovateFuture.Domain.Entities.Organisation", "Organisation")
+                        .WithMany("Profiles")
+                        .HasForeignKey("OrgId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("InnovateFuture.Domain.Entities.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InnovateFuture.Domain.Entities.Profile", "SupervisedByProfile")
+                        .WithMany()
+                        .HasForeignKey("SupervisedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("InnovateFuture.Domain.Entities.User", "User")
+                        .WithMany("Profiles")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("InvitedByProfile");
+
+                    b.Navigation("Organisation");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("SupervisedByProfile");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.Order", b =>
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("Profiles");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Profiles");
                 });
 #pragma warning restore 612, 618
         }

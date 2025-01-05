@@ -1,0 +1,5 @@
+FROM inff-api-build
+
+WORKDIR /
+COPY ./tests .
+ENTRYPOINT ["dotnet", "test", "--no-build"]
