@@ -34,18 +34,22 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
         builder.HasOne(p => p.User)
             .WithMany(u => u.Profiles)
             .HasForeignKey(p => p.UserId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Cascade);
+        
         builder.HasOne(p => p.Role)
             .WithMany()
             .OnDelete(DeleteBehavior.Restrict);
+        
         builder.HasOne(p => p.Organisation)
             .WithMany(o => o.Profiles)
             .HasForeignKey(p => p.OrgId)
             .OnDelete(DeleteBehavior.Cascade);
+        
         builder.HasOne(p => p.InvitedByProfile)
             .WithMany()
             .HasForeignKey(p => p.InvitedBy)
             .OnDelete(DeleteBehavior.SetNull);
+        
         builder.HasOne(p => p.SupervisedByProfile)
             .WithMany()
             .HasForeignKey(p => p.SupervisedBy)
