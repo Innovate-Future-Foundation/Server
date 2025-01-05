@@ -21,19 +21,21 @@ public class ProfilesController : ControllerBase
         _mediator = mediator;
         _mapper = mapper;
     }
-    
+
     /// <summary>
-    /// Update Profile details by its specified ID.
+    /// Update Profile details by its specified ID.       
     /// </summary>
+    /// <param name="id"></param>
     /// <param name="request"></param>
     /// <returns></returns>
     [AllowAnonymous]
-    [HttpPut]
-    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateProfile(Guid id, [FromBody] UpdateProfileRequest request)
     {
         var command = _mapper.Map<UpdateProfileCommand>(request);
-        var ProfileId = await _mediator.Send(command);
-        return Ok(new { ProfileId = ProfileId });
+        command.ProfileId = id;
+        var profileId = await _mediator.Send(command);
+        return Ok(new {  profileId });
     }
 
     /// <summary>
