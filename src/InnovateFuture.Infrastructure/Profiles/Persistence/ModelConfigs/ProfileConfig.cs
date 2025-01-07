@@ -1,4 +1,5 @@
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
