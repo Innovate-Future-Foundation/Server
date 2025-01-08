@@ -1,24 +1,28 @@
 using AutoMapper;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
+using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
+
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
-using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
+
 using System.ComponentModel;
 
-namespace InnovateFuture.Api.Controllers.OrganisationsController;
+
+namespace InnovateFuture.Api.Controllers.OrganisationController;
 
 [ApiExplorerSettings(IgnoreApi = false, GroupName = nameof(ApiVersion.V1))]
 [ApiController]
 [Route("api/v1/[controller]")]
-public class OrganisationsController : ControllerBase
+public class OrganisationController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
     
-    public OrganisationsController(IMediator mediator, IMapper mapper)
+    public OrganisationController(IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
         _mapper = mapper;
@@ -89,6 +93,26 @@ public class OrganisationsController : ControllerBase
         
         var organisations = await _mediator.Send(query);
         var response = _mapper.Map<List<GetOrganisationResponse>>(organisations);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Updates an organisation.
+    /// </summary>
+    /// <param name="id">The ID of the organisation to update.</param>
+    /// <param name="request">The details of the organisation to update.</param>
+    /// <returns>The updated organisation information.</returns>
+    [AllowAnonymous]
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(GetOrganisationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateOrganisation(Guid id, [FromBody] UpdateOrganisationRequest request)
+    {
+        var command = _mapper.Map<UpdateOrganisationCommand>(request);
+        command.OrgId = id;
+        
+        var organisation = await _mediator.Send(command);
+        var response = _mapper.Map<GetOrganisationResponse>(organisation);
         return Ok(response);
     }
 }
