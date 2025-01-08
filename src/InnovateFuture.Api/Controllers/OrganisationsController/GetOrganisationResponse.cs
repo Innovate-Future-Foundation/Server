@@ -13,5 +13,4 @@ public class GetOrganisationResponse
     public string? Email { get;  set; }
     public string? Subscription { get;  set; }
     public string Status { get;  set; }
-    public virtual ICollection<GetUserResponse>? Users { get; set; }
 }

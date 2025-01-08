@@ -14,6 +14,7 @@ using InnovateFuture.Application.Users.Commands.UpdateUser;
 using InnovateFuture.Application.Users.Queries.GetUser;
 using InnovateFuture.Application.Users.Queries.GetUsers;
 using InnovateFuture.Infrastructure.Common;
+using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
@@ -70,6 +71,8 @@ namespace InnovateFuture.Api
                 
                 configuration.RegisterServicesFromAssembly(typeof(GetRoleHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetRolesHandler).Assembly);
+
+                configuration.RegisterServicesFromAssembly(typeof(CreateOrganisationHandler).Assembly);
             });
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -79,6 +82,7 @@ namespace InnovateFuture.Api
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+            builder.Services.AddScoped<IOrgRepository, OrgRepository>();
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
@@ -88,6 +92,8 @@ namespace InnovateFuture.Api
             builder.Services.AddValidatorsFromAssembly(typeof(GetRolesQueryValidator).Assembly);
             
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateProfileCommandValidator).Assembly);
+
+            builder.Services.AddValidatorsFromAssembly(typeof(CreateOrganisationCommandValidator).Assembly);
 
             builder.Services.AddHealthChecks()
                 .AddNpgSql(connectionString)
@@ -150,6 +156,7 @@ namespace InnovateFuture.Api
             builder.Services.AddValidatorsFromAssemblyContaining<GetUsersQueryValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetRolesQueryValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<CreateOrganisationCommandValidator>();
             #endregion
 
             #region NLog
