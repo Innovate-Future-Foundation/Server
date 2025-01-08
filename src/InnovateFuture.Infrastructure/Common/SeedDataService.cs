@@ -1,9 +1,10 @@
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
+using InnovateFuture.Infrastructure.Common.Persistence;
 
 namespace InnovateFuture.Infrastructure.Common;
 
-public static class DataSeed
+public class SeedDataService:ISeedDataService
 {
     // Primary IDs for roles, organisations, and users
     private static readonly Guid _role01Id = Guid.Parse("e114c66a-07b2-4768-b0cf-c111895ce0c4");
@@ -22,7 +23,7 @@ public static class DataSeed
     
 
     // Seed roles
-    public static Role[] GetRoles() =>
+    private static Role[] GetRoles() =>
     [
         new Role("Platform Admin", RoleEnum.PlatformAdmin, _role01Id, "Responsible for managing the entire platform, including..."),
         new Role("Organisation Admin", RoleEnum.OrgAdmin, _role02Id, "Oversees organisational-level operations, including..."),
@@ -32,20 +33,20 @@ public static class DataSeed
     ];
 
     // Seed organisations
-    public static Organisation[] GetOrganisations() =>
+    private static Organisation[] GetOrganisations() =>
     [
         new Organisation("org_name_01_test", _org01Id),
         new Organisation("org_name_02_test", _org02Id)
     ];
 
     // Seed users
-    public static User[] GetUsers() =>
+    private static User[] GetUsers() =>
     [
         new User("yangqingyan0@gmail.com", _user01Id, _cognitoUuid)
     ];
 
     // Seed profiles
-    public static Profile[] GetProfiles() =>
+    private static Profile[] GetProfiles() =>
     [
         new Profile(
             _user01Id,
@@ -55,4 +56,26 @@ public static class DataSeed
         null,
             _profile01Id)
     ];
+    public void Initialize(ApplicationDbContext context)
+    {
+        context.Roles.AddRange(GetRoles());
+        context.Organisations.AddRange(GetOrganisations());
+        var users = GetUsers();
+        context.Users.AddRange(users);
+        var profiles = GetProfiles();
+        context.Profiles.AddRange(profiles);
+        context.SaveChanges();
+        
+        // update default profile of each user
+        foreach (var user in users)
+        {
+            var defaultProfileId =profiles.FirstOrDefault(p=>p.UserId==user.UserId)?.ProfileId;
+            if (defaultProfileId.HasValue)
+            {
+                user.UpdateDefaultProfile(defaultProfileId.Value);
+            }
+        }
+        context.Users.UpdateRange(users);
+        context.SaveChanges();
+    }
 }

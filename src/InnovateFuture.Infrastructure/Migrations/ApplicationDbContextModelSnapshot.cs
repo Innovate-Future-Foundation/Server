@@ -74,25 +74,7 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.HasKey("OrgId");
 
-                    b.ToTable("Organisations");
-
-                    b.HasData(
-                        new
-                        {
-                            OrgId = new Guid("d96e643e-a7aa-42b0-a8cd-1cdd8610e857"),
-                            CreatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1720),
-                            OrgName = "org_name_01_test",
-                            Status = (short)0,
-                            UpdatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1720)
-                        },
-                        new
-                        {
-                            OrgId = new Guid("0aecbf37-ead3-470c-ad8b-790d7eea3b0a"),
-                            CreatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1720),
-                            OrgName = "org_name_02_test",
-                            Status = (short)0,
-                            UpdatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1720)
-                        });
+                    b.ToTable("Organisations", (string)null);
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
@@ -168,19 +150,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
 
-                    b.ToTable("Profiles");
-
-                    b.HasData(
-                        new
-                        {
-                            ProfileId = new Guid("4d69456b-9b86-43b9-b8f7-09a88062eb6b"),
-                            CreatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1770),
-                            IsActive = true,
-                            OrgId = new Guid("d96e643e-a7aa-42b0-a8cd-1cdd8610e857"),
-                            RoleId = new Guid("e114c66a-07b2-4768-b0cf-c111895ce0c4"),
-                            UpdatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1770),
-                            UserId = new Guid("725f77b0-258a-4a92-827a-f5c4adfcba49")
-                        });
+                    b.ToTable("Profiles", (string)null);
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Role", b =>
@@ -223,54 +193,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Roles_name");
 
-                    b.ToTable("Roles");
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = new Guid("e114c66a-07b2-4768-b0cf-c111895ce0c4"),
-                            CodeName = (short)0,
-                            CreatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1620),
-                            Description = "Responsible for managing the entire platform, including...",
-                            Name = "Platform Admin",
-                            UpdatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1620)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("d3788298-39b4-4a40-9985-bfa6a830acd9"),
-                            CodeName = (short)1,
-                            CreatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1620),
-                            Description = "Oversees organisational-level operations, including...",
-                            Name = "Organisation Admin",
-                            UpdatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1620)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("3b69fda3-555a-4658-a6ab-31e1f327ef79"),
-                            CodeName = (short)2,
-                            CreatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1630),
-                            Description = "Handles teaching-related responsibilities within the organisation, such as...",
-                            Name = "Organisation Teacher",
-                            UpdatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1630)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("32ef6536-3cb1-4846-bd32-cd34b489fd43"),
-                            CodeName = (short)3,
-                            CreatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1630),
-                            Description = "Allows monitoring of a child’s progress...",
-                            Name = "Parent",
-                            UpdatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1630)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("28c99a2a-e593-4353-8dc2-cb83fc1ebfea"),
-                            CodeName = (short)4,
-                            CreatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1630),
-                            Description = "Access to tour details...",
-                            Name = "Student",
-                            UpdatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1630)
-                        });
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
@@ -329,17 +252,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Users_email");
 
-                    b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = new Guid("725f77b0-258a-4a92-827a-f5c4adfcba49"),
-                            CognitoUuid = new Guid("e95e0498-b0c1-700b-bb76-f571c5ec3f7c"),
-                            CreatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1750),
-                            Email = "yangqingyan0@gmail.com",
-                            UpdatedAt = new DateTime(2025, 1, 7, 8, 31, 10, 171, DateTimeKind.Utc).AddTicks(1750)
-                        });
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>

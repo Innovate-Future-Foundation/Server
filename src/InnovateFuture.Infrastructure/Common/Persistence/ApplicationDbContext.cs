@@ -19,17 +19,5 @@ public class ApplicationDbContext : DbContext
 
         // Apply all configurations from the current assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-        
-        var roles = DataSeed.GetRoles();
-        modelBuilder.Entity<Role>().HasData(roles);
-        
-        var organisations = DataSeed.GetOrganisations();
-        modelBuilder.Entity<Organisation>().HasData(organisations);
-
-        var users = DataSeed.GetUsers();
-        modelBuilder.Entity<User>().HasData(users);
-
-        var profiles = DataSeed.GetProfiles();
-        modelBuilder.Entity<Profile>().HasData(profiles);
     }
 }

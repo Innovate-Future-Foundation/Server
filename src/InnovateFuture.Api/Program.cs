@@ -13,6 +13,7 @@ using InnovateFuture.Application.Users.Commands.CreateUser;
 using InnovateFuture.Application.Users.Commands.UpdateUser;
 using InnovateFuture.Application.Users.Queries.GetUser;
 using InnovateFuture.Application.Users.Queries.GetUsers;
+using InnovateFuture.Infrastructure.Common;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
@@ -73,6 +74,7 @@ namespace InnovateFuture.Api
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
+            builder.Services.AddSingleton<ISeedDataService, SeedDataService>();
             builder.Services.AddScoped<IOrgRepository, OrgRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
@@ -162,6 +164,7 @@ namespace InnovateFuture.Api
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwaggerEXT();
+                app.SeedDataEXT();
             }else
             {
                 builder.Services.AddCors(option =>
