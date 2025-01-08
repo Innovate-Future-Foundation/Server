@@ -37,4 +37,11 @@ public class OrgRepository:IOrgRepository
         _dbContext.Organisations.Update(organisation);
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task GetAllAsync(List<Organisation> organisations)
+{
+    var results = await _dbContext.Organisations.ToListAsync();
+    organisations.Clear();  
+    organisations.AddRange(results);  
+}
 }
