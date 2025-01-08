@@ -4,6 +4,7 @@ using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
 
 namespace InnovateFuture.Api.Controllers.OrganisationsController;
 
@@ -35,11 +36,26 @@ public class OrganisationsController : ControllerBase
         return CreatedAtAction(nameof(GetOrganisation), new { id = orgId }, new { OrgId = orgId });
     }
 
-    // 暂时需要这个方法因为 CreatedAtAction 引用了它
+    /// <summary>
+    /// Gets an organisation by ID.
+    /// </summary>
+    /// <param name="id">The ID of the organisation to get.</param>
+    /// <returns>The organisation information.</returns>
     [AllowAnonymous]
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(GetOrganisationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetOrganisation(Guid id)
     {
-        return StatusCode(StatusCodes.Status501NotImplemented);
+        var query = new GetOrganisationQuery { OrgId = id };
+        var organisation = await _mediator.Send(query);
+        
+        if (organisation == null)
+        {
+            return NotFound();
+        }
+
+        var response = _mapper.Map<GetOrganisationResponse>(organisation);
+        return Ok(response);
     }
 }
