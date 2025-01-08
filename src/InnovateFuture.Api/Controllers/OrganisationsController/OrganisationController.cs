@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
+using System.ComponentModel;
 
 namespace InnovateFuture.Api.Controllers.OrganisationsController;
 
@@ -56,6 +58,37 @@ public class OrganisationsController : ControllerBase
         }
 
         var response = _mapper.Map<GetOrganisationResponse>(organisation);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Gets all organisations.
+    /// </summary>
+    /// <param name="orderBy">Sort by field: 'OrgName' or 'CreatedAt'.</param>
+    /// <param name="isAscending">Sort ascending (true) or descending (false).</param>
+    /// <returns>A list of organisations.</returns>
+    [AllowAnonymous]
+    [HttpGet]
+    [ProducesResponseType(typeof(List<GetOrganisationResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOrganisations(
+        [FromQuery] 
+        [DefaultValue("OrgName")]
+        [Description("Sort by field: 'OrgName' or 'CreatedAt'")]
+        string? orderBy = "OrgName", 
+        
+        [FromQuery] 
+        [DefaultValue(true)]
+        [Description("Sort ascending (true) or descending (false)")]
+        bool isAscending = true)
+    {
+        var query = new GetOrganisationsQuery 
+        { 
+            OrderBy = orderBy,
+            IsAscending = isAscending
+        };
+        
+        var organisations = await _mediator.Send(query);
+        var response = _mapper.Map<List<GetOrganisationResponse>>(organisations);
         return Ok(response);
     }
 }
