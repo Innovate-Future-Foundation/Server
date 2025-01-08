@@ -14,6 +14,9 @@ using InnovateFuture.Application.Users.Commands.UpdateUser;
 using InnovateFuture.Application.Users.Queries.GetUser;
 using InnovateFuture.Application.Users.Queries.GetUsers;
 using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
+using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
@@ -72,6 +75,8 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(GetRolesHandler).Assembly);
 
                 configuration.RegisterServicesFromAssembly(typeof(CreateOrganisationHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(UpdateOrganisationHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
             });
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -92,6 +97,7 @@ namespace InnovateFuture.Api
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateProfileCommandValidator).Assembly);
 
             builder.Services.AddValidatorsFromAssembly(typeof(CreateOrganisationCommandValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(UpdateOrganisationCommandValidator).Assembly);
 
             builder.Services.AddHealthChecks()
                 .AddNpgSql(connectionString)

@@ -1,4 +1,4 @@
-namespace InnovateFuture.Api.Controllers.OrganisationsController;
+namespace InnovateFuture.Api.Controllers.OrganisationController;
 
 public class CreateOrganisationRequest
 {

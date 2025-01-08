@@ -32,9 +32,8 @@ public class OrgRepository:IOrgRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Organisation organisation)
+    public async Task UpdateAsync()
     {
-        _dbContext.Organisations.Update(organisation);
         await _dbContext.SaveChangesAsync();
     }
 
