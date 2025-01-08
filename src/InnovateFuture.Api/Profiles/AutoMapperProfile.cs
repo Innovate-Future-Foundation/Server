@@ -34,5 +34,7 @@ public class AutoMapperProfile: Profile
         CreateMap<Role,GetRoleResponse>();
 
         CreateMap<CreateOrganisationRequest, CreateOrganisationCommand>();
+
+        CreateMap<Organisation, GetOrganisationResponse>();
     }
 }
