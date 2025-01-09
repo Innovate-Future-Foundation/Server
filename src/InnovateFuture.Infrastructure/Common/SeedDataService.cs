@@ -67,14 +67,12 @@ public class SeedDataService:ISeedDataService
         context.SaveChanges();
         
         // update default profile of each user
-        foreach (var user in users)
+        users.ToList().ForEach(u =>
         {
-            var defaultProfileId =profiles.FirstOrDefault(p=>p.UserId==user.UserId)?.ProfileId;
-            if (defaultProfileId.HasValue)
-            {
-                user.UpdateDefaultProfile(defaultProfileId.Value);
-            }
-        }
+            var defaultProfileId =profiles.FirstOrDefault(p=>p.UserId==u.UserId)!.ProfileId;
+            u.UpdateDefaultProfile(defaultProfileId);
+        });
+        
         context.Users.UpdateRange(users);
         context.SaveChanges();
     }
