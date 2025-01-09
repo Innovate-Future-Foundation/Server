@@ -1,12 +1,12 @@
 {
   "Servers": {
     "1": {
-      "Name": "if",
+      "Name": "IF",
       "Group": "Servers",
       "Host": "postgres",
       "Port": 5432,
       "MaintenanceDB": "postgres",
-      "Username": "db_admin",
+      "Username": "db_admin", 
       "SSLMode": "prefer"
     }
   }
