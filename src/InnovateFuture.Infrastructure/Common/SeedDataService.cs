@@ -6,6 +6,13 @@ namespace InnovateFuture.Infrastructure.Common;
 
 public class SeedDataService:ISeedDataService
 {
+    private readonly ApplicationDbContext _dbContext;
+
+    public SeedDataService(ApplicationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+    
     // Primary IDs for roles, organisations, and users
     private static readonly Guid _role01Id = Guid.Parse("e114c66a-07b2-4768-b0cf-c111895ce0c4");
     private static readonly Guid _role02Id = Guid.Parse("d3788298-39b4-4a40-9985-bfa6a830acd9");
@@ -21,7 +28,7 @@ public class SeedDataService:ISeedDataService
     
     private static readonly Guid _cognitoUuid = Guid.Parse("e95e0498-b0c1-700b-bb76-f571c5ec3f7c");
     
-
+    
     // Seed roles
     private static Role[] GetRoles() =>
     [
@@ -56,15 +63,15 @@ public class SeedDataService:ISeedDataService
         null,
             _profile01Id)
     ];
-    public void Initialize(ApplicationDbContext context)
+    public void Initialize()
     {
-        context.Roles.AddRange(GetRoles());
-        context.Organisations.AddRange(GetOrganisations());
+        _dbContext.Roles.AddRange(GetRoles());
+        _dbContext.Organisations.AddRange(GetOrganisations());
         var users = GetUsers();
-        context.Users.AddRange(users);
+        _dbContext.Users.AddRange(users);
         var profiles = GetProfiles();
-        context.Profiles.AddRange(profiles);
-        context.SaveChanges();
+        _dbContext.Profiles.AddRange(profiles);
+        _dbContext.SaveChanges();
         
         // update default profile of each user
         users.ToList().ForEach(u =>
@@ -73,7 +80,12 @@ public class SeedDataService:ISeedDataService
             u.UpdateDefaultProfile(defaultProfileId);
         });
         
-        context.Users.UpdateRange(users);
-        context.SaveChanges();
+        _dbContext.Users.UpdateRange(users);
+        _dbContext.SaveChanges();
+    }
+    public bool CanSeed()
+    {
+        return (!_dbContext.Users.Any() && !_dbContext.Profiles.Any() && !_dbContext.Roles.Any() &&
+                !_dbContext.Organisations.Any());
     }
 }

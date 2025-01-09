@@ -1,6 +1,5 @@
 
 using InnovateFuture.Infrastructure.Common;
-using InnovateFuture.Infrastructure.Common.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,13 +11,12 @@ public static class SeedDataExtension
     {
         using (var scope = app.Services.CreateScope())
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var seedDataService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
             
             // Check if data already exists
-            if (!dbContext.Users.Any() && !dbContext.Profiles.Any() && !dbContext.Roles.Any() && !dbContext.Organisations.Any())
+            if (seedDataService.CanSeed())
             {
-                seedDataService.Initialize(dbContext);
+                seedDataService.Initialize();
             }
         }
     }

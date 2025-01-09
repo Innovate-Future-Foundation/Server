@@ -4,5 +4,6 @@ namespace InnovateFuture.Infrastructure.Common;
 
 public interface ISeedDataService
 {
-    void Initialize(ApplicationDbContext context);
+    void Initialize();
+    bool CanSeed();
 }

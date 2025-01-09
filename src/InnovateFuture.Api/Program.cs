@@ -74,7 +74,7 @@ namespace InnovateFuture.Api
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
-            builder.Services.AddSingleton<ISeedDataService, SeedDataService>();
+            builder.Services.AddScoped<ISeedDataService, SeedDataService>();
             builder.Services.AddScoped<IOrgRepository, OrgRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
