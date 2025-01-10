@@ -37,7 +37,22 @@ public class OrgRepository:IOrgRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task GetAllAsync(List<Organisation> organisations)
+    public async Task<IEnumerable<Organisation>> GetAnyAsync(Expression<Func<Organisation, bool>> predicate)
+    {
+        var organisations = await _dbContext.Organisations
+            .Include(o => o.Profiles)
+            .ThenInclude(p => p.Organisation)
+            .Include(u => u.Profiles)
+            .ThenInclude(p => p.Role)
+            .Include(u => u.Profiles)
+            .ThenInclude(p => p.InvitedByProfile)
+            .Include(u => u.Profiles)
+            .ThenInclude(p => p.SupervisedByProfile)
+            .Where(predicate)
+            .ToListAsync();
+        
+        return organisations;
+    }
 {
     var results = await _dbContext.Organisations.ToListAsync();
     organisations.Clear();  
