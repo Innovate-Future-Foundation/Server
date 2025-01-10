@@ -15,14 +15,16 @@ public class Profile
     public string? Avatar { get; private set; }
     
     // navigation properties
-    public User User { get; private set; }
-    public Role Role { get; private set; }
-    public Organisation Organisation { get; private set; }
+    public required User User { get; private set; }
+    public required Role Role { get; private set; }
+    public required Organisation Organisation { get; private set; }
     public Profile? InvitedByProfile { get; private set; }
     public Profile? SupervisedByProfile { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    
     public Profile() { } 
+    
     public Profile(
         User user, 
         Role role, 
@@ -46,13 +48,14 @@ public class Profile
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
-    public void UpdateProfile(string? email, string? name, string?phone, string? avatar,Boolean? isActive)
+
+    public void UpdateProfile(string? email, string? name, string? phone, string? avatar, Boolean? isActive)
     {
-        Email = string.IsNullOrWhiteSpace(email)?Email:email;
-        Name = string.IsNullOrWhiteSpace(name)?Name:name;
-        Phone = string.IsNullOrWhiteSpace(phone)?Phone:phone;
-        Avatar = string.IsNullOrWhiteSpace(avatar)?Avatar:avatar;
-        IsActive = isActive??IsActive;
+        Email = string.IsNullOrWhiteSpace(email) ? Email : email;
+        Name = string.IsNullOrWhiteSpace(name) ? Name : name;
+        Phone = string.IsNullOrWhiteSpace(phone) ? Phone : phone;
+        Avatar = string.IsNullOrWhiteSpace(avatar) ? Avatar : avatar;
+        IsActive = isActive ?? IsActive;
         UpdatedAt = DateTime.UtcNow;
     }
 }
