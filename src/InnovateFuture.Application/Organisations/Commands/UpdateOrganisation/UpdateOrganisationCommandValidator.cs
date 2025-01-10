@@ -38,13 +38,6 @@ public class UpdateOrganisationCommandValidator : AbstractValidator<UpdateOrgani
                 .WithMessage("Invalid website URL format.");
         });
 
-        // // If status is provided, it must be either 'Active' or 'Inactive'
-        // When(x => !string.IsNullOrEmpty(x.Status), () =>
-        // {
-        //     RuleFor(x => x.Status)
-        //         .IsInEnum()
-        //         .WithMessage("Status must be a valid status value");
-        // });
 
         // If subscription is provided, it must be either 'Subscribed' or 'Unsubscribed'
         When(x => !string.IsNullOrEmpty(x.Subscription), () =>
