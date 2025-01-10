@@ -18,10 +18,10 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, Guid>
         
         // update
         user.UpdateUserDetails(
-            command.CognitoUuid,
             command.DefaultProfile, 
             command.Email,
-            command.FullName, 
+            command.GivenName, 
+            command.FamilyName,
             command.Phone,
             command.Birthday
             );

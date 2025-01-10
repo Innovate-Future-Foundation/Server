@@ -111,7 +111,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
-                    b.Property<Guid?>("OrgId")
+                    b.Property<Guid>("OrgId")
                         .HasColumnType("uuid")
                         .HasColumnName("org_id");
 
@@ -138,13 +138,15 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.HasKey("ProfileId");
 
-                    b.HasIndex("InvitedBy");
+                    b.HasIndex("InvitedBy")
+                        .IsUnique();
 
                     b.HasIndex("OrgId");
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("SupervisedBy");
+                    b.HasIndex("SupervisedBy")
+                        .IsUnique();
 
                     b.HasIndex("UserId", "RoleId", "OrgId")
                         .IsUnique()
@@ -207,7 +209,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("birthday");
 
-                    b.Property<Guid?>("CognitoUuid")
+                    b.Property<Guid>("CognitoUuid")
                         .HasColumnType("uuid")
                         .HasColumnName("cognito_uuid");
 
@@ -225,10 +227,15 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("email");
 
-                    b.Property<string>("FullName")
+                    b.Property<string>("FamilyName")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
-                        .HasColumnName("full_name");
+                        .HasColumnName("family_name");
+
+                    b.Property<string>("GivenName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("given_name");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(50)
@@ -255,14 +262,15 @@ namespace InnovateFuture.Infrastructure.Migrations
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
                 {
                     b.HasOne("InnovateFuture.Domain.Entities.Profile", "InvitedByProfile")
-                        .WithMany()
-                        .HasForeignKey("InvitedBy")
+                        .WithOne()
+                        .HasForeignKey("InnovateFuture.Domain.Entities.Profile", "InvitedBy")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("InnovateFuture.Domain.Entities.Organisation", "Organisation")
                         .WithMany("Profiles")
                         .HasForeignKey("OrgId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("InnovateFuture.Domain.Entities.Role", "Role")
                         .WithMany()
@@ -271,8 +279,8 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("InnovateFuture.Domain.Entities.Profile", "SupervisedByProfile")
-                        .WithMany()
-                        .HasForeignKey("SupervisedBy")
+                        .WithOne()
+                        .HasForeignKey("InnovateFuture.Domain.Entities.Profile", "SupervisedBy")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("InnovateFuture.Domain.Entities.User", "User")

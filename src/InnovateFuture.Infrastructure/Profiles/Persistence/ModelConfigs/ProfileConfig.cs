@@ -18,8 +18,8 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
         // Column Mappings
         builder.Property(p => p.ProfileId).HasColumnType("uuid").HasColumnName("profile_id").IsRequired();
         builder.Property(p => p.UserId).HasColumnType("uuid").HasColumnName("user_id").IsRequired();
+        builder.Property(p => p.OrgId).HasColumnType("uuid").HasColumnName("org_id").IsRequired();
         builder.Property(p => p.RoleId).HasColumnType("uuid").HasColumnName("role_id").IsRequired();
-        builder.Property(p => p.OrgId).HasColumnType("uuid").HasColumnName("org_id"); // no need for platform admin
         builder.Property(p => p.InvitedBy).HasColumnType("uuid").HasColumnName("invited_by");
         builder.Property(p => p.SupervisedBy).HasColumnType("uuid").HasColumnName("supervised_by");
         builder.Property(p => p.Name).HasColumnName("name").HasMaxLength(100);
@@ -43,12 +43,12 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
             .HasForeignKey(p => p.OrgId)
             .OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(p => p.InvitedByProfile)
-            .WithMany()
-            .HasForeignKey(p => p.InvitedBy)
+            .WithOne()
+            .HasForeignKey<Profile>(p => p.InvitedBy)
             .OnDelete(DeleteBehavior.SetNull);
         builder.HasOne(p => p.SupervisedByProfile)
-            .WithMany()
-            .HasForeignKey(p => p.SupervisedBy)
+            .WithOne()
+            .HasForeignKey<Profile>(p => p.SupervisedBy)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

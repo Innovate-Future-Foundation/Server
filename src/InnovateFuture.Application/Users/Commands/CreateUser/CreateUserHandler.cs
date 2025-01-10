@@ -28,20 +28,27 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         
         // Create user
         var user = new User(
+            command.CognitoUuid,
+            command.Email
+            );
+        // Add other details if provided
+        user.UpdateUserDetails(
+            null,
             command.Email,
-            command.FullName,
+            command.GivenName,
+            command.FamilyName,
             command.Phone,
             command.Birthday
             );
 
-        Profile? invitedByProfile = null;
-        Profile? supervisedByProfile = null;
+        Profile invitedByProfile = null;
+        Profile supervisedByProfile = null;
         
         if (command.InvitedBy.HasValue)
         {
             invitedByProfile = await _profileRepository.GetByIdAsync(command.InvitedBy.Value);
         }
-        if (command.SupervisedBy.HasValue)
+        else if (command.SupervisedBy.HasValue)
         {
             supervisedByProfile = await _profileRepository.GetByIdAsync(command.SupervisedBy.Value);
         }

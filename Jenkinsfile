@@ -8,7 +8,7 @@ pipeline {
         HEALTH_CHECK_RETRIES = '5'
         HEALTH_CHECK_INTERVAL = '5'
         DB_INIT_TIMEOUT = '30'
-        EC2_HOST = credentials('EC2_HOST')
+        EC2_HOST = '13.236.194.136' // or public IP
         API_URL = "http://${EC2_HOST}:5091"
         PGADMIN_URL = "http://${EC2_HOST}:5050"
     }
