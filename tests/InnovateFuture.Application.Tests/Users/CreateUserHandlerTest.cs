@@ -26,9 +26,9 @@ public class CreateUserHandlerTest
             OrgId = Guid.NewGuid(),
         };
         mockedOrgRepository.Setup(o=>o.GetByIdAsync(command.OrgId))
-            .ReturnsAsync(new Organisation("org_name_test01",null,null,null,null,null));
+            .ReturnsAsync(new Organisation("org_name_test01"));
         mockedRoleRepository.Setup(r => r.GetByIdAsync(command.RoleId))
-            .ReturnsAsync(new Role("organisation_admin",RoleEnum.OrgAdmin,null));
+            .ReturnsAsync(new Role("organisation_admin",RoleEnum.OrgAdmin));
         mockedUserRepository.Setup(u => u.AddAsync(It.IsAny<User>()))
             .Returns(Task.CompletedTask);
        

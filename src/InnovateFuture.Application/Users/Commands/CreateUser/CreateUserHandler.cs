@@ -27,12 +27,7 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         var organisation = await _orgRepository.GetByIdAsync(command.OrgId);
         
         // Create user
-        var user = new User(
-            command.Email,
-            command.FullName,
-            command.Phone,
-            command.Birthday
-            );
+        var user = new User(command.Email);
 
         Profile? invitedByProfile = null;
         Profile? supervisedByProfile = null;
@@ -47,13 +42,17 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         }
         
         var profile = new Profile(
-            user,
-            role,
-            organisation,
-            invitedByProfile,
-            supervisedByProfile
+            user.UserId,
+            role.RoleId,
+            organisation.OrgId,
+            invitedByProfile?.ProfileId,
+            supervisedByProfile?.ProfileId
         );
-        
+        profile.AddUser(user);
+        profile.AddRole(role);
+        profile.AddOrganisation(organisation);
+        profile.AddInvitedByProfile(invitedByProfile);
+        profile.AddSupervisedByProfile(supervisedByProfile);
         
         // Add profile to user's navigation property
         user.AddProfile(profile);
