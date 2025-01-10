@@ -11,8 +11,6 @@ pipeline {
         EC2_HOST = credentials('EC2_HOST')
         API_URL = "http://${EC2_HOST}:5091"
         PGADMIN_URL = "http://${EC2_HOST}:5050"
-        PROMETHEUS_PORT = '9090'
-        GRAFANA_PORT = '3000'
     }
 
     options {
@@ -38,31 +36,10 @@ pipeline {
                 script {
                     sh '''
                         echo "Starting cleanup process..."
-                        docker compose down --remove-orphans || true
+                        docker compose down || true
                         docker system prune -f --filter "until=${DOCKER_CACHE_TTL}" || true
                         docker volume prune -f || true
                         docker network prune -f || true
-                    '''
-                }
-            }
-        }
-
-        stage('Environment Setup') {
-            steps {
-                script {
-                    sh '''
-                        if [ ! -f ".env.example" ] || [ ! -f "docker-compose.yml" ]; then
-                            echo "ERROR: Required files not found"
-                            exit 1
-                        fi
-
-                        cp .env.example .env
-                        chmod 600 .env
-                        
-                        if ! grep -q "DB_NAME" .env; then
-                            echo "ERROR: Missing required environment variables"
-                            exit 1
-                        fi
                     '''
                 }
             }
@@ -73,11 +50,11 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            DOCKER_BUILDKIT=1 docker compose build \
+                            docker compose build \
                                 --build-arg BUILDKIT_INLINE_CACHE=1 \
                                 --build-arg CACHE_DATE="$(date)" \
                                 base api
-
+                            
                             docker compose images
                         '''
                     } catch (Exception e) {
@@ -114,51 +91,18 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy Services') {
-            steps {
-                script {
-                    try {
-                        sh '''
-                            docker compose up -d api pgadmin
-                            
-                            echo "Waiting for services to be healthy..."
-                            sleep 10
-                            
-                            if ! curl -sf ${API_URL}/health; then
-                                echo "ERROR: API health check failed"
-                                docker compose logs api
-                                exit 1
-                            fi
-                        '''
-                    } catch (Exception e) {
-                        error "Deployment failed: ${e.message}"
-                    }
-                }
-            }
-        }
     }
 
     post {
         always {
             cleanWs()
         }
-        success {
-            script {
-                sh '''
-                    echo "=== Deployment Summary ===" > deployment_report.txt
-                    echo "Build ID: ${BUILD_ID}" >> deployment_report.txt
-                    echo "API URL: ${API_URL}" >> deployment_report.txt
-                    docker compose ps >> deployment_report.txt
-                '''
-            }
-        }
         failure {
             script {
                 sh '''
-                    echo "=== Failure Analysis ===" > failure_report.txt
-                    docker compose ps >> failure_report.txt
-                    docker compose logs >> failure_report.txt
+                    echo "=== Failure Analysis ==="
+                    docker compose ps
+                    docker compose logs
                 '''
             }
         }
