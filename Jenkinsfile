@@ -36,7 +36,6 @@ pipeline {
                 script {
                     sh '''
                         echo "Starting cleanup process..."
-                        docker compose down || true
                         docker system prune -f --filter "until=${DOCKER_CACHE_TTL}" || true
                         docker volume prune -f || true
                         docker network prune -f || true
@@ -50,12 +49,10 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            docker compose build \
+                            docker build \
                                 --build-arg BUILDKIT_INLINE_CACHE=1 \
                                 --build-arg CACHE_DATE="$(date)" \
-                                base api
-                            
-                            docker compose images
+                                -t base -t api .
                         '''
                     } catch (Exception e) {
                         error "Build failed: ${e.message}"
@@ -69,21 +66,15 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            docker compose up -d postgres
+                            docker run -d --name postgres postgres
                             
                             echo "Waiting for database to be ready..."
                             COUNTER=0
-                            until docker compose exec postgres pg_isready -h localhost || [ $COUNTER -eq $DB_INIT_TIMEOUT ]; do
+                            until docker exec postgres pg_isready -h localhost || [ $COUNTER -eq $DB_INIT_TIMEOUT ]; do
                                 COUNTER=$((COUNTER+1))
                                 echo "Attempt $COUNTER/$DB_INIT_TIMEOUT: Database not ready..."
                                 sleep 2
                             done
-
-                            if [ $COUNTER -eq $DB_INIT_TIMEOUT ]; then
-                                echo "ERROR: Database failed to initialize"
-                                docker compose logs postgres
-                                exit 1
-                            fi
                         '''
                     } catch (Exception e) {
                         error "Database setup failed: ${e.message}"
@@ -100,11 +91,4 @@ pipeline {
         failure {
             script {
                 sh '''
-                    echo "=== Failure Analysis ==="
-                    docker compose ps
-                    docker compose logs
-                '''
-            }
-        }
-    }
-}
+                    echo "=== Failure Analysis ==
