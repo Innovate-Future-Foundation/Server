@@ -34,6 +34,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
+using InnovateFuture.Infrastructure.Common;
 
 namespace InnovateFuture.Api
 {
