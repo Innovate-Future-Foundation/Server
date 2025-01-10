@@ -17,12 +17,12 @@ public class CreateOrganisationHandler : IRequestHandler<CreateOrganisationComma
     {
         // Create organisation
         var organisation = new Organisation(
-            command.OrgName,
-            command.LogoUrl,
-            command.WebsiteUrl,
-            command.Address,
-            command.Email,
-            command.Subscription
+            orgName: command.OrgName,
+            logoUrl: command.LogoUrl,
+            websiteUrl: command.WebsiteUrl,
+            address: command.Address,
+            email: command.Email,
+            subscription: command.Subscription
         );
         
         // Save to database
