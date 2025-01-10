@@ -17,11 +17,6 @@ public class UpdateOrganisationHandler : IRequestHandler<UpdateOrganisationComma
     {
         var organisation = await _orgRepository.GetByIdAsync(request.OrgId);
         
-        if (organisation == null)
-        {
-            throw new Exception($"Organisation with ID {request.OrgId} not found.");
-        }
-
         organisation.UpdateOrganisationDetails(
             request.OrgName,
             request.LogoUrl,
