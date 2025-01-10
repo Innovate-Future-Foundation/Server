@@ -14,9 +14,19 @@ public class User
     public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public User(string email,string? fullName, string? phone, DateTime? birthday)
+    public User(){}
+    public User(
+        string email, 
+        Guid?userId=null, 
+        Guid? cognitoUuid=null, 
+        Guid? updatedDefaultProfile=null,
+        string? fullName=null, 
+        string? phone=null, 
+        DateTime? birthday=null)
     {
-        UserId = Guid.NewGuid();
+        UserId = userId??Guid.NewGuid();
+        CognitoUuid = cognitoUuid;
+        DefaultProfile = updatedDefaultProfile;
         Email = email;
         FullName = fullName;
         Phone = phone;

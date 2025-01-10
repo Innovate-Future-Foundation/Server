@@ -81,6 +81,7 @@ namespace InnovateFuture.Api
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
+            builder.Services.AddScoped<ISeedDataService, SeedDataService>();
             builder.Services.AddScoped<IOrgRepository, OrgRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
@@ -175,6 +176,7 @@ namespace InnovateFuture.Api
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwaggerEXT();
+                app.Services.SeedDataEXT();
             }else
             {
                 builder.Services.AddCors(option =>

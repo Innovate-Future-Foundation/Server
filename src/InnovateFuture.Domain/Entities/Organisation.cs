@@ -16,10 +16,10 @@ public class Organisation
     public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-
-    public Organisation(string orgName, string? logoUrl, string? websiteUrl, string? address, string? email, string? subscription)
+    public Organisation(){}
+    public Organisation(string orgName, Guid? orgId= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null, string? subscription=null)
     {
-        OrgId = Guid.NewGuid();
+        OrgId = orgId??Guid.NewGuid();
         OrgName = orgName;
         LogoUrl = logoUrl;
         WebsiteUrl = websiteUrl;
