@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Exceptions;
@@ -40,14 +41,6 @@ public class OrgRepository:IOrgRepository
     public async Task<IEnumerable<Organisation>> GetAnyAsync(Expression<Func<Organisation, bool>> predicate)
     {
         var organisations = await _dbContext.Organisations
-            .Include(o => o.Profiles)
-            .ThenInclude(p => p.Organisation)
-            .Include(u => u.Profiles)
-            .ThenInclude(p => p.Role)
-            .Include(u => u.Profiles)
-            .ThenInclude(p => p.InvitedByProfile)
-            .Include(u => u.Profiles)
-            .ThenInclude(p => p.SupervisedByProfile)
             .Where(predicate)
             .ToListAsync();
         
