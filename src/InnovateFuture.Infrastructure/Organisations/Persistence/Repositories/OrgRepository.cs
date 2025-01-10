@@ -53,9 +53,4 @@ public class OrgRepository:IOrgRepository
         
         return organisations;
     }
-{
-    var results = await _dbContext.Organisations.ToListAsync();
-    organisations.Clear();  
-    organisations.AddRange(results);  
-}
 }
