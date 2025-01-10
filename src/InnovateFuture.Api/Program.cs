@@ -164,7 +164,7 @@ namespace InnovateFuture.Api
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwaggerEXT();
-                app.SeedDataEXT();
+                app.Services.SeedDataEXT();
             }else
             {
                 builder.Services.AddCors(option =>

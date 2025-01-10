@@ -1,15 +1,14 @@
 
 using InnovateFuture.Infrastructure.Common;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace InnovateFuture.Infrastructure.Configs;
 
 public static class SeedDataExtension
 {
-    public static void SeedDataEXT(this WebApplication app)
+    public static void SeedDataEXT(this IServiceProvider serviceProvider)
     {
-        using (var scope = app.Services.CreateScope())
+        using (var scope = serviceProvider.CreateScope())
         {
             var seedDataService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
             
