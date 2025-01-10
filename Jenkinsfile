@@ -13,7 +13,7 @@ pipeline {
         PGADMIN_URL = "http://${EC2_HOST}:5050"
     }
 
-    options {
+      options {
         timestamps()
         timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
@@ -22,12 +22,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                cleanWs()
+                cleanWs()  // Clean workspace before checkout
                 checkout scm
-                sh '''
-                    git log -1
-                    git status
-                '''
             }
         }
 
@@ -35,10 +31,32 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        echo "Starting cleanup process..."
-                        docker system prune -f --filter "until=${DOCKER_CACHE_TTL}" || true
-                        docker volume prune -f || true
-                        docker network prune -f || true
+                        # Cleanup running containers and resources
+                        echo "Cleaning up existing containers..."
+                        docker ps -a | grep -E 'container-postgres|container-pgadmin' | awk '{print $1}' | xargs -r docker rm -f
+                        docker-compose down --remove-orphans -v || true
+
+                        # Optional: clean up unused resources
+                        docker system prune -f --filter "until=24h"
+                        docker volume prune -f
+                        docker network prune -f
+                    '''
+                }
+            }
+        }
+
+        stage('Environment Setup') {
+            steps {
+                script {
+                    sh '''
+                        # Validate environment file exists
+                        if [ ! -f ".env.example" ]; then
+                            echo "ERROR: .env.example file not found"
+                            exit 1
+                        fi
+
+                        # Setup environment file
+                        cp .env.example .env
                     '''
                 }
             }
@@ -49,10 +67,14 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            docker build \
-                                --build-arg BUILDKIT_INLINE_CACHE=1 \
-                                --build-arg CACHE_DATE="$(date)" \
-                                -t base -t api .
+                            # Build with cache optimization using global env
+                            docker compose build --parallel base api
+
+                            # Use project name in verification
+                            if ! docker images | grep -q "${COMPOSE_PROJECT_NAME}"; then
+                                echo "ERROR: Build failed - image not found"
+                                exit 1
+                            fi
                         '''
                     } catch (Exception e) {
                         error "Build failed: ${e.message}"
@@ -66,14 +88,20 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            docker run -d --name postgres postgres
-                            
+                            docker compose up -d postgres
+
                             echo "Waiting for database to be ready..."
-                            COUNTER=0
-                            until docker exec postgres pg_isready -h localhost || [ $COUNTER -eq $DB_INIT_TIMEOUT ]; do
-                                COUNTER=$((COUNTER+1))
-                                echo "Attempt $COUNTER/$DB_INIT_TIMEOUT: Database not ready..."
+                            for i in $(seq 1 ${DB_INIT_TIMEOUT}); do
+                                if docker compose exec -T postgres pg_isready -h localhost; then
+                                    echo "Database is ready"
+                                    break
+                                fi
+                                echo "Attempt $i/${DB_INIT_TIMEOUT}: Database not ready yet..."
                                 sleep 2
+                                if [ $i -eq ${DB_INIT_TIMEOUT} ]; then
+                                    echo "ERROR: Database failed to start"
+                                    exit 1
+                                fi
                             done
                         '''
                     } catch (Exception e) {
@@ -82,13 +110,127 @@ pipeline {
                 }
             }
         }
+
+        stage('Migration') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            echo "Running database migrations..."
+                            docker compose up -d migration
+
+                            # Monitor migration logs
+                            sleep 10
+                            if docker compose logs migration | grep -E "error|Error|ERROR|failed|Failed|FAILED"; then
+                                echo "ERROR: Migration failed"
+                                docker compose logs migration
+                                exit 1
+                            fi
+                        '''
+                    } catch (Exception e) {
+                        error "Migration failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            docker compose up -d api pgadmin
+
+                            echo "Verifying deployment..."
+                            sleep 10
+
+                            for i in $(seq 1 ${HEALTH_CHECK_RETRIES}); do
+                                if curl -sf ${API_URL}/health; then
+                                    echo "API is healthy"
+                                    break
+                                fi
+                                echo "Attempt $i/${HEALTH_CHECK_RETRIES}: API not healthy yet..."
+                                sleep ${HEALTH_CHECK_INTERVAL}
+                                if [ $i -eq ${HEALTH_CHECK_RETRIES} ]; then
+                                    echo "ERROR: API health check failed"
+                                    exit 1
+                                fi
+                            done
+                        '''
+                    } catch (Exception e) {
+                        error "Deployment failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    try {
+                        sh '''#!/bin/bash
+                            echo "=== Current Docker Networks ==="
+                            docker network ls
+
+                            echo "\n=== Container Network Details ==="
+                            # Get the network name dynamically
+                            NETWORK_NAME=$(docker network ls | grep ${COMPOSE_PROJECT_NAME} | awk '{print $2}')
+                            echo "Network name: ${NETWORK_NAME}"
+                            docker network inspect ${NETWORK_NAME}
+
+                            echo "\n=== Container Connectivity Test ==="
+                            docker-compose exec -T api ping -c 2 container-postgres
+
+                            echo "\n=== Database Connection Test ==="
+                            set -a
+                            . ./.env
+                            set +a
+                            docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
+
+                            echo "\n=== API Environment Variables ==="
+                            docker-compose exec -T api env | grep DB
+
+                            echo "\n=== Container Status ==="
+                            docker-compose ps
+
+                            echo "\n=== API Health Check ==="
+                            curl -v ${API_URL}/health || true
+
+                            echo "\n=== Service URLs ==="
+                            echo "API URL: ${API_URL}"
+                            echo "Swagger UI: ${API_URL}/swagger"
+                            echo "PgAdmin URL: ${PGADMIN_URL}"
+                        '''
+                    } catch (Exception e) {
+                        error "Verification failed: ${e.message}"
+                    }
+                }
+            }
+        }
     }
 
     post {
-        always {
-            cleanWs()
+        success {
+            script {
+                sh '''
+                    echo "\n=== Deployment Summary ==="
+                    echo "API URL: ${API_URL}"
+                    echo "Swagger UI: ${API_URL}/swagger"
+                    echo "PgAdmin URL: ${PGADMIN_URL}"
+
+                    echo "\n=== Running Containers ==="
+                    docker-compose ps
+                '''
+            }
         }
         failure {
             script {
                 sh '''
-                    echo "=== Failure Analysis ==
+                    echo "=== Failure Debug Information ==="
+                    docker-compose ps
+                    docker-compose logs
+                '''
+            }
+        }
+    }
+}
