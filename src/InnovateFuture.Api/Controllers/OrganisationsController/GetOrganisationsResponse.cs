@@ -1,7 +1,4 @@
-
-using InnovateFuture.Api.Controllers.UsersController;
-
-namespace InnovateFuture.Api.Controllers.OrganisationController;
+namespace InnovateFuture.Api.Controllers.OrganisationsController;
 
 public class GetOrganisationResponse
 {
