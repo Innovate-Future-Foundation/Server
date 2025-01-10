@@ -7,5 +7,5 @@ public interface IOrgRepository
     Task<Organisation> GetByIdAsync(Guid id);
     Task AddAsync(Organisation organisation);
     Task UpdateAsync();
-    Task GetAllAsync(List<Organisation> organisations);
+    Task<IEnumerable<Organisation>>GetAnyAsync(Expression<Func<Organisation, bool>> predicate);
 }
