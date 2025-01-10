@@ -1,7 +1,7 @@
 using InnovateFuture.Api.Controllers.ProfilesController;
 using InnovateFuture.Api.Controllers.RolesController;
 using InnovateFuture.Api.Controllers.UsersController;
-using InnovateFuture.Api.Controllers.OrganisationController;
+using InnovateFuture.Api.Controllers.OrganisationsController;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Roles.Queries.GetRoles;
 using InnovateFuture.Application.Users.Commands.CreateUser;

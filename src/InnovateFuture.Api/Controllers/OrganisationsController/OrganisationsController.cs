@@ -4,15 +4,12 @@ using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
-
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-
 using System.ComponentModel;
 
-
-namespace InnovateFuture.Api.Controllers.OrganisationController;
+namespace InnovateFuture.Api.Controllers.OrganisationsController;
 
 [ApiExplorerSettings(IgnoreApi = false, GroupName = nameof(ApiVersion.V1))]
 [ApiController]
