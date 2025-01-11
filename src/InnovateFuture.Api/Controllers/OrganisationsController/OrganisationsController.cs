@@ -19,7 +19,7 @@ public class OrganisationsController : ControllerBase
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
     
-    public OrganisationController(IMediator mediator, IMapper mapper)
+    public OrganisationsController(IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
         _mapper = mapper;
