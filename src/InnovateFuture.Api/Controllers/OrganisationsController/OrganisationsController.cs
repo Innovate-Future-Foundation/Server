@@ -14,7 +14,7 @@ namespace InnovateFuture.Api.Controllers.OrganisationsController;
 [ApiExplorerSettings(IgnoreApi = false, GroupName = nameof(ApiVersion.V1))]
 [ApiController]
 [Route("api/v1/[controller]")]
-public class OrganisationController : ControllerBase
+public class OrganisationsController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
