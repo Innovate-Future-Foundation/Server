@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: test-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-testuser}
+      POSTGRES_PASSWORD: ${DB_PASS:-testpass}
+      POSTGRES_DB: ${DB_NAME:-testdb}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-testuser}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  tests:
+    image: inff-api-build:latest
+    container_name: test-runner
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-testdb}
+      DB_USER: ${DB_USER:-testuser}
+      DB_PASS: ${DB_PASS:-testpass}
+      ASPNETCORE_ENVIRONMENT: Testing
+    command: >
+      dotnet test "InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj"
+      --logger "console;verbosity=detailed"
+      --results-directory /testresults
+    volumes:
+      - ./testresults:/testresults
+
+networks:
+  default:
+    name: test-network
