@@ -45,7 +45,13 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      # - postgres-data:/var/lib/postgresql/data
+      - ./db/data/postgres:/var/lib/postgresql/data 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
     networks:
       - app-network
@@ -56,14 +62,16 @@ services:
       context: .
       dockerfile: Dockerfile.pgadmin
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - '5050:80'
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PG_USER}
       PGADMIN_DEFAULT_PASSWORD: ${PG_PASS}
     volumes:
-      - pgadmin-data:/var/lib/pgadmin
+      # - pgadmin-data:/var/lib/pgadmin
+      - ./db/data/postgres:/var/lib/postgresql/data 
     restart: unless-stopped
     networks:
       - app-network

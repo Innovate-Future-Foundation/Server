@@ -486,3 +486,13 @@ src/InnovateFuture.Api/appsettings.Development.json
 
 # Ignore build and publish content
 app/
+
+# Database
+db/data/*
+!db/data/.gitkeep
+db/backups/*
+!db/backups/.gitkeep
+
+!db/init/
+db/init/*
+!db/init/init.sql
