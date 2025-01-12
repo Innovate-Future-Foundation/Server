@@ -12,7 +12,7 @@ pipeline {
         // Add EC2 environment variables
         DOMAIN_NAME = 'inff.work'
         JENKINS_SUBDOMAIN = "jenkins.${DOMAIN_NAME}"
-        EC2_HOST = JENKINS_SUBDOMAIN
+        EC2_HOST = "${JENKINS_SUBDOMAIN}"
         API_URL = "https://${JENKINS_SUBDOMAIN}:5091"
         PGADMIN_URL = "https://${JENKINS_SUBDOMAIN}:5050"
     }
