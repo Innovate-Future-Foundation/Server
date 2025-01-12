@@ -10,7 +10,7 @@ pipeline {
         HEALTH_CHECK_INTERVAL = '5'
         DB_INIT_TIMEOUT = '30'
         // Add EC2 environment variable
-        EC2_HOST = '98.85.41.63' // or public IP
+        EC2_HOST = '3.25.115.53' // or public IP
         API_URL = "http://${EC2_HOST}:5091"
         PGADMIN_URL = "http://${EC2_HOST}:5050"
     }
