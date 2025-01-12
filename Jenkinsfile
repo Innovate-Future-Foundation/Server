@@ -2,18 +2,20 @@ pipeline {
     agent any
 
     environment {
+        // Define global environment variables
         DOCKER_BUILDKIT = '1'
         COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${env.BUILD_ID}"
         DOCKER_CACHE_TTL = '24h'
         HEALTH_CHECK_RETRIES = '5'
         HEALTH_CHECK_INTERVAL = '5'
         DB_INIT_TIMEOUT = '30'
-        EC2_HOST = '13.236.194.136' // or public IP
+        // Add EC2 environment variables
+        EC2_HOST = '98.85.41.63' // or public IP
         API_URL = "http://${EC2_HOST}:5091"
         PGADMIN_URL = "http://${EC2_HOST}:5050"
     }
 
-      options {
+    options {
         timestamps()
         timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
