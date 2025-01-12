@@ -29,7 +29,11 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                script {
+                withCredentials([[
+                    credentialsId: 'aws-credentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
                     sh '''
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
                         docker tag api:latest ${ECR_REPO}:${IMAGE_TAG}
@@ -37,6 +41,13 @@ pipeline {
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+            sh 'docker system prune -f'
         }
     }
 }
