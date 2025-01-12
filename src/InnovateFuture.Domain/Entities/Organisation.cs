@@ -31,14 +31,15 @@ public class Organisation
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateOrganisation(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, string? subscription)
+    public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, string? subscription, StatusEnum status)
     {
-        OrgName = string.IsNullOrWhiteSpace(orgName)?OrgName:orgName;
-        LogoUrl = string.IsNullOrWhiteSpace(logoUrl)?logoUrl:LogoUrl;
-        WebsiteUrl = string.IsNullOrWhiteSpace(websiteUrl)?websiteUrl:WebsiteUrl;
-        Address = string.IsNullOrWhiteSpace(address)?address:Address;
-        Email = string.IsNullOrWhiteSpace(email)?email:Email;
-        Subscription = string.IsNullOrWhiteSpace(subscription)?subscription:Subscription;
+        OrgName = string.IsNullOrWhiteSpace(orgName) ? OrgName : orgName;
+        LogoUrl = string.IsNullOrWhiteSpace(logoUrl) ? LogoUrl : logoUrl;
+        WebsiteUrl = string.IsNullOrWhiteSpace(websiteUrl) ? WebsiteUrl : websiteUrl;
+        Address = string.IsNullOrWhiteSpace(address) ? Address : address;
+        Email = string.IsNullOrWhiteSpace(email) ? Email : email;
+        Subscription = string.IsNullOrWhiteSpace(subscription) ? Subscription : subscription;
+        Status = status;
         UpdatedAt = DateTime.UtcNow;
     }
 
