@@ -35,15 +35,29 @@ pipeline {
             steps {
                 script {
                     sh '''
+                        # Kill any process using port 5091
+                        PORT=5091
+                        PID=$(lsof -t -i:${PORT} || true)
+                        if [ ! -z "$PID" ]; then
+                            echo "Killing process using port ${PORT}: $PID"
+                            sudo kill -9 $PID || true
+                        fi
+
                         # Cleanup running containers and resources
                         echo "Cleaning up existing containers..."
-                        docker ps -a | grep -E 'container-postgres|container-pgadmin' | awk '{print $1}' | xargs -r docker rm -f
+                        docker ps -a | grep -E 'container-postgres|container-pgadmin|inff-api' | awk '{print $1}' | xargs -r docker rm -f
                         docker-compose down --remove-orphans -v || true
 
                         # Optional: clean up unused resources
                         docker system prune -f --filter "until=24h"
                         docker volume prune -f
                         docker network prune -f
+
+                        # Verify port is free
+                        if lsof -i:${PORT}; then
+                            echo "ERROR: Port ${PORT} is still in use"
+                            exit 1
+                        fi
                     '''
                 }
             }
