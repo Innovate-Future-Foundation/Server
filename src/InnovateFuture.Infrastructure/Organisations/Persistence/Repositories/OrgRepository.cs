@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Exceptions;
@@ -32,9 +33,17 @@ public class OrgRepository:IOrgRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Organisation organisation)
+    public async Task UpdateAsync()
     {
-        _dbContext.Organisations.Update(organisation);
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<Organisation>> GetAnyAsync(Expression<Func<Organisation, bool>> predicate)
+    {
+        var organisations = await _dbContext.Organisations
+            .Where(predicate)
+            .ToListAsync();
+        
+        return organisations;
     }
 }

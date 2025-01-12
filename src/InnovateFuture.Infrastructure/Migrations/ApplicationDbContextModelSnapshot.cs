@@ -74,7 +74,7 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.HasKey("OrgId");
 
-                    b.ToTable("Organisations");
+                    b.ToTable("Organisations", (string)null);
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
@@ -150,7 +150,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
 
-                    b.ToTable("Profiles");
+                    b.ToTable("Profiles", (string)null);
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Role", b =>
@@ -193,7 +193,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Roles_name");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
@@ -252,7 +252,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Users_email");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>

@@ -24,8 +24,8 @@ public class GetUsersHandlerTest
         var query = new GetUsersQuery();
         var expectedUsers = new List<User>
         {
-            new User ("test1@example.com",null,null,null ),
-            new User ("test2@example.com",null,null,null ),
+            new User ("test1@example.com"),
+            new User ("test2@example.com" ),
         };
 
         _mockedUserRepository
@@ -55,9 +55,9 @@ public class GetUsersHandlerTest
 
         // Assert
         _mockedUserRepository.Verify(repo => repo.GetAnyAsync(It.Is<Expression<Func<User, bool>>>(predicate =>
-            predicate.Compile().Invoke(new User ("test@example.com",null,null,null )
+            predicate.Compile().Invoke(new User ("test@example.com",null,null,null,null,null,null)
                ) &&
-            !predicate.Compile().Invoke( new User ("other@example.com" ,null,null,null))
+            !predicate.Compile().Invoke( new User ("other@example.com",null,null,null,null,null,null))
         )), Times.Once);
     }
     
@@ -72,9 +72,9 @@ public class GetUsersHandlerTest
         };
         
         var correctUser = new User
-            ("test@example.com","John Doe",null,null);
+            ("test@example.com",null,null,null,"John Doe");
         var wrongUser = new User
-            ("wrong@example.com","Mary Green",null,null);
+            ("wrong@example.com",null,null,null,"Mary Green");
 
         _mockedUserRepository
             .Setup(repo => repo.GetAnyAsync(It.IsAny<Expression<Func<User, bool>>>()))
