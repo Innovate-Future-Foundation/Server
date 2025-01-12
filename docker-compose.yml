@@ -76,9 +76,9 @@ services:
     networks:
       - app-network
 
-volumes:
-  postgres-data:
-  pgadmin-data:
+# volumes:
+#   postgres-data:
+#   pgadmin-data:
 
 networks:
   app-network:
