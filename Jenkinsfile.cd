@@ -2,105 +2,57 @@ pipeline {
     agent any
 
     environment {
-        EC2_HOST = '3.25.115.53'
-        API_URL = "http://${EC2_HOST}:5091"
-        PGADMIN_URL = "http://${EC2_HOST}:5050"
-        HEALTH_CHECK_RETRIES = '5'
-        HEALTH_CHECK_INTERVAL = '5'
-        DB_INIT_TIMEOUT = '30'
-    }
-
-    options {
-        timestamps()
-        timeout(time: 30, unit: 'MINUTES')
-        disableConcurrentBuilds()
+        AWS_ACCOUNT_ID = '986643365562'
+        AWS_REGION = 'ap-southeast-2'
+        ECS_CLUSTER = 'arn:aws:ecs:ap-southeast-2:986643365562:cluster/DevCluster'
+        ECS_SERVICE = 'api-service'
+        TASK_DEFINITION = 'api-task'
+        ECR_REPO = '986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo'
+        IMAGE_TAG = params.IMAGE_TAG
     }
 
     stages {
-        stage('Database Setup') {
+        stage('Update ECS Task Definition') {
             steps {
                 script {
                     sh '''
-                        docker compose up -d postgres
-                        for i in $(seq 1 ${DB_INIT_TIMEOUT}); do
-                            if docker compose exec -T postgres pg_isready -h localhost; then
-                                echo "Database is ready"
-                                break
-                            fi
-                            echo "Attempt $i/${DB_INIT_TIMEOUT}: Database not ready yet..."
-                            sleep 2
-                        done
+                        # Get current task definition
+                        TASK_DEF=$(aws ecs describe-task-definition --task-definition ${TASK_DEFINITION})
+                        
+                        # Update image in task definition
+                        NEW_TASK_DEF=$(echo $TASK_DEF | jq --arg IMAGE "${ECR_REPO}:${IMAGE_TAG}" \
+                            '.taskDefinition | .containerDefinitions[0].image = $IMAGE')
+                        
+                        # Register new task definition
+                        aws ecs register-task-definition --family ${TASK_DEFINITION} \
+                            --cli-input-json "$NEW_TASK_DEF"
                     '''
                 }
             }
         }
 
-        stage('Migration') {
+        stage('Deploy to ECS') {
             steps {
                 script {
                     sh '''
-                        docker compose up -d migration
-                        sleep 10
-                        if docker compose logs migration | grep -E "error|Error|ERROR|failed|Failed|FAILED"; then
-                            echo "ERROR: Migration failed"
-                            docker compose logs migration
-                            exit 1
-                        fi
+                        aws ecs update-service --cluster ${ECS_CLUSTER} \
+                            --service ${ECS_SERVICE} \
+                            --task-definition ${TASK_DEFINITION} \
+                            --force-new-deployment
                     '''
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('Monitor Deployment') {
             steps {
                 script {
                     sh '''
-                        docker compose up -d api pgadmin
-                        sleep 10
-                        for i in $(seq 1 ${HEALTH_CHECK_RETRIES}); do
-                            if curl -sf ${API_URL}/health; then
-                                echo "API is healthy"
-                                break
-                            fi
-                            sleep ${HEALTH_CHECK_INTERVAL}
-                        done
+                        aws ecs wait services-stable \
+                            --cluster ${ECS_CLUSTER} \
+                            --services ${ECS_SERVICE}
                     '''
                 }
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                script {
-                    sh '''
-                        NETWORK_NAME=$(docker network ls | grep ${COMPOSE_PROJECT_NAME} | awk '{print $2}')
-                        docker network inspect ${NETWORK_NAME}
-                        docker-compose exec -T api ping -c 2 container-postgres
-                        docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
-                        curl -v ${API_URL}/health
-                    '''
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            script {
-                sh '''
-                    echo "API URL: ${API_URL}"
-                    echo "Swagger UI: ${API_URL}/swagger"
-                    echo "PgAdmin URL: ${PGADMIN_URL}"
-                    docker-compose ps
-                '''
-            }
-        }
-        failure {
-            script {
-                sh '''
-                    docker-compose ps
-                    docker-compose logs
-                '''
             }
         }
     }

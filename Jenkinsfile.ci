@@ -2,15 +2,11 @@ pipeline {
     agent any
 
     environment {
+        AWS_ACCOUNT_ID = '986643365562'
+        AWS_REGION = 'ap-southeast-2'
+        ECR_REPO = '986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo'
+        IMAGE_TAG = "${env.GIT_COMMIT}-${env.BUILD_NUMBER}"
         DOCKER_BUILDKIT = '1'
-        COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${env.BUILD_ID}"
-        DOCKER_CACHE_TTL = '24h'
-    }
-
-    options {
-        timestamps()
-        timeout(time: 30, unit: 'MINUTES')
-        disableConcurrentBuilds()
     }
 
     stages {
@@ -21,48 +17,25 @@ pipeline {
             }
         }
 
-        stage('Pre-build Cleanup') {
-            steps {
-                script {
-                    sh '''
-                        docker ps -a | grep -E 'container-postgres|container-pgadmin' | awk '{print $1}' | xargs -r docker rm -f
-                        docker-compose down --remove-orphans -v || true
-                        docker system prune -f --filter "until=24h"
-                        docker volume prune -f
-                        docker network prune -f
-                    '''
-                }
-            }
-        }
-
-        stage('Environment Setup') {
-            steps {
-                script {
-                    sh '''
-                        if [ ! -f ".env.example" ]; then
-                            echo "ERROR: .env.example file not found"
-                            exit 1
-                        fi
-                        cp .env.example .env
-                    '''
-                }
-            }
-        }
-
         stage('Build and Test') {
             steps {
                 script {
-                    try {
-                        sh '''
-                            docker compose build --parallel base api
-                            if ! docker images | grep -q "${COMPOSE_PROJECT_NAME}"; then
-                                echo "ERROR: Build failed - image not found"
-                                exit 1
-                            fi
-                        '''
-                    } catch (Exception e) {
-                        error "Build failed: ${e.message}"
-                    }
+                    sh '''
+                        docker compose build --parallel base api
+                        docker compose -f docker-compose.test.yml up --exit-code-from tests
+                    '''
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                script {
+                    sh '''
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
+                        docker tag api:latest ${ECR_REPO}:${IMAGE_TAG}
+                        docker push ${ECR_REPO}:${IMAGE_TAG}
+                    '''
                 }
             }
         }
