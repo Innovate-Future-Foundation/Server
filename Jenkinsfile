@@ -92,6 +92,10 @@ pipeline {
                 script {
                     try {
                         sh '''
+                            # Load environment variables from .env
+                            export $(cat .env | grep -v '^#' | xargs)
+
+                            # Start PostgreSQL
                             docker compose up -d postgres
 
                             echo "Waiting for database to be ready..."
