@@ -10,9 +10,11 @@ pipeline {
         HEALTH_CHECK_INTERVAL = '5'
         DB_INIT_TIMEOUT = '30'
         // Add EC2 environment variables
-        EC2_HOST = '98.85.41.63' // or public IP
-        API_URL = "http://${EC2_HOST}:5091"
-        PGADMIN_URL = "http://${EC2_HOST}:5050"
+        DOMAIN_NAME = 'inff.work'
+        JENKINS_SUBDOMAIN = "jenkins.${DOMAIN_NAME}"
+        EC2_HOST = JENKINS_SUBDOMAIN
+        API_URL = "https://${JENKINS_SUBDOMAIN}:5091"
+        PGADMIN_URL = "https://${JENKINS_SUBDOMAIN}:5050"
     }
 
     options {
