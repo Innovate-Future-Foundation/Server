@@ -7,4 +7,5 @@ public interface IRoleRepository
 {
     Task<Role> GetByIdAsync(Guid id);
     Task<IEnumerable<Role>>GetAnyAsync(Expression<Func<Role, bool>> predicate);
+    //object GetByIdAsync(object role);
 }

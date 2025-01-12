@@ -1,15 +1,16 @@
 {
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=password",
-  "JWTConfig": {
+  {
+    "Logging": {
+      "LogLevel": {
+        "Default": "Information",
+        "Microsoft.AspNetCore": "Warning"
+      }
+    },
+    "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=password",
+    "JWTConfig": {
       "SecretKey": "SecretKeyExample",
       "Issuer": "innovateFuture",
       "Audience": "innovateFuture",
       "ExpireSeconds": 7200
     }
-}
+  }

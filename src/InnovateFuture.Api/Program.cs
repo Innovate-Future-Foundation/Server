@@ -29,6 +29,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
+using InnovateFuture.Application.Services;
 
 namespace InnovateFuture.Api
 {
@@ -67,7 +68,6 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(UpdateProfileHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetProfileHandler).Assembly);
                 
-                configuration.RegisterServicesFromAssembly(typeof(GetRoleHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetRolesHandler).Assembly);
             });
             // auto mapper instance
@@ -77,6 +77,7 @@ namespace InnovateFuture.Api
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+            builder.Services.AddScoped<IAccessControlService, AccessControlService>();
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);

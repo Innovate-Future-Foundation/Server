@@ -5,6 +5,7 @@ using InnovateFuture.Application.Roles.Queries.GetRoles;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using InnovateFuture.Application.Services;
 
 namespace InnovateFuture.Api.Controllers.RolesController;
 
@@ -16,10 +17,12 @@ public class RolesController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
-    public RolesController(IMediator mediator,IMapper mapper)
+    private readonly IAccessControlService _accessControlService;
+    public RolesController(IMediator mediator,IMapper mapper, IAccessControlService accessControlService)
     {
         _mediator = mediator;
         _mapper = mapper;
+        _accessControlService = accessControlService;
     }
 
     /// <summary>
@@ -51,5 +54,27 @@ public class RolesController : ControllerBase
         var roles = await _mediator.Send(query);
         var rolesResponse = _mapper.Map<IEnumerable<GetRoleResponse>>(roles);
         return Ok(rolesResponse);
+    }
+
+
+    /// <summary>
+    /// Retrieves permissions for the specified role.
+    /// </summary>
+    /// <param name="roleId"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet("{roleId}/permissions")]
+    public async Task<IActionResult> GetPermissions(Guid roleId)
+    {
+        try
+        {
+            var permissions = await _accessControlService.GetPermissions(roleId);
+            return Ok(permissions);
+        }
+        catch (Exception ex)
+        {
+            // Log exception if necessary, and return an error response
+            return NotFound(new { message = ex.Message });
+        }
     }
 }

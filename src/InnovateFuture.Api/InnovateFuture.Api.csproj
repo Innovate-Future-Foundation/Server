@@ -10,6 +10,14 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DocumentationFile>bin\Debug\net8.0\InnovateFuture.Api.xml</DocumentationFile>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Content Remove="appsettings.Development.json" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="appsettings.Development.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
@@ -28,6 +36,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InnovateFuture.Application\InnovateFuture.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\AccessControlController\" />
   </ItemGroup>
 
 </Project>
