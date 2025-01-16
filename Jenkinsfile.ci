@@ -54,23 +54,26 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        echo "DB_HOST=${DB_HOST}" > .env
-                        echo "DB_PORT=${DB_PORT}" >> .env
-                        echo "DB_NAME=${DB_NAME}" >> .env
-                        echo "DB_USER=${DB_USER}" >> .env
-                        echo "DB_PASS=${DB_PASS}" >> .env
-                        echo "PG_USER=${PG_USER}" >> .env
-                        echo "PG_PASS=${PG_PASS}" >> .env
-                        echo "JWT_SECRET=${JWT_SECRET}" >> .env
-                        echo "DEP_ENV=${DEP_ENV}" >> .env
-                        
-                        # Run tests
-                        docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
-                        
-                        # Build API image
-                        docker build -f Dockerfile.api -t ${ECR_URL}:${BUILD_NUMBER} .
-                        docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
-                    '''
+                echo "DB_HOST=${DB_HOST}" > .env
+                echo "DB_PORT=${DB_PORT}" >> .env
+                echo "DB_NAME=${DB_NAME}" >> .env
+                echo "DB_USER=${DB_USER}" >> .env
+                echo "DB_PASS=${DB_PASS}" >> .env
+                echo "PG_USER=${PG_USER}" >> .env
+                echo "PG_PASS=${PG_PASS}" >> .env
+                echo "JWT_SECRET=${JWT_SECRET}" >> .env
+                echo "DEP_ENV=${DEP_ENV}" >> .env
+                
+                # Build base image first
+                docker build -f Dockerfile.base -t inff-api-build .
+                
+                # Run tests with proper database initialization
+                docker-compose -f docker-compose.test.yml up --build --exit-code-from tests
+                
+                # Build final API image if tests pass
+                docker build -f Dockerfile.api -t ${ECR_URL}:${BUILD_NUMBER} .
+                docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
+            '''
                 }
             }
         }

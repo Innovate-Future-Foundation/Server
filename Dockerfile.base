@@ -5,20 +5,32 @@ WORKDIR /src
 RUN dotnet tool install --global dotnet-ef --version 9.0.0
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-# Copy solution and project files
+# Copy solution file
 COPY ["InnovateFuture.sln", "../"]
+
+# Copy main project files
 COPY ["src/InnovateFuture.Api/*.csproj", "InnovateFuture.Api/"]
 COPY ["src/InnovateFuture.Application/*.csproj", "InnovateFuture.Application/"]
 COPY ["src/InnovateFuture.Domain/*.csproj", "InnovateFuture.Domain/"]
 COPY ["src/InnovateFuture.Infrastructure/*.csproj", "InnovateFuture.Infrastructure/"]
 
-# Remove test project references from solution (temporary fix)
-RUN sed -i '/InnovateFuture\..*\.Tests/d' ../InnovateFuture.sln
+# Copy test project files
+COPY ["tests/InnovateFuture.Api.Tests/*.csproj", "InnovateFuture.Api.Tests/"]
+COPY ["tests/InnovateFuture.Application.Tests/*.csproj", "InnovateFuture.Application.Tests/"]
+COPY ["tests/InnovateFuture.Domain.Tests/*.csproj", "InnovateFuture.Domain.Tests/"]
+COPY ["tests/InnovateFuture.Infrastructure.Tests/*.csproj", "InnovateFuture.Infrastructure.Tests/"]
 
+# Restore packages
 RUN dotnet restore "InnovateFuture.Api/InnovateFuture.Api.csproj"
+RUN dotnet restore "InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj"
 
 # Copy all source code
 COPY src/ .
+COPY tests/ .
 
-# Build the project
+# Build the projects
 RUN dotnet build "InnovateFuture.Api/InnovateFuture.Api.csproj" -c Release
+RUN dotnet build "InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj" -c Release
+
+# Set the entry point to allow for different commands
+ENTRYPOINT ["dotnet"]

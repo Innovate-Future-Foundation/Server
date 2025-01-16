@@ -2,14 +2,14 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:17.2
     container_name: test-postgres
     environment:
-      POSTGRES_USER: ${DB_USER:-testuser}
-      POSTGRES_PASSWORD: ${DB_PASS:-testpass}
-      POSTGRES_DB: ${DB_NAME:-testdb}
+      POSTGRES_DB: InnovateFuture
+      POSTGRES_USER: db_admin
+      POSTGRES_PASSWORD: 123321abb
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-testuser}"]
+      test: ["CMD-SHELL", "pg_isready -U db_admin -d InnovateFuture"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,17 +23,12 @@ services:
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-testdb}
-      DB_USER: ${DB_USER:-testuser}
-      DB_PASS: ${DB_PASS:-testpass}
+      DB_NAME: InnovateFuture
+      DB_USER: db_admin
+      DB_PASS: 123321abb
       ASPNETCORE_ENVIRONMENT: Testing
-    command: >
-      dotnet test "InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj"
-      --logger "console;verbosity=detailed"
-      --results-directory /testresults
     volumes:
-      - ./testresults:/testresults
-
-networks:
-  default:
-    name: test-network
+      - ./tests:/tests
+    command: >
+      dotnet test "/src/InnovateFuture.Api.Tests/InnovateFuture.Api.Tests.csproj"
+      --logger "console;verbosity=detailed"
