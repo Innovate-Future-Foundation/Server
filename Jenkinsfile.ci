@@ -2,7 +2,6 @@ pipeline {
     agent any
     
     environment {
-        AWS_CREDENTIALS = 'aws-credentials'
         ECR_URL = '986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo'
         AWS_REGION = 'ap-southeast-2'
     }
@@ -17,12 +16,14 @@ pipeline {
 
         stage('ECR Login') {
             steps {
-                withCredentials([[
-                    credentialsId: "${AWS_CREDENTIALS}",
-                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-                    class: 'AmazonWebServicesCredentialsBinding'
-                ]]) {
+                withCredentials([
+                    [
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'aws-credentials',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]
+                ]) {
                     sh '''
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URL}
                     '''
@@ -41,12 +42,14 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                withCredentials([[
-                    credentialsId: "${AWS_CREDENTIALS}",
-                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-                    class: 'AmazonWebServicesCredentialsBinding'
-                ]]) {
+                withCredentials([
+                    [
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'aws-credentials',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]
+                ]) {
                     sh '''
                         docker push ${ECR_URL}:${BUILD_NUMBER}
                         docker push ${ECR_URL}:latest
