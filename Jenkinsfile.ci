@@ -1,65 +1,80 @@
 pipeline {
     agent any
-
+    
     environment {
-        // Core Configuration
-        DOCKER_BUILDKIT = '1'
-        COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${env.BUILD_ID}"
-        
-        // AWS ECR Configuration
-        AWS_CREDENTIALS = credentials('aws-credentials')
+        ECR_URL = '986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo'
         AWS_REGION = 'ap-southeast-2'
-        AWS_ACCOUNT_ID = credentials('AWS_ACCOUNT_ID')
-        ECR_REPO_NAME = 'ecr-repo'
-        IMAGE_TAG = 'latest'
-        DOCKER_IMAGE_NAME = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}"
     }
-
-    options {
-        timestamps()
-        timeout(time: 30, unit: 'MINUTES')
-        disableConcurrentBuilds()
-    }
-
+    
     stages {
-        stage('Initialize') {
+        stage('Checkout') {
             steps {
                 cleanWs()
                 checkout scm
-                sh 'docker system prune -f'
             }
         }
 
-        stage('ECR Authentication') {
+        stage('ECR Login') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials',
-                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                ]]) {
+                withCredentials([
+                    [
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'aws-credentials',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]
+                ]) {
                     sh '''
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URL}
                     '''
                 }
             }
         }
 
-        stage('Build and Push') {
+        stage('Build and Test') {
             steps {
-                sh '''
-                    docker compose build --parallel base api
-                    docker tag ${COMPOSE_PROJECT_NAME}_api:latest ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
-                    docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
-                    aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG}
-                '''
+                script {
+                    sh '''
+                        docker build \
+                            --build-arg DB_HOST=postgres \
+                            --build-arg DB_PORT=5432 \
+                            --build-arg DB_NAME=InnovateFuture \
+                            --build-arg DB_USER=db_admin \
+                            --build-arg DB_PASS=123321abb \
+                            --build-arg PG_USER=db@inff.com \
+                            --build-arg PG_PASS=q4hbGe7N3EAy \
+                            --build-arg JWT_SECRET=u68-03Pn4n_@w@fM \
+                            --build-arg DEP_ENV=Development \
+                            -t ${ECR_URL}:${BUILD_NUMBER} .
+                        docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                withCredentials([
+                    [
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'aws-credentials',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]
+                ]) {
+                    sh '''
+                        docker push ${ECR_URL}:${BUILD_NUMBER}
+                        docker push ${ECR_URL}:latest
+                    '''
+                }
             }
         }
     }
 
     post {
         always {
-            sh 'docker logout ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com'
+            sh 'docker logout ${ECR_URL}'
+            cleanWs()
         }
     }
 }
