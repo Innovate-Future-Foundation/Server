@@ -14,11 +14,10 @@ COPY ["src/InnovateFuture.Application/*.csproj", "InnovateFuture.Application/"]
 COPY ["src/InnovateFuture.Domain/*.csproj", "InnovateFuture.Domain/"]
 COPY ["src/InnovateFuture.Infrastructure/*.csproj", "InnovateFuture.Infrastructure/"]
 
-# Copy test project files
+# Copy test project files (only existing ones)
 COPY ["tests/InnovateFuture.Api.Tests/*.csproj", "InnovateFuture.Api.Tests/"]
 COPY ["tests/InnovateFuture.Application.Tests/*.csproj", "InnovateFuture.Application.Tests/"]
 COPY ["tests/InnovateFuture.Domain.Tests/*.csproj", "InnovateFuture.Domain.Tests/"]
-COPY ["tests/InnovateFuture.Infrastructure.Tests/*.csproj", "InnovateFuture.Infrastructure.Tests/"]
 
 # Restore packages
 RUN dotnet restore "InnovateFuture.Api/InnovateFuture.Api.csproj"
