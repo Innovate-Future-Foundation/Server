@@ -1,11 +1,31 @@
 pipeline {
     agent any
-    
+
     environment {
-        ECR_URL = '986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo'
+        DOCKER_BUILDKIT = '1'
+        COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${env.BUILD_ID}"
+        DOCKER_CACHE_TTL = '24h'
+        HEALTH_CHECK_RETRIES = '5'
+        HEALTH_CHECK_INTERVAL = '5'
+        DB_INIT_TIMEOUT = '30'
+        EC2_HOST = '52.63.228.145'
+        API_URL = "http://${EC2_HOST}:5091"
+        PGADMIN_URL = "http://${EC2_HOST}:5050"
+        
+        // ECR Configuration
         AWS_REGION = 'ap-southeast-2'
+        AWS_ACCOUNT_ID = credentials('AWS_ACCOUNT_ID')
+        ECR_REPO_NAME = 'ecr-repo'
+        IMAGE_TAG = 'latest'
+        DOCKER_IMAGE_NAME = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}"
     }
-    
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -14,18 +34,40 @@ pipeline {
             }
         }
 
-        stage('ECR Login') {
+        stage('Pre-build Cleanup') {
             steps {
-                withCredentials([
-                    [
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: 'aws-credentials',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]
-                ]) {
+                script {
                     sh '''
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URL}
+                        echo "Cleaning up existing containers..."
+                        docker ps -a | grep -E 'container-postgres|container-pgadmin' | awk '{print $1}' | xargs -r docker rm -f
+                        docker-compose down --remove-orphans -v || true
+                        docker system prune -f --filter "until=24h"
+                        docker volume prune -f
+                        docker network prune -f
+                    '''
+                }
+            }
+        }
+
+        stage('ECR Authentication') {
+            steps {
+                script {
+                    sh '''
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                    '''
+                }
+            }
+        }
+
+        stage('Environment Setup') {
+            steps {
+                script {
+                    sh '''
+                        if [ ! -f ".env.example" ]; then
+                            echo "ERROR: .env.example file not found"
+                            exit 1
+                        fi
+                        cp .env.example .env
                     '''
                 }
             }
@@ -33,36 +75,188 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                sh '''
-                    docker build -t ${ECR_URL}:${BUILD_NUMBER} .
-                    docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
-                '''
+                script {
+                    try {
+                        sh '''
+                            docker compose build --parallel base api
+                            if ! docker images | grep -q "${COMPOSE_PROJECT_NAME}"; then
+                                echo "ERROR: Build failed - image not found"
+                                exit 1
+                            fi
+                            
+                            # Tag images for ECR
+                            docker tag ${COMPOSE_PROJECT_NAME}_api:latest ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                        '''
+                    } catch (Exception e) {
+                        error "Build failed: ${e.message}"
+                    }
+                }
             }
         }
 
         stage('Push to ECR') {
             steps {
-                withCredentials([
-                    [
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: 'aws-credentials',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]
-                ]) {
-                    sh '''
-                        docker push ${ECR_URL}:${BUILD_NUMBER}
-                        docker push ${ECR_URL}:latest
-                    '''
+                script {
+                    try {
+                        sh '''
+                            echo "Pushing image to ECR..."
+                            docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                            
+                            # Verify the push
+                            aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG}
+                        '''
+                    } catch (Exception e) {
+                        error "ECR push failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Database Setup') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            docker compose up -d postgres
+                            echo "Waiting for database to be ready..."
+                            for i in $(seq 1 ${DB_INIT_TIMEOUT}); do
+                                if docker compose exec -T postgres pg_isready -h localhost; then
+                                    echo "Database is ready"
+                                    break
+                                fi
+                                echo "Attempt $i/${DB_INIT_TIMEOUT}: Database not ready yet..."
+                                sleep 2
+                                if [ $i -eq ${DB_INIT_TIMEOUT} ]; then
+                                    echo "ERROR: Database failed to start"
+                                    exit 1
+                                fi
+                            done
+                        '''
+                    } catch (Exception e) {
+                        error "Database setup failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Migration') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            echo "Running database migrations..."
+                            docker compose up -d migration
+                            sleep 10
+                            if docker compose logs migration | grep -E "error|Error|ERROR|failed|Failed|FAILED"; then
+                                echo "ERROR: Migration failed"
+                                docker compose logs migration
+                                exit 1
+                            fi
+                        '''
+                    } catch (Exception e) {
+                        error "Migration failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            docker compose up -d api pgadmin
+                            echo "Verifying deployment..."
+                            sleep 10
+                            for i in $(seq 1 ${HEALTH_CHECK_RETRIES}); do
+                                if curl -sf ${API_URL}/health; then
+                                    echo "API is healthy"
+                                    break
+                                fi
+                                echo "Attempt $i/${HEALTH_CHECK_RETRIES}: API not healthy yet..."
+                                sleep ${HEALTH_CHECK_INTERVAL}
+                                if [ $i -eq ${HEALTH_CHECK_RETRIES} ]; then
+                                    echo "ERROR: API health check failed"
+                                    exit 1
+                                fi
+                            done
+                        '''
+                    } catch (Exception e) {
+                        error "Deployment failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    try {
+                        sh '''#!/bin/bash
+                            echo "=== Current Docker Networks ==="
+                            docker network ls
+                            echo "\n=== Container Network Details ==="
+                            NETWORK_NAME=$(docker network ls | grep ${COMPOSE_PROJECT_NAME} | awk '{print $2}')
+                            echo "Network name: ${NETWORK_NAME}"
+                            docker network inspect ${NETWORK_NAME}
+                            echo "\n=== Container Connectivity Test ==="
+                            docker-compose exec -T api ping -c 2 container-postgres
+                            echo "\n=== Database Connection Test ==="
+                            set -a
+                            . ./.env
+                            set +a
+                            docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "\\l"
+                            echo "\n=== API Environment Variables ==="
+                            docker-compose exec -T api env | grep DB
+                            echo "\n=== Container Status ==="
+                            docker-compose ps
+                            echo "\n=== API Health Check ==="
+                            curl -v ${API_URL}/health || true
+                            echo "\n=== Service URLs ==="
+                            echo "API URL: ${API_URL}"
+                            echo "Swagger UI: ${API_URL}/swagger"
+                            echo "PgAdmin URL: ${PGADMIN_URL}"
+                            echo "\n=== ECR Image Info ==="
+                            aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG}
+                        '''
+                    } catch (Exception e) {
+                        error "Verification failed: ${e.message}"
+                    }
                 }
             }
         }
     }
 
     post {
+        success {
+            script {
+                sh '''
+                    echo "\n=== Deployment Summary ==="
+                    echo "API URL: ${API_URL}"
+                    echo "Swagger UI: ${API_URL}/swagger"
+                    echo "PgAdmin URL: ${PGADMIN_URL}"
+                    echo "ECR Image: ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
+                    echo "\n=== Running Containers ==="
+                    docker-compose ps
+                '''
+            }
+        }
+        failure {
+            script {
+                sh '''
+                    echo "=== Failure Debug Information ==="
+                    docker-compose ps
+                    docker-compose logs
+                '''
+            }
+        }
         always {
-            sh 'docker logout ${ECR_URL}'
-            cleanWs()
+            script {
+                sh '''
+                    echo "Logging out from ECR..."
+                    docker logout ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                '''
+            }
         }
     }
 }
