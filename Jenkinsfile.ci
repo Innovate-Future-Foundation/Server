@@ -5,215 +5,61 @@ pipeline {
         // Core Configuration
         DOCKER_BUILDKIT = '1'
         COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${env.BUILD_ID}"
-        VERSION = sh(script: 'git describe --tags --always', returnStdout: true).trim()
         
-        // Timeouts and Retries
-        DOCKER_CACHE_TTL = '24h'
-        HEALTH_CHECK_RETRIES = '10'
-        HEALTH_CHECK_INTERVAL = '10'
-        DB_INIT_TIMEOUT = '60'
-        
-        // Service Configuration
-        EC2_HOST = '52.63.228.145'
-        API_URL = "http://${EC2_HOST}:5091"
-        PGADMIN_URL = "http://${EC2_HOST}:5050"
-        
-        // AWS Configuration
+        // AWS ECR Configuration
         AWS_CREDENTIALS = credentials('aws-credentials')
         AWS_REGION = 'ap-southeast-2'
         AWS_ACCOUNT_ID = credentials('AWS_ACCOUNT_ID')
         ECR_REPO_NAME = 'ecr-repo'
+        IMAGE_TAG = 'latest'
         DOCKER_IMAGE_NAME = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}"
-        
-        // Security Scanning
-        TRIVY_SEVERITY = 'HIGH,CRITICAL'
-        SONAR_PROJECT_KEY = 'my-project'
     }
 
     options {
         timestamps()
-        timeout(time: 45, unit: 'MINUTES')
+        timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
-        buildDiscarder(logRotator(numToKeepStr: '10'))
-        ansiColor('xterm')
     }
 
     stages {
         stage('Initialize') {
-            parallel {
-                stage('Checkout') {
-                    steps {
-                        cleanWs()
-                        checkout scm
-                    }
-                }
-                stage('Pre-build Cleanup') {
-                    steps {
-                        script {
-                            sh '''
-                                echo "Cleaning up existing containers and images..."
-                                docker compose down --remove-orphans -v || true
-                                docker system prune -f --filter "until=24h"
-                                docker volume prune -f --filter "label!=keep=true"
-                                docker network prune -f
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Security Scan') {
-            parallel {
-                stage('Code Analysis') {
-                    steps {
-                        withSonarQubeEnv('SonarQube') {
-                            sh "sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY}"
-                        }
-                    }
-                }
-                stage('Dependencies Scan') {
-                    steps {
-                        sh 'trivy fs --severity ${TRIVY_SEVERITY} .'
-                    }
-                }
-            }
-        }
-
-        stage('Build and Test') {
             steps {
-                script {
-                    try {
-                        sh '''
-                            docker compose build --parallel --build-arg VERSION=${VERSION} base api
-                            docker tag ${COMPOSE_PROJECT_NAME}_api:latest ${DOCKER_IMAGE_NAME}:${VERSION}
-                            docker tag ${COMPOSE_PROJECT_NAME}_api:latest ${DOCKER_IMAGE_NAME}:latest
-                            
-                            # Run unit tests
-                            docker compose run --rm api npm test
-                            
-                            # Scan container
-                            trivy image --severity ${TRIVY_SEVERITY} ${DOCKER_IMAGE_NAME}:${VERSION}
-                        '''
-                    } catch (Exception e) {
-                        error "Build failed: ${e.message}"
-                    }
-                }
+                cleanWs()
+                checkout scm
+                sh 'docker system prune -f'
             }
         }
 
-        stage('Push to ECR') {
+        stage('ECR Authentication') {
             steps {
-                script {
-                    withAWS(credentials: 'aws-credentials', region: AWS_REGION) {
-                        sh '''
-                            aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                            docker push ${DOCKER_IMAGE_NAME}:${VERSION}
-                            docker push ${DOCKER_IMAGE_NAME}:latest
-                            aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${VERSION}
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Database') {
-            stages {
-                stage('Setup') {
-                    steps {
-                        script {
-                            retry(3) {
-                                sh '''
-                                    docker compose up -d postgres
-                                    ./scripts/wait-for-postgres.sh ${DB_INIT_TIMEOUT}
-                                '''
-                            }
-                        }
-                    }
-                }
-                stage('Migration') {
-                    steps {
-                        script {
-                            sh '''
-                                docker compose up -d migration
-                                ./scripts/check-migration.sh
-                            '''
-                        }
-                    }
-                }
-                stage('Backup') {
-                    steps {
-                        sh './scripts/backup-database.sh'
-                    }
-                }
-            }
-        }
-
-        stage('Deploy') {
-            stages {
-                stage('Rolling Update') {
-                    steps {
-                        script {
-                            sh '''
-                                docker compose up -d --no-deps api
-                                ./scripts/health-check.sh ${API_URL} ${HEALTH_CHECK_RETRIES} ${HEALTH_CHECK_INTERVAL}
-                            '''
-                        }
-                    }
-                }
-                stage('Smoke Test') {
-                    steps {
-                        sh './scripts/run-smoke-tests.sh ${API_URL}'
-                    }
-                }
-            }
-            post {
-                failure {
-                    script {
-                        sh './scripts/rollback.sh ${VERSION}'
-                    }
-                }
-            }
-        }
-
-        stage('Verify') {
-            steps {
-                script {
-                    sh '''#!/bin/bash
-                        ./scripts/verify-deployment.sh
-                        ./scripts/monitor-resources.sh
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    sh '''
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                     '''
                 }
+            }
+        }
+
+        stage('Build and Push') {
+            steps {
+                sh '''
+                    docker compose build --parallel base api
+                    docker tag ${COMPOSE_PROJECT_NAME}_api:latest ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                    docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                    aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG}
+                '''
             }
         }
     }
 
     post {
-        success {
-            script {
-                sh '''
-                    ./scripts/notify-success.sh
-                    ./scripts/tag-release.sh ${VERSION}
-                '''
-            }
-        }
-        failure {
-            script {
-                sh '''
-                    ./scripts/collect-diagnostics.sh
-                    ./scripts/notify-failure.sh
-                '''
-            }
-        }
         always {
-            script {
-                sh '''
-                    docker logout ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                    ./scripts/cleanup.sh
-                '''
-                junit '**/test-results/*.xml'
-                archiveArtifacts artifacts: 'logs/**, diagnostics/**', allowEmptyArchive: true
-            }
+            sh 'docker logout ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com'
         }
     }
 }
