@@ -40,6 +40,16 @@ pipeline {
             }
         }
 
+        stage('Build Base Image') {
+            steps {
+                script {
+                    sh '''
+                        docker build -f Dockerfile.base -t inff-api-build .
+                    '''
+                }
+            }
+        }
+
         stage('Build and Test') {
             steps {
                 script {
@@ -54,7 +64,11 @@ pipeline {
                         echo "JWT_SECRET=${JWT_SECRET}" >> .env
                         echo "DEP_ENV=${DEP_ENV}" >> .env
                         
-                        docker build -t ${ECR_URL}:${BUILD_NUMBER} .
+                        # Run tests
+                        docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
+                        
+                        # Build API image
+                        docker build -f Dockerfile.api -t ${ECR_URL}:${BUILD_NUMBER} .
                         docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
                     '''
                 }
@@ -83,8 +97,12 @@ pipeline {
     post {
         always {
             sh '''
+                docker-compose -f docker-compose.test.yml down -v
                 docker logout ${ECR_URL}
                 rm -f .env
+                docker rmi inff-api-build || true
+                docker rmi ${ECR_URL}:${BUILD_NUMBER} || true
+                docker rmi ${ECR_URL}:latest || true
             '''
             cleanWs()
         }
