@@ -2,11 +2,9 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCOUNT_ID = '986643365562'
-        AWS_REGION = 'ap-southeast-2'
-        ECR_REPO = '986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo'
-        IMAGE_TAG = "${env.GIT_COMMIT}-${env.BUILD_NUMBER}"
+        ECR_URL = '986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo'
         DOCKER_BUILDKIT = '1'
+        AWS_REGION = 'ap-southeast-2'
     }
 
     stages {
@@ -17,11 +15,22 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('ECR Login') {
             steps {
                 script {
                     sh '''
-                        docker compose build --parallel base api
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URL}
+                    '''
+                }
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                script {
+                    sh '''
+                        docker build -t ${ECR_URL}:${BUILD_NUMBER} .
+                        docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
                     '''
                 }
             }
@@ -29,23 +38,13 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                withCredentials([[
-                    credentialsId: 'aws-credentials', region: env.AWS_REGION
-                ]]) {
+                script {
                     sh '''
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
-                        docker tag api:latest ${ECR_REPO}:${IMAGE_TAG}
-                        docker push ${ECR_REPO}:${IMAGE_TAG}
+                        docker push ${ECR_URL}:${BUILD_NUMBER}
+                        docker push ${ECR_URL}:latest
                     '''
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            cleanWs()
-            sh 'docker system prune -f'
         }
     }
 }
