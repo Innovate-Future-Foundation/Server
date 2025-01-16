@@ -1,12 +1,12 @@
 pipeline {
     agent any
-
+    
     environment {
+        AWS_CREDENTIALS = 'aws-credentials'
         ECR_URL = '986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo'
-        DOCKER_BUILDKIT = '1'
         AWS_REGION = 'ap-southeast-2'
     }
-
+    
     stages {
         stage('Checkout') {
             steps {
@@ -17,7 +17,12 @@ pipeline {
 
         stage('ECR Login') {
             steps {
-                script {
+                withCredentials([[
+                    credentialsId: "${AWS_CREDENTIALS}",
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                    class: 'AmazonWebServicesCredentialsBinding'
+                ]]) {
                     sh '''
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URL}
                     '''
@@ -27,24 +32,34 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                script {
-                    sh '''
-                        docker build -t ${ECR_URL}:${BUILD_NUMBER} .
-                        docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
-                    '''
-                }
+                sh '''
+                    docker build -t ${ECR_URL}:${BUILD_NUMBER} .
+                    docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
+                '''
             }
         }
 
         stage('Push to ECR') {
             steps {
-                script {
+                withCredentials([[
+                    credentialsId: "${AWS_CREDENTIALS}",
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                    class: 'AmazonWebServicesCredentialsBinding'
+                ]]) {
                     sh '''
                         docker push ${ECR_URL}:${BUILD_NUMBER}
                         docker push ${ECR_URL}:latest
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker logout ${ECR_URL}'
+            cleanWs()
         }
     }
 }
