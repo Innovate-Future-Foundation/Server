@@ -13,6 +13,7 @@ pipeline {
         PGADMIN_URL = "http://${EC2_HOST}:5050"
         
         // ECR Configuration
+        AWS_CREDENTIALS = credentials('aws-credentials')
         AWS_REGION = 'ap-southeast-2'
         AWS_ACCOUNT_ID = credentials('AWS_ACCOUNT_ID')
         ECR_REPO_NAME = 'ecr-repo'
@@ -52,9 +53,15 @@ pipeline {
         stage('ECR Authentication') {
             steps {
                 script {
-                    sh '''
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                    '''
+                     withCredentials([[
+                $class: 'AmazonWebServicesCredentialsBinding',
+                credentialsId: 'aws-credentials',
+                accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+            ]]) {
+                sh '''
+                    aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                '''
                 }
             }
         }
