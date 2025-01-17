@@ -1,0 +1,30 @@
+{
+    "family": "inff-api",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "256",
+    "memory": "512",
+    "containerDefinitions": [
+        {
+            "name": "inff-api",
+            "image": "<IMAGE_NAME>",
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {"name": "DB_HOST", "value": "${DB_HOST}"},
+                {"name": "DB_PORT", "value": "${DB_PORT}"},
+                {"name": "DB_NAME", "value": "${DB_NAME}"},
+                {"name": "DB_USER", "value": "${DB_USER}"},
+                {"name": "DB_PASS", "value": "${DB_PASS}"},
+                {"name": "PG_USER", "value": "${PG_USER}"},
+                {"name": "PG_PASS", "value": "${PG_PASS}"},
+                {"name": "JWT_SECRET", "value": "${JWT_SECRET}"},
+                {"name": "DEP_ENV", "value": "${DEP_ENV}"}
+            ]
+        }
+    ]
+}
