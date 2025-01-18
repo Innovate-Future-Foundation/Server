@@ -31,11 +31,7 @@ public class Profile
         Guid? profileId = null
     )
     {
-<<<<<<< HEAD
         ProfileId = profileId?? Guid.NewGuid();
-=======
-        ProfileId = profileId ?? Guid.NewGuid();
->>>>>>> 571e19b (Revise the profile, ove the navigation property to the corresponding Id field)
         UserId = userId;
         RoleId = roleId;
         OrgId = orgId;
@@ -48,30 +44,18 @@ public class Profile
 
     public void UpdateProfile(string? email, string? name, string? phone, string? avatar, Boolean? isActive)
     {
-<<<<<<< HEAD
         Email = string.IsNullOrWhiteSpace(email)? Email : email;
         Name = string.IsNullOrWhiteSpace(name)? Name : name;
         Phone = string.IsNullOrWhiteSpace(phone)? Phone : phone;
         Avatar = string.IsNullOrWhiteSpace(avatar)? Avatar : avatar;
         IsActive = isActive?? IsActive;
-=======
-        Email = string.IsNullOrWhiteSpace(email) ? Email : email;
-        Name = string.IsNullOrWhiteSpace(name) ? Name : name;
-        Phone = string.IsNullOrWhiteSpace(phone) ? Phone : phone;
-        Avatar = string.IsNullOrWhiteSpace(avatar) ? Avatar : avatar;
-        IsActive = isActive ?? IsActive;
->>>>>>> 571e19b (Revise the profile, ove the navigation property to the corresponding Id field)
         UpdatedAt = DateTime.UtcNow;
     }
 
     // Methods to set navigation properties
     public void AddUser(User user)
     {
-<<<<<<< HEAD
         User = user?? throw new ArgumentNullException(nameof(user));
-=======
-        User = user ?? throw new ArgumentNullException(nameof(user));
->>>>>>> 571e19b (Revise the profile, ove the navigation property to the corresponding Id field)
         UserId = user.UserId;
     }
 
@@ -97,10 +81,6 @@ public class Profile
     {
         SupervisedByProfile = supervisedByProfile;
         SupervisedBy = supervisedByProfile?.ProfileId;
-<<<<<<< HEAD
     }  
 
-=======
-    }
->>>>>>> 571e19b (Revise the profile, ove the navigation property to the corresponding Id field)
 }
