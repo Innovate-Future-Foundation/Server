@@ -31,7 +31,7 @@ public class Profile
         Guid? profileId = null
     )
     {
-        ProfileId = profileId ?? Guid.NewGuid();
+        ProfileId = profileId?? Guid.NewGuid();
         UserId = userId;
         RoleId = roleId;
         OrgId = orgId;
@@ -44,18 +44,18 @@ public class Profile
 
     public void UpdateProfile(string? email, string? name, string? phone, string? avatar, Boolean? isActive)
     {
-        Email = string.IsNullOrWhiteSpace(email) ? Email : email;
-        Name = string.IsNullOrWhiteSpace(name) ? Name : name;
-        Phone = string.IsNullOrWhiteSpace(phone) ? Phone : phone;
-        Avatar = string.IsNullOrWhiteSpace(avatar) ? Avatar : avatar;
-        IsActive = isActive ?? IsActive;
+        Email = string.IsNullOrWhiteSpace(email)? Email : email;
+        Name = string.IsNullOrWhiteSpace(name)? Name : name;
+        Phone = string.IsNullOrWhiteSpace(phone)? Phone : phone;
+        Avatar = string.IsNullOrWhiteSpace(avatar)? Avatar : avatar;
+        IsActive = isActive?? IsActive;
         UpdatedAt = DateTime.UtcNow;
     }
 
     // Methods to set navigation properties
     public void AddUser(User user)
     {
-        User = user ?? throw new ArgumentNullException(nameof(user));
+        User = user?? throw new ArgumentNullException(nameof(user));
         UserId = user.UserId;
     }
 
@@ -81,36 +81,6 @@ public class Profile
     {
         SupervisedByProfile = supervisedByProfile;
         SupervisedBy = supervisedByProfile?.ProfileId;
-    }
-    
-    // Methods to set navigation properties
-    public void AddUser(User user)
-    {
-        User = user ?? throw new ArgumentNullException(nameof(user));
-        UserId = user.UserId;
-    }
+    }  
 
-    public void AddRole(Role role)
-    {
-        Role = role ?? throw new ArgumentNullException(nameof(role));
-        RoleId = role.RoleId;
-    }
-
-    public void AddOrganisation(Organisation? organisation)
-    {
-        Organisation = organisation;
-        OrgId = organisation?.OrgId;
-    }
-
-    public void AddInvitedByProfile(Profile? invitedByProfile)
-    {
-        InvitedByProfile = invitedByProfile;
-        InvitedBy = invitedByProfile?.ProfileId;
-    }
-
-    public void AddSupervisedByProfile(Profile? supervisedByProfile)
-    {
-        SupervisedByProfile = supervisedByProfile;
-        SupervisedBy = supervisedByProfile?.ProfileId;
-    }
 }
