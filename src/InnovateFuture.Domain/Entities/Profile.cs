@@ -61,7 +61,7 @@ public class Profile
 
     public void AddRole(Role role)
     {
-        Role = role ?? throw new ArgumentNullException(nameof(role));
+        Role = role?? throw new ArgumentNullException(nameof(role));
         RoleId = role.RoleId;
     }
 
