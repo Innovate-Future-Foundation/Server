@@ -1,30 +1,35 @@
 {
     "family": "inff-api",
+    "executionRoleArn": "arn:aws:iam::986643365562:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "requiresCompatibilities": ["FARGATE"],
-    "cpu": "256",
-    "memory": "512",
     "containerDefinitions": [
         {
             "name": "inff-api",
-            "image": "<IMAGE_NAME>",
+            "image": "986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo:23",
+            "cpu": 256,
+            "memory": 512,
             "portMappings": [
                 {
                     "containerPort": 3000,
+                    "hostPort": 3000,
                     "protocol": "tcp"
                 }
             ],
+            "essential": true,
             "environment": [
-                {"name": "DB_HOST", "value": "${DB_HOST}"},
-                {"name": "DB_PORT", "value": "${DB_PORT}"},
-                {"name": "DB_NAME", "value": "${DB_NAME}"},
-                {"name": "DB_USER", "value": "${DB_USER}"},
-                {"name": "DB_PASS", "value": "${DB_PASS}"},
-                {"name": "PG_USER", "value": "${PG_USER}"},
-                {"name": "PG_PASS", "value": "${PG_PASS}"},
-                {"name": "JWT_SECRET", "value": "${JWT_SECRET}"},
-                {"name": "DEP_ENV", "value": "${DEP_ENV}"}
+                {"name": "PG_PASS", "value": "q4hbGe7N3EAy"},
+                {"name": "DEP_ENV", "value": "Development"},
+                {"name": "DB_PORT", "value": "5432"},
+                {"name": "DB_PASS", "value": "123321abb"},
+                {"name": "JWT_SECRET", "value": "u68-03Pn4n_@w@fM"},
+                {"name": "DB_USER", "value": "db_admin"},
+                {"name": "DB_NAME", "value": "InnovateFuture"},
+                {"name": "DB_HOST", "value": "postgres"},
+                {"name": "PG_USER", "value": "db@inff.com"}
             ]
         }
-    ]
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "256",
+    "memory": "512"
 }

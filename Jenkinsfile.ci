@@ -13,9 +13,6 @@ pipeline {
         PG_PASS = 'q4hbGe7N3EAy'
         JWT_SECRET = 'u68-03Pn4n_@w@fM'
         DEP_ENV = 'Development'
-        ECS_CLUSTER = 'inff-api-cluster'
-        ECS_SERVICE = 'inff-api-service'
-        TASK_FAMILY = 'inff-api'
     }
     
     stages {
@@ -57,26 +54,26 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        echo "DB_HOST=${DB_HOST}" > .env
-                        echo "DB_PORT=${DB_PORT}" >> .env
-                        echo "DB_NAME=${DB_NAME}" >> .env
-                        echo "DB_USER=${DB_USER}" >> .env
-                        echo "DB_PASS=${DB_PASS}" >> .env
-                        echo "PG_USER=${PG_USER}" >> .env
-                        echo "PG_PASS=${PG_PASS}" >> .env
-                        echo "JWT_SECRET=${JWT_SECRET}" >> .env
-                        echo "DEP_ENV=${DEP_ENV}" >> .env
-                        
-                        # Build base image first
-                        docker build -f Dockerfile.base -t inff-api-build .
-                        
-                        # Run tests with proper database initialization
-                        docker-compose -f docker-compose.test.yml up --build --exit-code-from tests
-                        
-                        # Build final API image if tests pass
-                        docker build -f Dockerfile.api -t ${ECR_URL}:${BUILD_NUMBER} .
-                        docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
-                    '''
+                echo "DB_HOST=${DB_HOST}" > .env
+                echo "DB_PORT=${DB_PORT}" >> .env
+                echo "DB_NAME=${DB_NAME}" >> .env
+                echo "DB_USER=${DB_USER}" >> .env
+                echo "DB_PASS=${DB_PASS}" >> .env
+                echo "PG_USER=${PG_USER}" >> .env
+                echo "PG_PASS=${PG_PASS}" >> .env
+                echo "JWT_SECRET=${JWT_SECRET}" >> .env
+                echo "DEP_ENV=${DEP_ENV}" >> .env
+                
+                # Build base image first
+                docker build -f Dockerfile.base -t inff-api-build .
+                
+                # Run tests with proper database initialization
+                docker-compose -f docker-compose.test.yml up --build --exit-code-from tests
+                
+                # Build final API image if tests pass
+                docker build -f Dockerfile.api -t ${ECR_URL}:${BUILD_NUMBER} .
+                docker tag ${ECR_URL}:${BUILD_NUMBER} ${ECR_URL}:latest
+            '''
                 }
             }
         }
@@ -95,34 +92,6 @@ pipeline {
                         docker push ${ECR_URL}:${BUILD_NUMBER}
                         docker push ${ECR_URL}:latest
                     '''
-                }
-            }
-        }
-
-        stage('Deploy to ECS') {
-            steps {
-                withCredentials([
-                    [
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: 'aws-credentials',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]
-                ]) {
-                    script {
-                        sh """
-                            TASK_DEFINITION=\$(aws ecs describe-task-definition --task-definition ${TASK_FAMILY} --region ${AWS_REGION})
-                            NEW_TASK_DEFINITION=\$(echo \$TASK_DEFINITION | jq '.taskDefinition' | jq '.containerDefinitions[0].image = "${ECR_URL}:${BUILD_NUMBER}"')
-                            aws ecs register-task-definition --family ${TASK_FAMILY} --cli-input-json "\$NEW_TASK_DEFINITION" --region ${AWS_REGION}
-                            
-                            aws ecs update-service \
-                                --cluster ${ECS_CLUSTER} \
-                                --service ${ECS_SERVICE} \
-                                --task-definition ${TASK_FAMILY} \
-                                --force-new-deployment \
-                                --region ${AWS_REGION}
-                        """
-                    }
                 }
             }
         }
