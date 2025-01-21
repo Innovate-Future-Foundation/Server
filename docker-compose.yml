@@ -16,8 +16,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
       - ASPNETCORE_URLS=http://+:5091/
     depends_on:
-      - migration
-  
+      migration:
+        condition: service_completed_successfully
+
   migration:
     image: inff-api-build
     command: >
@@ -43,7 +44,7 @@ services:
 
   pgadmin:
     container_name: container-pgadmin
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:8.14
     depends_on:
       - postgres
     ports:

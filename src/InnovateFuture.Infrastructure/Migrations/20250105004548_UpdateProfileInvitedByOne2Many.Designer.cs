@@ -3,6 +3,7 @@ using System;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InnovateFuture.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250105004548_UpdateProfileInvitedByOne2Many")]
+    partial class UpdateProfileInvitedByOne2Many
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,7 +77,7 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.HasKey("OrgId");
 
-                    b.ToTable("Organisations", (string)null);
+                    b.ToTable("Organisations");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
@@ -144,13 +147,14 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("SupervisedBy");
+                    b.HasIndex("SupervisedBy")
+                        .IsUnique();
 
                     b.HasIndex("UserId", "RoleId", "OrgId")
                         .IsUnique()
                         .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
 
-                    b.ToTable("Profiles", (string)null);
+                    b.ToTable("Profiles");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Role", b =>
@@ -193,7 +197,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Roles_name");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
@@ -245,14 +249,11 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Users_cognito_uuid");
 
-                    b.HasIndex("DefaultProfile")
-                        .IsUnique();
-
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("IX_Users_email");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
@@ -274,8 +275,8 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("InnovateFuture.Domain.Entities.Profile", "SupervisedByProfile")
-                        .WithMany()
-                        .HasForeignKey("SupervisedBy")
+                        .WithOne()
+                        .HasForeignKey("InnovateFuture.Domain.Entities.Profile", "SupervisedBy")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("InnovateFuture.Domain.Entities.User", "User")
@@ -293,14 +294,6 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.Navigation("SupervisedByProfile");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
-                {
-                    b.HasOne("InnovateFuture.Domain.Entities.Profile", null)
-                        .WithOne()
-                        .HasForeignKey("InnovateFuture.Domain.Entities.User", "DefaultProfile")
-                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>

@@ -3,6 +3,7 @@ using System;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InnovateFuture.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250105075821_SetDefaultProfileAsForeignKey")]
+    partial class SetDefaultProfileAsForeignKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,7 +77,7 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.HasKey("OrgId");
 
-                    b.ToTable("Organisations", (string)null);
+                    b.ToTable("Organisations");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
@@ -150,7 +153,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
 
-                    b.ToTable("Profiles", (string)null);
+                    b.ToTable("Profiles");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Role", b =>
@@ -193,7 +196,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Roles_name");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
@@ -252,7 +255,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Users_email");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>

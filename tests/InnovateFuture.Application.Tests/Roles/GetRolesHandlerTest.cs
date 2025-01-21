@@ -25,8 +25,8 @@ public class GetRolesHandlerTest
         var query = new GetRolesQuery();
         var expectedRoles = new List<Role>
         {
-            new Role ("Organisation Admin", RoleEnum.OrgAdmin,null ),
-            new Role ("Organisation Teacher", RoleEnum.OrgTeacher,null ),
+            new Role ("Organisation Admin", RoleEnum.OrgAdmin ),
+            new Role ("Organisation Teacher", RoleEnum.OrgTeacher ),
         };
 
         _mockedRoleRepository
@@ -56,9 +56,9 @@ public class GetRolesHandlerTest
 
         // Assert
         _mockedRoleRepository.Verify(repo => repo.GetAnyAsync(It.Is<Expression<Func<Role, bool>>>(predicate =>
-            predicate.Compile().Invoke(new Role ("Organisation Admin", RoleEnum.OrgAdmin,null)
+            predicate.Compile().Invoke(new Role ("Organisation Admin", RoleEnum.OrgAdmin,null,null)
                ) &&
-            !predicate.Compile().Invoke( new Role ("Organisation Teacher", RoleEnum.OrgTeacher,null))
+            !predicate.Compile().Invoke( new Role ("Organisation Teacher", RoleEnum.OrgTeacher,null,null))
         )), Times.Once);
     }
     
@@ -72,8 +72,8 @@ public class GetRolesHandlerTest
             CodeName = RoleEnum.Student,
         };
 
-        var correctRole = new Role("Student", RoleEnum.Student, null);
-        var wrongRole = new Role("Organisation Teacher", RoleEnum.OrgTeacher, null);
+        var correctRole = new Role("Student", RoleEnum.Student);
+        var wrongRole = new Role("Organisation Teacher", RoleEnum.OrgTeacher);
 
         _mockedRoleRepository
             .Setup(repo => repo.GetAnyAsync(It.IsAny<Expression<Func<Role, bool>>>()))

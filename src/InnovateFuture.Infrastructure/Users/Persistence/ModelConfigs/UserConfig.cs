@@ -1,5 +1,3 @@
-
-
 using InnovateFuture.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -33,9 +31,9 @@ public class UserConfig : IEntityTypeConfiguration<User>
         builder.Property(u => u.UpdatedAt).HasColumnType("timestamptz").HasColumnName("updated_at").IsRequired();
         
         // navigation property
-        builder.HasMany(u => u.Profiles)
-            .WithOne(p => p.User)
-            .HasForeignKey(p => p.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Profile>()
+            .WithOne()
+            .HasForeignKey<User>(u => u.DefaultProfile)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

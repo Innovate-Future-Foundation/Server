@@ -11,10 +11,11 @@ public class Role
     public string? Description { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    public Role(){}
 
-    public Role(string name, RoleEnum codeName, string? description)
+    public Role(string name, RoleEnum codeName, Guid?roleId=null, string? description=null)
     {
-        RoleId = Guid.NewGuid();
+        RoleId = roleId??Guid.NewGuid();
         Name = name;
         CodeName = codeName;
         Description = description;

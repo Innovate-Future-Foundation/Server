@@ -13,6 +13,11 @@ using InnovateFuture.Application.Users.Commands.CreateUser;
 using InnovateFuture.Application.Users.Commands.UpdateUser;
 using InnovateFuture.Application.Users.Queries.GetUser;
 using InnovateFuture.Application.Users.Queries.GetUsers;
+using InnovateFuture.Infrastructure.Common;
+using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
+using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
@@ -29,6 +34,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
+using InnovateFuture.Infrastructure.Common;
 
 namespace InnovateFuture.Api
 {
@@ -69,14 +75,20 @@ namespace InnovateFuture.Api
                 
                 configuration.RegisterServicesFromAssembly(typeof(GetRoleHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetRolesHandler).Assembly);
+
+                configuration.RegisterServicesFromAssembly(typeof(CreateOrganisationHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(UpdateOrganisationHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
             });
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
+            builder.Services.AddScoped<ISeedDataService, SeedDataService>();
             builder.Services.AddScoped<IOrgRepository, OrgRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+            builder.Services.AddScoped<IOrgRepository, OrgRepository>();
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
@@ -86,6 +98,9 @@ namespace InnovateFuture.Api
             builder.Services.AddValidatorsFromAssembly(typeof(GetRolesQueryValidator).Assembly);
             
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateProfileCommandValidator).Assembly);
+
+            builder.Services.AddValidatorsFromAssembly(typeof(CreateOrganisationCommandValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(UpdateOrganisationCommandValidator).Assembly);
 
             builder.Services.AddHealthChecks()
                 .AddNpgSql(connectionString)
@@ -151,6 +166,7 @@ namespace InnovateFuture.Api
             builder.Services.AddValidatorsFromAssemblyContaining<GetUsersQueryValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetRolesQueryValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<CreateOrganisationCommandValidator>();
             #endregion
 
             #region NLog
@@ -165,6 +181,7 @@ namespace InnovateFuture.Api
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwaggerEXT();
+                app.Services.SeedDataEXT();
             }else
             {
                 builder.Services.AddCors(option =>
