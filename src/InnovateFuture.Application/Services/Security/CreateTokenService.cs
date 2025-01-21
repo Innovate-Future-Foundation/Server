@@ -1,7 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using InnovateFuture.Api.Configs;
+using InnovateFuture.Infrastructure.Configs;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
