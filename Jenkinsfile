@@ -25,7 +25,7 @@ pipeline {
 
         stage('Push Docker Images') {
             steps {
-                withAWS(credentials: 'aws-credentials', region: '${AWS_REGION}') {
+                withAWS(credentials: 'aws-credentials', region: 'ap-southeast-2') {
                     script {
                         sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
                         
@@ -33,7 +33,7 @@ pipeline {
                         sh "docker tag ${IMAGE_NAME}:latest ${ECR_REPO}:${buildNumber}"
                         sh "docker push ${ECR_REPO}:${buildNumber}"
                         
-                        sh "docker tag inff-api-build:latest ${ECR_REPO}:api-${buildNumber}"
+                        sh "docker tag ${IMAGE_NAME}:latest ${ECR_REPO}:api-${buildNumber}"
                         sh "docker push ${ECR_REPO}:api-${buildNumber}"
                     }
                 }
