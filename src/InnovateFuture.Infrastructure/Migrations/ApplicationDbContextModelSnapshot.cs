@@ -22,73 +22,35 @@ namespace InnovateFuture.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Order", b =>
                 {
-                    b.Property<Guid>("OrgId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("org_id");
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("address");
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("email");
-
-                    b.Property<string>("LogoUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("logo_url");
-
-                    b.Property<string>("OrgName")
+                    b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("org_name");
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
+                    b.HasKey("Id");
 
-                    b.Property<string>("Subscription")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("subscription");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("WebsiteUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("website_url");
-
-                    b.HasKey("OrgId");
-
-                    b.ToTable("Organisations");
+                    b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.OrderItem", b =>
                 {
-                    b.Property<Guid>("ProfileId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("profile_id");
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("Avatar")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("avatar");
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
 
+<<<<<<< HEAD
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
@@ -174,30 +136,29 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnName("description");
 
                     b.Property<string>("Name")
+=======
+                    b.Property<string>("ProductName")
+>>>>>>> eace9c9ac9e23d482f1d2a3e2e03b7e7ff7d0a1b
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("name");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("updated_at");
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
 
-                    b.HasKey("RoleId");
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("CodeName")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Roles_code_name");
+                    b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Roles_name");
+                    b.HasIndex("OrderId");
 
-                    b.ToTable("Roles");
+                    b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.OrderItem", b =>
                 {
+<<<<<<< HEAD
                     b.Property<Guid>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
@@ -304,13 +265,18 @@ namespace InnovateFuture.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>
-                {
-                    b.Navigation("Profiles");
+=======
+                    b.HasOne("InnovateFuture.Domain.Entities.Order", null)
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Order", b =>
+>>>>>>> eace9c9ac9e23d482f1d2a3e2e03b7e7ff7d0a1b
                 {
-                    b.Navigation("Profiles");
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }
