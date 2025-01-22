@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore;
 namespace InnovateFuture.Infrastructure.Common.Persistence;
 public class ApplicationDbContext : DbContext
 {
-    public DbSet<User> Users { get; set; }
-    public DbSet<Role> Roles { get; set; }
-    public DbSet<Profile> Profiles { get; set; }
-    public DbSet<Organisation> Organisations { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
