@@ -33,10 +33,10 @@ stage('Push Docker Images') {
                 
                 // Tag and push inff-api-build
                 sh "docker tag inff-api-build:latest ${ECR_REPO}:inff-api-build"
-                sh "docker push ${ECR_REPO}:inff-api-build"
                 
                 // Tag and push server-api
                 sh "docker tag server-api:latest ${ECR_REPO}:server-api"
+                sh "docker push ${ECR_REPO}:inff-api-build"
                 sh "docker push ${ECR_REPO}:server-api"
             }
         }
