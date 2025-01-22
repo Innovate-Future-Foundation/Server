@@ -24,24 +24,25 @@ pipeline {
             }
         }
 
-        stage('Push Docker Images') {
-            steps {
-                withAWS(credentials: 'aws-credentials', region: AWS_REGION) {
-                    script {
-                        // Authenticate with ECR
-                        sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
-                        
-                        // Tag and push inff-api-build
-                        sh "docker tag inff-api-build:latest ${ECR_REPO}/inff-api-build:latest"
-                        sh "docker push ${ECR_REPO}/inff-api-build:latest"
-                        
-                        // Tag and push server-api
-                        sh "docker tag server-api:latest ${ECR_REPO}/server-api:latest"
-                        sh "docker push ${ECR_REPO}/server-api:latest"
-                    }
-                }
+stage('Push Docker Images') {
+    steps {
+        withAWS(credentials: 'aws-credentials', region: AWS_REGION) {
+            script {
+                // Authenticate with ECR
+                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
+                
+                // Tag and push inff-api-build
+                sh "docker tag inff-api-build:latest ${ECR_REPO}:inff-api-build"
+                sh "docker push ${ECR_REPO}:inff-api-build"
+                
+                // Tag and push server-api
+                sh "docker tag server-api:latest ${ECR_REPO}:server-api"
+                sh "docker push ${ECR_REPO}:server-api"
             }
         }
+    }
+}
+
 
         stage('Clean Up') {
             steps {
