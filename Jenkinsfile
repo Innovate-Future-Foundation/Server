@@ -18,24 +18,23 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} build --no-cache'
+                    sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} build'
                 }
             }
         }
 
         stage('Push Docker Images') {
             steps {
-                withAWS(credentials: 'aws-credentials', region: '${AWS_REGION}') {
+                withAWS(credentials: 'aws-credentials', region: 'ap-southeast-2') {
                     script {
-                        def buildNumber = env.BUILD_NUMBER
-                        def imageTags = ["${buildNumber}", "api-${buildNumber}", "latest"]
-                        
                         sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
                         
-                        imageTags.each { tag ->
-                            sh "docker tag ${IMAGE_NAME}:latest ${ECR_REPO}:${tag}"
-                            sh "docker push ${ECR_REPO}:${tag}"
-                        }
+                        def buildNumber = env.BUILD_NUMBER
+                        sh "docker tag ${IMAGE_NAME}:latest ${ECR_REPO}:${buildNumber}"
+                        sh "docker push ${ECR_REPO}:${buildNumber}"
+                        
+                        sh "docker tag ${IMAGE_NAME}:latest ${ECR_REPO}:api-${buildNumber}"
+                        sh "docker push ${ECR_REPO}:api-${buildNumber}"
                     }
                 }
             }
@@ -45,7 +44,8 @@ pipeline {
             steps {
                 script {
                     sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} down --rmi all --volumes --remove-orphans'
-                    sh "docker system prune -af"
+                    sh "docker rmi ${ECR_REPO}:${BUILD_NUMBER}"
+                    sh "docker rmi ${ECR_REPO}:api-${BUILD_NUMBER}"
                 }
             }
         }
@@ -54,12 +54,6 @@ pipeline {
     post {
         always {
             cleanWs()
-        }
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline execution failed. Please check the logs for details.'
         }
     }
 }
