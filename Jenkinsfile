@@ -4,7 +4,8 @@ pipeline {
     environment {
         AWS_REGION = 'ap-southeast-2'
         ECR_REPO = '986643365562.dkr.ecr.ap-southeast-2.amazonaws.com/ecr-repo'
-        IMAGE_NAME = 'inff-api-build'
+        BASE_IMAGE_NAME = 'inff-api-build'
+        API_IMAGE_NAME = 'server-api'
         DOCKER_COMPOSE_FILE = 'docker-compose.yml'
     }
 
@@ -31,11 +32,14 @@ pipeline {
                         sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
                         
                         def buildNumber = env.BUILD_NUMBER
-                        sh "docker tag ${IMAGE_NAME}:latest ${ECR_REPO}:${buildNumber}"
-                        sh "docker push ${ECR_REPO}:${buildNumber}"
                         
-                        sh "docker tag ${IMAGE_NAME}:latest ${ECR_REPO}:api-${buildNumber}"
-                        sh "docker push ${ECR_REPO}:api-${buildNumber}"
+                        // Tag and push base image (inff-api-build)
+                        sh "docker tag ${BASE_IMAGE_NAME}:latest ${ECR_REPO}:${BASE_IMAGE_NAME}-${buildNumber}"
+                        sh "docker push ${ECR_REPO}:${BASE_IMAGE_NAME}-${buildNumber}"
+                        
+                        // Tag and push API image (server-api)
+                        sh "docker tag ${API_IMAGE_NAME}:latest ${ECR_REPO}:${API_IMAGE_NAME}-${buildNumber}"
+                        sh "docker push ${ECR_REPO}:${API_IMAGE_NAME}-${buildNumber}"
                     }
                 }
             }
