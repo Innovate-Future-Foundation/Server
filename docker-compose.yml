@@ -16,8 +16,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
       - ASPNETCORE_URLS=http://+:5091/
     depends_on:
-       migration:
-          condition: service_completed_successfully
+      - migration
   
   migration:
     image: inff-api-build
@@ -27,6 +26,7 @@ services:
       --startup-project InnovateFuture.Api/InnovateFuture.Api.csproj"
     environment:
       - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
+      - JWTConfig__SecretKey=${JWT_SECRET}
       - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
     depends_on:
       - base
