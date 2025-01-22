@@ -28,18 +28,16 @@ pipeline {
             steps {
                 withAWS(credentials: 'aws-credentials', region: AWS_REGION) {
                     script {
-                        echo "Pushing Docker images to region: ${AWS_REGION}"
+                        // Authenticate with ECR
                         sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
                         
-                        def buildNumber = env.BUILD_NUMBER
+                        // Tag and push inff-api-build
+                        sh "docker tag inff-api-build:latest ${ECR_REPO}/inff-api-build:latest"
+                        sh "docker push ${ECR_REPO}/inff-api-build:latest"
                         
-                        // Tag and push base image (inff-api-build)
-                        sh "docker tag ${BASE_IMAGE_NAME}:latest ${ECR_REPO}:${BASE_IMAGE_NAME}-${buildNumber}"
-                        sh "docker push ${ECR_REPO}:${BASE_IMAGE_NAME}-${buildNumber}"
-                        
-                        // Tag and push API image (server-api)
-                        sh "docker tag ${API_IMAGE_NAME}:latest ${ECR_REPO}:${API_IMAGE_NAME}-${buildNumber}"
-                        sh "docker push ${ECR_REPO}:${API_IMAGE_NAME}-${buildNumber}"
+                        // Tag and push server-api
+                        sh "docker tag server-api:latest ${ECR_REPO}/server-api:latest"
+                        sh "docker push ${ECR_REPO}/server-api:latest"
                     }
                 }
             }
