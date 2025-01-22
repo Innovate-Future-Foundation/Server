@@ -25,7 +25,7 @@ pipeline {
 
         stage('Push Docker Images') {
             steps {
-                withAWS(credentials: 'aws-credentials', region: 'ap-southeast-2') {
+                withAWS(credentials: 'aws-credentials', region: '${AWS_REGION}') {
                     script {
                         sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
                         
@@ -44,16 +44,5 @@ pipeline {
             steps {
                 script {
                     sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} down --rmi all --volumes --remove-orphans'
-                    sh "docker rmi ${ECR_REPO}:${BUILD_NUMBER}"
-                    sh "docker rmi ${ECR_REPO}:api-${BUILD_NUMBER}"
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            cleanWs()
-        }
-    }
-}
+                    
+                    // Use try-catch to handle potential errors during image remo
