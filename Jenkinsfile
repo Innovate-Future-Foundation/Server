@@ -19,7 +19,7 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} build'
+                    sh 'docker compose build'
                 }
             }
         }
