@@ -45,4 +45,12 @@ pipeline {
                 script {
                     sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} down --rmi all --volumes --remove-orphans'
                     
-                    // Use try-catch to handle potential errors during image remo
+                    // Use try-catch to handle potential errors during image removal
+                    try {
+                        sh 'docker rmi $(docker images -f "dangling=true" -q) || true'
+                    } catch (Exception e) {
+                        echo "Error during image removal: ${e.getMessage()}"
+                    }
+                }
+            }
+        }
