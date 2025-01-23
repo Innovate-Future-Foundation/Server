@@ -1,0 +1,11 @@
+FROM dpage/pgadmin4:latest
+USER root
+
+COPY servers.json /pgadmin4/servers.json
+RUN chown 5050:5050 /pgadmin4/servers.json
+
+USER 5050:5050
+ENV PGADMIN_SERVER_JSON_FILE=/pgadmin4/servers.json
+
+EXPOSE 80
+ENTRYPOINT ["/entrypoint.sh"]

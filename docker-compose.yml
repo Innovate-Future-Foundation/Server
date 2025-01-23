@@ -4,12 +4,13 @@ services:
       context: .
       dockerfile: Dockerfile.base
     image: inff-api-build
+
   api:
     build:
       context: .
       dockerfile: Dockerfile.api
     ports:
-      - "5091:5091"
+      - '5091:5091'
     environment:
       - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
       - JWTConfig__SecretKey=${JWT_SECRET}
@@ -18,6 +19,8 @@ services:
     depends_on:
       migration:
         condition: service_completed_successfully
+    networks:
+      - app-network
 
   migration:
     image: inff-api-build
@@ -32,6 +35,8 @@ services:
     depends_on:
       - base
       - postgres
+    networks:
+      - app-network
 
   postgres:
     container_name: container-postgres
@@ -40,16 +45,34 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - app-network
 
   pgadmin:
     container_name: container-pgadmin
-    image: dpage/pgadmin4:8.14
+    build:
+      context: .
+      dockerfile: Dockerfile.pgadmin
     depends_on:
       - postgres
     ports:
-      - "5050:80"
+      - '5050:80'
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PG_USER}
       PGADMIN_DEFAULT_PASSWORD: ${PG_PASS}
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
     restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+
+networks:
+  app-network:
+    driver: bridge
