@@ -19,15 +19,31 @@ services:
     depends_on:
       migration:
         condition: service_completed_successfully
+      test:
+        condition: service_completed_successfully
     networks:
       - app-network
+
+  test:
+    image: inff-api-build
+    command: >
+      sh -c "dotnet test
+      --configuration Release
+      --no-build --verbosity normal"
+    depends_on:
+      base:
+        condition: service_completed_successfully
+      migration:
+        condition: service_completed_successfully
 
   migration:
     image: inff-api-build
     command: >
       sh -c "dotnet ef database update
-      --project InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj
-      --startup-project InnovateFuture.Api/InnovateFuture.Api.csproj"
+      --project src/InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj
+      --startup-project src/InnovateFuture.Api/InnovateFuture.Api.csproj
+      --configuration Release
+      --no-build"
     environment:
       - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
       - JWTConfig__SecretKey=${JWT_SECRET}
