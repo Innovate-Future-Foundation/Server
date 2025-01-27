@@ -1,6 +1,16 @@
 version: '3.8'
 
 services:
+  base:
+    build:
+      context: ../../
+      dockerfile: Dockerfile.base
+    image: inff-api-build
+  api:
+    build:
+      context: ../../
+      dockerfile: Dockerfile.api
+    image: inff-api
   postgres:
     container_name: container-pg
     image: postgres
@@ -14,6 +24,12 @@ services:
     # volumes:
       # - ./postgres/postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "PGPASSWORD=root psql -U admin -h localhost -p 5432 -d InnovateFuture -c 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - inff-network-backend
 
@@ -30,24 +46,55 @@ services:
     volumes:
       - /opt/pgadmin/servers.json:/pgadmin4/servers.json  # Mount pre-configured servers.json
     restart: unless-stopped
+    healthcheck:
+          test: ["CMD", "wget", "-O", "-", "http://localhost/misc/ping"]
+          interval: 10s
+          timeout: 5s
+          retries: 3
+          start_period: 30s
+    networks:
+      - inff-network-backend
+  
+  migration:
+    container_name: migration
+    image: inff-api-build
+    command: >
+      sh -c "dotnet ef database update
+      --project InnovateFuture.Infrastructure/InnovateFuture.Infrastructure.csproj
+      --startup-project InnovateFuture.Api/InnovateFuture.Api.csproj"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DBConnection: Host=postgres;Port=5432;Username=admin;Password=root;Database=InnovateFuture;
+      JWTConfig__SecretKey: MY_SECRET_KEY
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: no
     networks:
       - inff-network-backend
 
-  # dotnet-app:
-  #   container_name: iff-server
-  #   build:
-  #     context: ../../
-  #     dockerfile: .devops/dev/Dockerfile
-  #   ports:
-  #     - "5091:5091"  # Map port 5091 for http access
-  #     - "7173:7173"  # Map port 7173 for https access
-  #   environment:
-  #     ASPNETCORE_ENVIRONMENT: Development
-  #     DBConnection: Host=postgres;Port=5432;Username=admin;Password=root;Database=InnovateFuture
-  #     JWTConfig__SecretKey: MY_SECRET_KEY
-  #   depends_on:
-  #     - postgres
-  #   restart: unless-stopped
+  dotnet-app:
+    container_name: dotnet-app
+    image: inff-api
+    ports:
+      - "5091:5091"  # Map port 5091 for http access
+      - "7173:7173"  # Map port 7173 for https access
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DBConnection: Host=postgres;Port=5432;Username=admin;Password=root;Database=InnovateFuture;
+      JWTConfig__SecretKey: MY_SECRET_KEY
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5091/swagger/index.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - inff-network-backend
     
 # volumes:
   # postgres-data:
