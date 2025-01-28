@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel;
+using InnovateFuture.Application.Common.Models;
 
 namespace InnovateFuture.Api.Controllers.OrganisationsController;
 
@@ -62,35 +63,16 @@ public class OrganisationsController : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>
-    /// Gets all organisations.
-    /// </summary>
-    /// <param name="orderBy">Sort by field: 'OrgName' or 'CreatedAt'.</param>
-    /// <param name="isAscending">Sort ascending (true) or descending (false).</param>
-    /// <returns>A list of organisations.</returns>
+   
     [AllowAnonymous]
     [HttpGet]
-    [ProducesResponseType(typeof(List<GetOrganisationResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOrganisations(
-        [FromQuery] 
-        [DefaultValue("OrgName")]
-        [Description("Sort by field: 'OrgName' or 'CreatedAt'")]
-        string? orderBy = "OrgName", 
-        
-        [FromQuery] 
-        [DefaultValue(true)]
-        [Description("Sort ascending (true) or descending (false)")]
-        bool isAscending = true)
+    public async Task<IActionResult> GetOrganisations([FromQuery]QueryOrganisationsRequest queryRequest)
     {
-        var query = new GetOrganisationsQuery 
-        { 
-            OrderBy = orderBy,
-            IsAscending = isAscending
-        };
+        var query = _mapper.Map<GetOrganisationsQuery>(queryRequest);
+        var paginatedOrganisations = await _mediator.Send(query);
+        var response = _mapper.Map<GetOrganisationResponse[]>(paginatedOrganisations.Data);
         
-        var organisations = await _mediator.Send(query);
-        var response = _mapper.Map<List<GetOrganisationResponse>>(organisations);
-        return Ok(response);
+        return Ok(new PaginatedResult<GetOrganisationResponse>(){Data=response,Meta=paginatedOrganisations.Meta});
     }
 
     /// <summary>

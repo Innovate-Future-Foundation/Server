@@ -9,8 +9,10 @@ using InnovateFuture.Application.Users.Commands.UpdateUser;
 using InnovateFuture.Application.Users.Queries.GetUsers;
 using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Domain.Entities;
 using Profile = AutoMapper.Profile;
+using QueryOrganisationsFilters = InnovateFuture.Application.Organisations.Queries.GetOrganisations.QueryOrganisationsFilters;
 
 namespace InnovateFuture.Api.Profiles;
 
@@ -35,9 +37,15 @@ public class AutoMapperProfile: Profile
         CreateMap<Role,GetRoleResponse>();
 
         CreateMap<CreateOrganisationRequest, CreateOrganisationCommand>();
-
+    
         CreateMap<Organisation, GetOrganisationResponse>();
+        
+        CreateMap<QueryOrganisationsRequest, GetOrganisationsQuery>();
+        
+        CreateMap<InnovateFuture.Api.Controllers.OrganisationsController.QueryOrganisationsFilters,
+            QueryOrganisationsFilters>();
 
         CreateMap<UpdateOrganisationRequest, UpdateOrganisationCommand>();
+        
     }
 }

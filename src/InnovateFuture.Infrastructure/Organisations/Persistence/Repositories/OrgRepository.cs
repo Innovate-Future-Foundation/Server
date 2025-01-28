@@ -4,6 +4,7 @@ using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Exceptions;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace InnovateFuture.Infrastructure.Organisations.Persistence.Repositories;
 
@@ -38,12 +39,26 @@ public class OrgRepository:IOrgRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<Organisation>> GetAnyAsync(Expression<Func<Organisation, bool>> predicate)
+    public async Task<(List<Organisation> data, int totalItems, int? totalPages)> GetAnyAsync(Expression<Func<Organisation, bool>>? predicate=null, int? limit = null, int offset=0,string? queryOrderBy=null)
     {
-        var organisations = await _dbContext.Organisations
-            .Where(predicate)
-            .ToListAsync();
+        IQueryable<Organisation> query =_dbContext.Organisations;
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
         
-        return organisations;
+        int totalItems = await query.CountAsync();
+        
+        int? totalPages = limit.HasValue?(int)Math.Ceiling(totalItems / (double)limit.Value):null;
+
+        if (!string.IsNullOrEmpty(queryOrderBy))
+        {
+            query = query.OrderBy(queryOrderBy);
+        }
+
+        var organisations = await query.Skip(offset)
+            .Take(limit ?? totalItems).ToListAsync();
+        
+        return (organisations, totalItems, totalPages);
     }
 }

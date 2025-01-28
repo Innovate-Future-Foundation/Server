@@ -101,6 +101,7 @@ namespace InnovateFuture.Api
 
             builder.Services.AddValidatorsFromAssembly(typeof(CreateOrganisationCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateOrganisationCommandValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(GetOrganisationsQueryValidator).Assembly);
 
             builder.Services.AddHealthChecks()
                 .AddNpgSql(connectionString)
@@ -164,6 +165,7 @@ namespace InnovateFuture.Api
             builder.Services.AddValidatorsFromAssemblyContaining<GetRolesQueryValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<CreateOrganisationCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<GetOrganisationsQueryValidator>();
             #endregion
 
             #region NLog
