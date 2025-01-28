@@ -63,7 +63,11 @@ public class OrganisationsController : ControllerBase
         return Ok(response);
     }
 
-   
+    /// <summary>
+    /// Get paginated organisations
+    /// </summary>
+    /// <param name="queryRequest"></param>
+    /// <returns></returns>
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetOrganisations([FromQuery]QueryOrganisationsRequest queryRequest)
