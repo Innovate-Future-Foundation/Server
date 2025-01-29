@@ -12,8 +12,7 @@ public class QueryOrganisationsRequest{
 }
 public class QueryOrganisationsFilters
 {
-    public string? OrgName { get; set; }
+    public string? OrgNameOrEmail { get; set; }
     public StatusEnum? Status { get; set; } 
-    public string? Email { get; set; }
     public SubscriptionEnum? Subscription { get; set; }
 }

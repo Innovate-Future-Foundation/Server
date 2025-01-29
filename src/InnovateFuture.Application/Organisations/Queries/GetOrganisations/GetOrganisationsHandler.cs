@@ -29,8 +29,8 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, Pa
                 var filters = query.Filters;
                 // Build predicate based on query conditions
                 queryPredicate = o =>
-                    (string.IsNullOrEmpty(filters.Email) || o.Email.Contains(filters.Email)) &&
-                    (string.IsNullOrEmpty(filters.OrgName) || o.OrgName.Contains(filters.OrgName)) &&
+                    (string.IsNullOrEmpty(filters.OrgNameOrEmail) || o.OrgName.Contains(filters.OrgNameOrEmail) || 
+                     (!string.IsNullOrEmpty(o.Email) && o.Email!.Contains(filters.OrgNameOrEmail)) )&&
                     (!filters.Status.HasValue || o.Status == filters.Status);
             }
 
@@ -49,7 +49,7 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, Pa
             Data= data.ToArray(),
             Meta= new Meta
             {
-                PageSize=query.Limit,
+                Limit=query.Limit,
                 TotalItems=totalItems,
             }
         };
