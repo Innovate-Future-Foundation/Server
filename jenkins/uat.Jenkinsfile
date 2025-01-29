@@ -17,7 +17,7 @@ pipeline {
         DOCKER_NETWORK = "inff-network-backend"
         DATABASE_PORT = '5432'
         DATABASE_NAME = 'InnovateFuture'
-        DATABASE_CREDENTIALS = credentials('postgre_user')
+        DATABASE_CREDENTIALS = credentials('postgres_user')
         JWTConfig__SecretKey = 'MY_SECRET_KEY'
         ASPNETCORE_ENVIRONMENT = 'Development'
         
@@ -34,14 +34,6 @@ pipeline {
 
                     echo 'Setup Prerequisites...'
                     env.DATABASE_CONN = "Host=localhost;Port=5432;Database=${DATABASE_NAME};Username=${DATABASE_CREDENTIALS_USR};Password=${DATABASE_CREDENTIALS_PSW}"
-                }
-            }
-        }
-        stage('Checkout') {
-            steps {
-                script {
-                    echo '=== Checking out code from SCM ==='
-                    checkout()
                 }
             }
         }
