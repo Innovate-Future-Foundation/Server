@@ -8,5 +8,7 @@ public interface IOrgRepository
     Task<Organisation> GetByIdAsync(Guid id);
     Task AddAsync(Organisation organisation);
     Task UpdateAsync();
-    Task<IEnumerable<Organisation>> GetAnyAsync(Expression<Func<Organisation, bool>> predicate);
+
+    Task<(List<Organisation> data, int totalItems)> GetAnyAsync(
+        Expression<Func<Organisation, bool>>? predicate=null, int? limit = null, int offset=0, string? queryOrderBy=null);
 }

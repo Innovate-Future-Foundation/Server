@@ -1,3 +1,4 @@
+using InnovateFuture.Domain.Enums;
 using MediatR;
 
 namespace InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
@@ -9,5 +10,5 @@ public class CreateOrganisationCommand : IRequest<Guid>
     public string? WebsiteUrl { get; set; }
     public string? Address { get; set; }
     public string? Email { get; set; }
-    public string? Subscription { get; set; }
+    public SubscriptionEnum? Subscription { get; set; }
 }

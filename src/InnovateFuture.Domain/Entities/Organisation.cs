@@ -10,14 +10,14 @@ public class Organisation
     public string? WebsiteUrl { get; private set; }
     public string? Address { get; private set; }
     public string? Email { get; private set; }
-    public string? Subscription { get; private set; }
+    public SubscriptionEnum? Subscription { get; private set; }
     public StatusEnum Status { get; private set; }
     
     public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Organisation(){}
-    public Organisation(string orgName, Guid? orgId= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null, string? subscription=null)
+    public Organisation(string orgName, Guid? orgId= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null, SubscriptionEnum? subscription=null)
     {
         OrgId = orgId??Guid.NewGuid();
         OrgName = orgName;
@@ -31,15 +31,15 @@ public class Organisation
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, string? subscription, StatusEnum status)
+    public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, SubscriptionEnum? subscription, StatusEnum? status)
     {
         OrgName = string.IsNullOrWhiteSpace(orgName) ? OrgName : orgName;
         LogoUrl = string.IsNullOrWhiteSpace(logoUrl) ? LogoUrl : logoUrl;
         WebsiteUrl = string.IsNullOrWhiteSpace(websiteUrl) ? WebsiteUrl : websiteUrl;
         Address = string.IsNullOrWhiteSpace(address) ? Address : address;
         Email = string.IsNullOrWhiteSpace(email) ? Email : email;
-        Subscription = string.IsNullOrWhiteSpace(subscription) ? Subscription : subscription;
-        Status = status;
+        Subscription = subscription?? Subscription;
+        Status = status??Status;
         UpdatedAt = DateTime.UtcNow;
     }
 

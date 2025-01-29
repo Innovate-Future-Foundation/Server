@@ -37,15 +37,6 @@ public class UpdateOrganisationCommandValidator : AbstractValidator<UpdateOrgani
                 .Must(BeAValidUrl)
                 .WithMessage("Invalid website URL format.");
         });
-
-
-        // If subscription is provided, it must be either 'Subscribed' or 'Unsubscribed'
-        When(x => !string.IsNullOrEmpty(x.Subscription), () =>
-        {
-            RuleFor(x => x.Subscription)
-                .Must(sub => sub == "Subscribed" || sub == "Unsubscribed")
-                .WithMessage("Subscription must be either 'Subscribed' or 'Unsubscribed'.");
-        });
     }
 
     // Helper method to validate URL format

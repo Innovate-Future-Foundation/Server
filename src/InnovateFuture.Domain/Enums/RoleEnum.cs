@@ -4,6 +4,7 @@ public enum RoleEnum
 {
     PlatformAdmin,
     OrgAdmin,
+    OrgManager,
     OrgTeacher,
     Parent,
     Student
