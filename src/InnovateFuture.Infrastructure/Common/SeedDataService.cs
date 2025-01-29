@@ -19,6 +19,7 @@ public class SeedDataService:ISeedDataService
     private static readonly Guid _role03Id = Guid.Parse("3b69fda3-555a-4658-a6ab-31e1f327ef79");
     private static readonly Guid _role04Id = Guid.Parse("32ef6536-3cb1-4846-bd32-cd34b489fd43");
     private static readonly Guid _role05Id = Guid.Parse("28c99a2a-e593-4353-8dc2-cb83fc1ebfea");
+    private static readonly Guid _role06Id = Guid.Parse("64fe5f03-b1c4-4b44-9894-a89f5772a751");
     
     private static readonly Guid _org01Id = Guid.Parse("d96e643e-a7aa-42b0-a8cd-1cdd8610e857");
     private static readonly Guid _org02Id = Guid.Parse("0aecbf37-ead3-470c-ad8b-790d7eea3b0a");
@@ -33,10 +34,11 @@ public class SeedDataService:ISeedDataService
     private static Role[] GetRoles() =>
     [
         new Role("Platform Admin", RoleEnum.PlatformAdmin, _role01Id, "Responsible for managing the entire platform, including..."),
-        new Role("Organisation Admin", RoleEnum.OrgAdmin, _role02Id, "Oversees organisational-level operations, including..."),
-        new Role("Organisation Teacher", RoleEnum.OrgTeacher, _role03Id, "Handles teaching-related responsibilities within the organisation, such as..."),
-        new Role("Parent", RoleEnum.Parent, _role04Id, "Allows monitoring of a child’s progress..."),
-        new Role("Student", RoleEnum.Student, _role05Id, "Access to tour details...")
+        new Role("Organisation Admin", RoleEnum.OrgAdmin, _role02Id, "Oversees organisational-level operations, including inviting managers..."),
+        new Role("Organisation Manager", RoleEnum.OrgManager, _role03Id, "Oversees organisational-level operations, including..."),
+        new Role("Organisation Teacher", RoleEnum.OrgTeacher, _role04Id, "Handles teaching-related responsibilities within the organisation, such as..."),
+        new Role("Parent", RoleEnum.Parent, _role05Id, "Allows monitoring of a child’s progress..."),
+        new Role("Student", RoleEnum.Student, _role06Id, "Access to tour details...")
     ];
 
     // Seed organisations
