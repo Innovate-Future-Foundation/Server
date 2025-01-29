@@ -39,9 +39,9 @@ public class OrgRepository:IOrgRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<(List<Organisation> data, int totalItems, int? totalPages)> GetAnyAsync(Expression<Func<Organisation, bool>>? predicate=null, int? limit = null, int offset=0,string? queryOrderBy=null)
+    public async Task<(List<Organisation> data, int totalItems)> GetAnyAsync(Expression<Func<Organisation, bool>>? predicate=null, int? limit = null, int offset=0,string? queryOrderBy=null)
     {
-        IQueryable<Organisation> query =_dbContext.Organisations;
+        IQueryable<Organisation> query = _dbContext.Organisations;
         if (predicate != null)
         {
             query = query.Where(predicate);
@@ -49,8 +49,6 @@ public class OrgRepository:IOrgRepository
         
         int totalItems = await query.CountAsync();
         
-        int? totalPages = limit.HasValue?(int)Math.Ceiling(totalItems / (double)limit.Value):null;
-
         if (!string.IsNullOrEmpty(queryOrderBy))
         {
             query = query.OrderBy(queryOrderBy);
@@ -59,6 +57,6 @@ public class OrgRepository:IOrgRepository
         var organisations = await query.Skip(offset)
             .Take(limit ?? totalItems).ToListAsync();
         
-        return (organisations, totalItems, totalPages);
+        return (organisations, totalItems);
     }
 }

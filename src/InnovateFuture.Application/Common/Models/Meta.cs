@@ -7,9 +7,6 @@ public class Meta
     // Common fields
     public int PageSize { get; set; }
     public int TotalItems { get; set; }
-    // Offset-based pagination
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public int? TotalPages { get; set; }
     // Cursor-based pagination
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? NextCursor { get; set; }

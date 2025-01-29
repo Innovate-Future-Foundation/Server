@@ -74,9 +74,8 @@ public class OrganisationsController : ControllerBase
     {
         var query = _mapper.Map<GetOrganisationsQuery>(queryRequest);
         var paginatedOrganisations = await _mediator.Send(query);
-        var response = _mapper.Map<GetOrganisationResponse[]>(paginatedOrganisations.Data);
-        
-        return Ok(new PaginatedResult<GetOrganisationResponse>(){Data=response,Meta=paginatedOrganisations.Meta});
+        var response = _mapper.Map<PaginatedResult<GetOrganisationResponse>>(paginatedOrganisations);
+        return Ok(response);
     }
 
     /// <summary>

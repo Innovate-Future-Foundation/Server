@@ -29,8 +29,8 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, Pa
                 var filters = query.Filters;
                 // Build predicate based on query conditions
                 queryPredicate = o =>
-                    (string.IsNullOrEmpty(filters.Email) || o.Email == filters.Email) &&
-                    (string.IsNullOrEmpty(filters.OrgName) || o.OrgName == filters.OrgName) &&
+                    (string.IsNullOrEmpty(filters.Email) || o.Email.Contains(filters.Email)) &&
+                    (string.IsNullOrEmpty(filters.OrgName) || o.OrgName.Contains(filters.OrgName)) &&
                     (!filters.Status.HasValue || o.Status == filters.Status);
             }
 
@@ -42,8 +42,7 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, Pa
             }
         }
         
-        var (data,totalItems,totalPages) = await _orgRepository.GetAnyAsync(queryPredicate,query.Limit,query.Offset??0,queryOrderBy);
-
+        var (data,totalItems) = await _orgRepository.GetAnyAsync(queryPredicate,query.Limit,query.Offset??0,queryOrderBy);
         
         return new PaginatedResult<Organisation>
         {
@@ -52,7 +51,6 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, Pa
             {
                 PageSize=query.Limit,
                 TotalItems=totalItems,
-                TotalPages=totalPages
             }
         };
     }

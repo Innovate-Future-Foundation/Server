@@ -12,6 +12,6 @@ public class UpdateOrganisationCommand : IRequest<Organisation>
     public string? WebsiteUrl { get; set; }
     public string? Address { get; set; }
     public string? Email { get; set; }
-    public string? Subscription { get; set; }
+    public SubscriptionEnum? Subscription { get; set; }
     public StatusEnum Status { get; set; }
 }

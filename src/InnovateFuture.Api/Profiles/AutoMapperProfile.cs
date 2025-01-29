@@ -2,6 +2,7 @@ using InnovateFuture.Api.Controllers.ProfilesController;
 using InnovateFuture.Api.Controllers.RolesController;
 using InnovateFuture.Api.Controllers.UsersController;
 using InnovateFuture.Api.Controllers.OrganisationsController;
+using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Roles.Queries.GetRoles;
 using InnovateFuture.Application.Users.Commands.CreateUser;
@@ -37,15 +38,20 @@ public class AutoMapperProfile: Profile
         CreateMap<Role,GetRoleResponse>();
 
         CreateMap<CreateOrganisationRequest, CreateOrganisationCommand>();
-    
-        CreateMap<Organisation, GetOrganisationResponse>();
+
+        CreateMap<Organisation, GetOrganisationResponse>()
+            .ForMember(des => des.Subscription,
+                opt => opt.MapFrom(src => src.Subscription.HasValue ? src.Subscription.Value.ToString() : null))
+            .ForMember(des => des.Status,
+                opt => opt.MapFrom(src => src.Status.ToString()));
         
         CreateMap<QueryOrganisationsRequest, GetOrganisationsQuery>();
+
+        CreateMap<PaginatedResult<Organisation>,PaginatedResult<GetOrganisationResponse>>();
         
         CreateMap<InnovateFuture.Api.Controllers.OrganisationsController.QueryOrganisationsFilters,
             QueryOrganisationsFilters>();
 
         CreateMap<UpdateOrganisationRequest, UpdateOrganisationCommand>();
-        
     }
 }

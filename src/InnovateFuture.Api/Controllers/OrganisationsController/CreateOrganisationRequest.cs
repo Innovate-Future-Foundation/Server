@@ -1,3 +1,5 @@
+using InnovateFuture.Domain.Enums;
+
 namespace InnovateFuture.Api.Controllers.OrganisationsController;
 
 public class CreateOrganisationRequest
@@ -7,5 +9,5 @@ public class CreateOrganisationRequest
     public string? WebsiteUrl { get;  set; }
     public string? Address { get;  set; }
     public string? Email { get;  set; }
-    public string? Subscription { get;  set; }
+    public SubscriptionEnum? Subscription { get;  set; }
 }

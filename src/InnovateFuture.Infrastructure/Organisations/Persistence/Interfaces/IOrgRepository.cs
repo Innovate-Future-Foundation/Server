@@ -9,6 +9,6 @@ public interface IOrgRepository
     Task AddAsync(Organisation organisation);
     Task UpdateAsync();
 
-    Task<(List<Organisation> data, int totalItems, int? totalPages)> GetAnyAsync(
+    Task<(List<Organisation> data, int totalItems)> GetAnyAsync(
         Expression<Func<Organisation, bool>>? predicate=null, int? limit = null, int offset=0, string? queryOrderBy=null);
 }
