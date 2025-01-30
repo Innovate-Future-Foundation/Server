@@ -29,9 +29,6 @@ pipeline {
         stage ('Prepare') {
             steps {
                 script {
-                    echo 'Clean Workspace...'
-                    cleanWs()
-
                     echo 'Setup Prerequisites...'
                     env.DATABASE_CONN = "Host=localhost;Port=5432;Database=${DATABASE_NAME};Username=${DATABASE_CREDENTIALS_USR};Password=${DATABASE_CREDENTIALS_PSW}"
                 }
@@ -95,6 +92,8 @@ pipeline {
     post {
         always {
             echo "Pipeline finished at ${nowTimesamp}"
+            echo 'Clean Workspace...'
+            cleanWs()
         }
     }
 }
