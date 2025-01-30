@@ -8,7 +8,7 @@ pipeline {
     environment {
         CODE_REPO_URL = 'https://github.com/Innovate-Future-Foundation/Server'
         BRANCH_NAME = 'devops/uat'
-        BASE_DIRECTORY = './jenkins'
+        BASE_DIRECTORY = './'
         AWS_CONFIGURE_REGION = 'ap-southeast-2'
         ECR_URL = '058264518385.dkr.ecr.ap-southeast-2.amazonaws.com'
         BACKEND_API_ECR_REPO = 'inff/backend-api'
