@@ -82,9 +82,8 @@ pipeline {
                     // sh "docker tag inff-api-test:latest ${ECR_URL}/${API_TEST_ECR_REPO}:${env.CURRENT_TAG}"
 
                     echo "Push image to ECR"
-                    sh "docker push ${ECR_URL}/${API_BUILD_ECR_REPO}:${env.CURRENT_TAG}"
-                    sh "docker push ${ECR_URL}/${API_ECR_REPO}:${env.CURRENT_TAG}"
-                    // sh "docker push ${ECR_URL}/${API_TEST_ECR_REPO}:${env.CURRENT_TAG}"
+                    sh "docker push ${ECR_URL}/${BACKEND_BUILD_ECR_REPO}:${env.CURRENT_TAG}"
+                    sh "docker push ${ECR_URL}/${BACKEND_API_ECR_REPO}:${env.CURRENT_TAG}"
                 }
             }
         }
