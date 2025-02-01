@@ -5,11 +5,10 @@ using InnovateFuture.Domain.Entities;
 
 namespace InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 
-public class  GetOrganisationsQuery : IRequest<PaginatedResult<Organisation>>
+public class  GetOrganisationsQuery : IRequest<(List<Organisation> data, int totalItems)>
 {
     public QueryOrganisationsFilters? Filters { get; set; }
-    public string? OrderBy { get; set; }
-    public bool? IsAscending { get; set; }
+    public Sorting[]? Sortings { get; set; }
     public int? Offset { get; set; }
     public int Limit { get; set; }
 }

@@ -12,6 +12,7 @@ using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Domain.Enums;
 using Profile = AutoMapper.Profile;
 using QueryOrganisationsFilters = InnovateFuture.Application.Organisations.Queries.GetOrganisations.QueryOrganisationsFilters;
 
@@ -38,20 +39,18 @@ public class AutoMapperProfile: Profile
         CreateMap<Role,GetRoleResponse>();
 
         CreateMap<CreateOrganisationRequest, CreateOrganisationCommand>();
-
-        CreateMap<Organisation, GetOrganisationResponse>()
-            .ForMember(des => des.Subscription,
-                opt => opt.MapFrom(src => src.Subscription.HasValue ? src.Subscription.Value.ToString() : null))
-            .ForMember(des => des.Status,
-                opt => opt.MapFrom(src => src.Status.ToString()));
         
         CreateMap<QueryOrganisationsRequest, GetOrganisationsQuery>();
-
-        CreateMap<PaginatedResult<Organisation>,PaginatedResult<GetOrganisationResponse>>();
         
         CreateMap<InnovateFuture.Api.Controllers.OrganisationsController.QueryOrganisationsFilters,
-            QueryOrganisationsFilters>();
+                QueryOrganisationsFilters>();
 
+        CreateMap<Organisation, GetOrganisationsData>();
+
+        CreateMap<(List<Organisation> data, int totalItems), GetOrganisationResponse>()
+            .ForMember(desc=>desc.Data, opt=>opt.MapFrom(src=>src.data))
+            .ForMember(desc=>desc.Meta,opt=>opt.MapFrom(src=>new Meta(){TotalItems = src.totalItems}));
+        
         CreateMap<UpdateOrganisationRequest, UpdateOrganisationCommand>();
     }
 }

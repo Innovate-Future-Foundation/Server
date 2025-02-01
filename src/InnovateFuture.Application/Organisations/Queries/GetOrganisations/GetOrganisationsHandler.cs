@@ -6,7 +6,7 @@ using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 
 namespace InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 
-public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, PaginatedResult<Organisation>>
+public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, (List<Organisation> data, int totalItems)>
 {
     private readonly IOrgRepository _orgRepository;
 
@@ -15,7 +15,7 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, Pa
         _orgRepository = orgRepository;
     }
 
-    public async Task<PaginatedResult<Organisation>> Handle(GetOrganisationsQuery query, CancellationToken cancellationToken)
+    public async Task<(List<Organisation> data, int totalItems)> Handle(GetOrganisationsQuery query, CancellationToken cancellationToken)
     {
         Expression<Func<Organisation, bool>>? queryPredicate=null;
         string? queryOrderBy=null;
@@ -31,27 +31,24 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, Pa
                 queryPredicate = o =>
                     (string.IsNullOrEmpty(filters.OrgNameOrEmail) || o.OrgName.Contains(filters.OrgNameOrEmail) || 
                      (!string.IsNullOrEmpty(o.Email) && o.Email!.Contains(filters.OrgNameOrEmail)) )&&
-                    (!filters.Status.HasValue || o.Status == filters.Status);
+                    (!filters.Status.HasValue || o.Status == filters.Status)&&
+                    (!filters.Subscription.HasValue || o.Subscription == filters.Subscription)
+                    ;
             }
 
-            if (!string.IsNullOrEmpty(query.OrderBy))
+            if (query.Sortings!=null || query.Sortings!.Any())
             {
-                string orderBy = query.OrderBy;
-                string direction = query.IsAscending != null ? (query.IsAscending.Value ? "asc" : "desc") : "";
-                queryOrderBy = $"{orderBy} {direction}";
+                foreach (var sorting in query.Sortings!)
+                {
+                    string orderBy = sorting.OrderBy;
+                    string direction = sorting.IsAscending ? "asc" : "desc";
+                    queryOrderBy += string.IsNullOrEmpty(queryOrderBy)?$"{orderBy} {direction}":$", {orderBy} {direction}";
+                }
             }
         }
         
         var (data,totalItems) = await _orgRepository.GetAnyAsync(queryPredicate,query.Limit,query.Offset??0,queryOrderBy);
-        
-        return new PaginatedResult<Organisation>
-        {
-            Data= data.ToArray(),
-            Meta= new Meta
-            {
-                Limit=query.Limit,
-                TotalItems=totalItems,
-            }
-        };
+
+        return (data, totalItems);
     }
 }
