@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using InnovateFuture.Application.Common.Models;
 using MediatR;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
