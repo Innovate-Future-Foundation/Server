@@ -21,7 +21,7 @@ public class OrganisationConfig : IEntityTypeConfiguration<Organisation>
         builder.Property(o => o.WebsiteUrl).HasColumnName("website_url").HasMaxLength(500);
         builder.Property(o => o.Address).HasColumnName("address").HasMaxLength(255);
         builder.Property(o => o.Email).HasColumnName("email").HasMaxLength(100);
-        builder.Property(o => o.Subscription).HasColumnName("subscription").HasMaxLength(50);
+        builder.Property(o => o.Subscription).HasColumnType("smallint").HasColumnName("subscription");
         builder.Property(o => o.Status).HasColumnType("smallint").HasColumnName("status").IsRequired();
         builder.Property(o => o.CreatedAt).HasColumnType("timestamptz").HasColumnName("created_at").IsRequired();
         builder.Property(o => o.UpdatedAt).HasColumnType("timestamptz").HasColumnName("updated_at").IsRequired();

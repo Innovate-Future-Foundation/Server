@@ -18,7 +18,8 @@ public class CommonResultFilter:IResultFilter
                 object? meta = null;
                 var resultType = resultValue.GetType();
                 
-                if ( resultType.IsGenericType&&resultType.GetGenericTypeDefinition() == typeof(PaginatedResult<>))
+                if (resultType.GetInterfaces()
+                    .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IPaginatedResult<>)))
                 {
                     // Extract Data and MetaData from PaginatedResult<>
                     data = resultType.GetProperty("Data")?.GetValue(resultValue);

@@ -23,6 +23,15 @@ public class SeedDataService:ISeedDataService
     
     private static readonly Guid _org01Id = Guid.Parse("d96e643e-a7aa-42b0-a8cd-1cdd8610e857");
     private static readonly Guid _org02Id = Guid.Parse("0aecbf37-ead3-470c-ad8b-790d7eea3b0a");
+    private static readonly Guid _org03Id = Guid.Parse("b8fff326-d13b-4ade-9822-e9ee8da23129");
+    private static readonly Guid _org04Id = Guid.Parse("806b2ff3-76b4-4139-a417-f63d6b8c04b2");
+    private static readonly Guid _org05Id = Guid.Parse("53700e74-4fd1-4aa2-9a6c-83eefd806efb");
+    private static readonly Guid _org06Id = Guid.Parse("6a4f721b-f71c-4cc4-9b14-8777ffbe0e55");
+    private static readonly Guid _org07Id = Guid.Parse("e2041d02-eeb0-4fa7-b5b4-f313af5d495b");
+    private static readonly Guid _org08Id = Guid.Parse("a8b91013-2f9a-4c2c-9806-6e4a8a2e7875");
+    private static readonly Guid _org09Id = Guid.Parse("5c12a964-b4d2-46a7-bc50-480bd85fde40");
+    private static readonly Guid _org10Id = Guid.Parse("c3ff657e-2770-4963-b49f-cf4d2bf393b0");
+    
     
     private static readonly Guid _user01Id = Guid.Parse("725f77b0-258a-4a92-827a-f5c4adfcba49");
     private static readonly Guid _profile01Id = Guid.Parse("4d69456b-9b86-43b9-b8f7-09a88062eb6b");
@@ -44,8 +53,16 @@ public class SeedDataService:ISeedDataService
     // Seed organisations
     private static Organisation[] GetOrganisations() =>
     [
-        new Organisation("org_name_01_test", _org01Id),
-        new Organisation("org_name_02_test", _org02Id)
+        new Organisation("org_name_01_test", _org01Id,null,null,null,"org_01_test@test.com",SubscriptionEnum.basic),
+        new Organisation("org_name_02_test", _org02Id,null,null,null,"org_02_test@test.com",SubscriptionEnum.premium),
+        new Organisation("org_name_03_test", _org03Id,null,null,null,"org_03_test@test.com",SubscriptionEnum.free),
+        new Organisation("org_name_04_test", _org04Id,null,null,null,"org_04_test@test.com",SubscriptionEnum.basic),
+        new Organisation("org_name_05_test", _org05Id,null,null,null,"org_05_test@test.com",SubscriptionEnum.basic),
+        new Organisation("org_f_name_06_test", _org06Id,null,null,null,"org_q_06_test@test.com",SubscriptionEnum.premium),
+        new Organisation("org_f_name_07_test", _org07Id,null,null,null,"org_q_07_test@test.com",SubscriptionEnum.basic),
+        new Organisation("org_f_name_08_test", _org08Id,null,null,null,"org_q_08_test@test.com",SubscriptionEnum.free),
+        new Organisation("org_f_name_09_test", _org09Id,null,null,null,"org_q_09_test@test.com",SubscriptionEnum.basic),
+        new Organisation("org_f_name_10_test", _org10Id,null,null,null,"org_q_10_test@test.com",SubscriptionEnum.free),
     ];
 
     // Seed users

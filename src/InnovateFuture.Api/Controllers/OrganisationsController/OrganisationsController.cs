@@ -73,8 +73,8 @@ public class OrganisationsController : ControllerBase
     public async Task<IActionResult> GetOrganisations([FromQuery]QueryOrganisationsRequest queryRequest)
     {
         var query = _mapper.Map<GetOrganisationsQuery>(queryRequest);
-        var paginatedOrganisations = await _mediator.Send(query);
-        var response = _mapper.Map<PaginatedResult<GetOrganisationResponse>>(paginatedOrganisations);
+        var organisationsResponse = await _mediator.Send(query);
+        var response = _mapper.Map<GetOrganisationResponse>(organisationsResponse);
         return Ok(response);
     }
 

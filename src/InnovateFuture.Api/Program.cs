@@ -43,7 +43,7 @@ namespace InnovateFuture.Api
         public static void Main(string[] args) 
         {
             var logger = LogManager.Setup().LoadConfigurationFromFile("nLog.config").GetCurrentClassLogger();
-            var policyName = "defalutPolicy";
+            var policyName = "AllowLocalhost";
             
             var builder = WebApplication.CreateBuilder(args);
             
@@ -174,6 +174,17 @@ namespace InnovateFuture.Api
             builder.Host.UseNLog();
             #endregion
 
+            builder.Services.AddCors(option =>
+            {
+                option.AddPolicy(policyName, policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                });
+            });
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -181,17 +192,6 @@ namespace InnovateFuture.Api
             {
                 app.UseSwaggerEXT();
                 app.Services.SeedDataEXT();
-            }else
-            {
-                builder.Services.AddCors(option =>
-                {
-                    option.AddPolicy(policyName, policy =>
-                    {
-                        policy.WithOrigins("https://your-frontend-domain.com")
-                            .AllowAnyMethod()
-                            .AllowAnyHeader();
-                    });
-                });
             }
             
             app.UseMiddleware<GlobalExceptionMiddleware>();
@@ -200,6 +200,8 @@ namespace InnovateFuture.Api
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
+            
+            app.UseCors(policyName);
             
             app.UseAuthentication();
 

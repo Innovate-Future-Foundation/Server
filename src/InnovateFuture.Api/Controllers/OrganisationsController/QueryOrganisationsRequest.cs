@@ -1,12 +1,12 @@
+using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Domain.Enums;
     
 namespace InnovateFuture.Api.Controllers.OrganisationsController;
 
 
-public class QueryOrganisationsRequest{
+public class QueryOrganisationsRequest :IPaginatedRequest<QueryOrganisationsFilters> {
     public QueryOrganisationsFilters? Filters { get; set; }
-    public string? OrderBy { get; set; }
-    public bool? IsAscending { get; set; }
+    public Sorting[]? Sortings { get; set; }
     public int? Offset { get; set; }
     public int Limit { get; set; }
 }
