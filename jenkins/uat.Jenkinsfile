@@ -98,13 +98,13 @@ pipeline {
                             def updatedTaskDef = readJSON(text: currentTaskDef)
                             updatedTaskDef.containerDefinitions.each { container ->
                                 if (container.name == "api") {
-                                    container.image = "${env.ECR_URL}/${BACKEND_API_ECR_REPO}:${env.CURRENT_TAG}"
+                                    container.image = "${env.ECR_URL}/${BACKEND_API_ECR_REPO}:${env.CURRENT_TAG}" as String
                                 } else if (container.name == "migration") {
-                                    container.image = "${env.ECR_URL}/${BACKEND_BUILD_ECR_REPO}:${env.CURRENT_TAG}"
+                                    container.image = "${env.ECR_URL}/${BACKEND_BUILD_ECR_REPO}:${env.CURRENT_TAG}" as String
                                 }
                             }
 
-                            def fieldsToRemove = [
+                            [
                                 'taskDefinitionArn',
                                 'revision',
                                 'status',
@@ -112,8 +112,7 @@ pipeline {
                                 'compatibilities',
                                 'registeredAt',
                                 'registeredBy'
-                            ]
-                            fieldsToRemove.each { field -> updatedTaskDef.remove(field) }
+                            ].each { updatedTaskDef.remove(it) }
 
                             def cleanedJson = JsonOutput.toJson(updatedTaskDef)
                             writeFile(file: 'new-task-definition.json', text: cleanedJson)
@@ -143,6 +142,7 @@ pipeline {
                             """
                         } catch (Exception ex) {
                             error "Deployment failed: ${ex.getMessage()}"
+                            echo "Final JSON:\n${cleanedJson}"
                             // other error handlings
                         }
                     }
