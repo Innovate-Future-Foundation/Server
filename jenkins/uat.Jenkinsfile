@@ -106,7 +106,7 @@ pipeline {
                             
                             echo "- Creating New Task Definition with updatedTaskDef"
                             def newTaskDef = sh(
-                                script: "aws ecs register-task-definition --cli-input-json '${JSONSerializer.toString(updatedTaskDef)}'",
+                                script: "aws ecs register-task-definition --cli-input-json '${JsonOutput.toJson(updatedTaskDef)}'",
                                 returnStdout: true
                             ).trim()
                             
@@ -129,10 +129,8 @@ pipeline {
                                 --cluster inff-uat-cluster \
                                 --services inff-uat-backend-srv
                             """
-                            
                         } catch (Exception ex) {
                             error "Deployment failed: ${ex.getMessage()}"
-                            // Add automatic rollback logic here if needed
                         }
                     }
                 }
