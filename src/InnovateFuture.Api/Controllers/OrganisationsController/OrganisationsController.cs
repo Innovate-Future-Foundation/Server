@@ -47,7 +47,7 @@ public class OrganisationsController : ControllerBase
     /// <returns>The organisation information.</returns>
     [AllowAnonymous]
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(GetOrganisationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetOrganisationsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetOrganisation(Guid id)
     {
@@ -59,7 +59,7 @@ public class OrganisationsController : ControllerBase
             return NotFound();
         }
 
-        var response = _mapper.Map<GetOrganisationResponse>(organisation);
+        var response = _mapper.Map<GetOrganisationsResponse>(organisation);
         return Ok(response);
     }
 
@@ -74,7 +74,7 @@ public class OrganisationsController : ControllerBase
     {
         var query = _mapper.Map<GetOrganisationsQuery>(queryRequest);
         var organisationsResponse = await _mediator.Send(query);
-        var response = _mapper.Map<GetOrganisationResponse>(organisationsResponse);
+        var response = _mapper.Map<GetOrganisationPaginatedResponse>(organisationsResponse);
         return Ok(response);
     }
 
@@ -86,7 +86,7 @@ public class OrganisationsController : ControllerBase
     /// <returns>The updated organisation information.</returns>
     [AllowAnonymous]
     [HttpPut("{id}")]
-    [ProducesResponseType(typeof(GetOrganisationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetOrganisationsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateOrganisation(Guid id, [FromBody] UpdateOrganisationRequest request)
     {
@@ -94,7 +94,7 @@ public class OrganisationsController : ControllerBase
         command.OrgId = id;
         
         var organisation = await _mediator.Send(command);
-        var response = _mapper.Map<GetOrganisationResponse>(organisation);
+        var response = _mapper.Map<GetOrganisationsResponse>(organisation);
         return Ok(response);
     }
 }

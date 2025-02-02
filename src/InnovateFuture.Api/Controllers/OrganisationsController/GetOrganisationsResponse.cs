@@ -3,13 +3,13 @@ using InnovateFuture.Domain.Enums;
 
 namespace InnovateFuture.Api.Controllers.OrganisationsController;
 
-public class GetOrganisationResponse:IPaginatedResult<GetOrganisationsData>
+public class GetOrganisationPaginatedResponse:IPaginatedResult<GetOrganisationsResponse>
 {
-    public GetOrganisationsData[] Data { get; set; }
+    public GetOrganisationsResponse[] Data { get; set; }
     public Meta Meta { get; set; }
 }
 
-public class GetOrganisationsData
+public class GetOrganisationsResponse
 {
     public Guid OrgId { get;  set; }
     public string OrgName { get; set; }

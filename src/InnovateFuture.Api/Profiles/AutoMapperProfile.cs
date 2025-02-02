@@ -44,9 +44,9 @@ public class AutoMapperProfile: Profile
         CreateMap<InnovateFuture.Api.Controllers.OrganisationsController.QueryOrganisationsFilters,
                 QueryOrganisationsFilters>();
 
-        CreateMap<Organisation, GetOrganisationsData>();
+        CreateMap<Organisation, GetOrganisationsResponse>();
 
-        CreateMap<(List<Organisation> data, int totalItems), GetOrganisationResponse>()
+        CreateMap<(List<Organisation> data, int totalItems), GetOrganisationPaginatedResponse>()
             .ForMember(desc=>desc.Data, opt=>opt.MapFrom(src=>src.data))
             .ForMember(desc=>desc.Meta,opt=>opt.MapFrom(src=>new Meta(){TotalItems = src.totalItems}));
         
