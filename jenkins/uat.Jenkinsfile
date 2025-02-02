@@ -103,16 +103,29 @@ pipeline {
                                     container.image = "${env.ECR_URL}/${BACKEND_BUILD_ECR_REPO}:${env.CURRENT_TAG}"
                                 }
                             }
+
+                            def fieldsToRemove = [
+                                'taskDefinitionArn',
+                                'revision',
+                                'status',
+                                'requiresAttributes',
+                                'compatibilities',
+                                'registeredAt',
+                                'registeredBy'
+                            ]
+                            fieldsToRemove.each { field -> updatedTaskDef.remove(field) }
+
+                            def cleanedJson = JsonOutput.toJson(updatedTaskDef)
+                            writeFile(file: 'new-task-definition.json', text: cleanedJson)
                             
-                            echo "- Creating New Task Definition with updatedTaskDef"
+                            echo "- Creating New Task Definition"
                             def newTaskDef = sh(
-                                script: "aws ecs register-task-definition --cli-input-json '${JsonOutput.toJson(updatedTaskDef)}'",
+                                script: "aws ecs register-task-definition --cli-input-json file://new-task-definition.json",
                                 returnStdout: true
                             ).trim()
                             
                             def newTaskDefArn = readJSON(text: newTaskDef).taskDefinition.taskDefinitionArn
                             
-                            // Update ECS service
                             echo "- Updating ECS service with new task definition"
                             sh """
                                 aws ecs update-service \
@@ -122,8 +135,7 @@ pipeline {
                                 --force-new-deployment
                             """
                             
-                            // Wait for service stabilization
-                            echo "Waiting for service stabilization..."
+                            echo "- Waiting for service stabilization"
                             sh """
                                 aws ecs wait services-stable \
                                 --cluster inff-uat-cluster \
@@ -131,6 +143,7 @@ pipeline {
                             """
                         } catch (Exception ex) {
                             error "Deployment failed: ${ex.getMessage()}"
+                            // other error handlings
                         }
                     }
                 }
@@ -146,6 +159,7 @@ pipeline {
         failure {
             echo "!!! Deployment failed  #${env.CURRENT_TAG}!!!"
             // todo rollback
+            // todo notification
         }
         always {
             echo "Pipeline finished at ${nowTimesamp}"
