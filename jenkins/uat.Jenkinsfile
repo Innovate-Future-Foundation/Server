@@ -40,7 +40,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    echo "=== Start Building Image #${currentBuild.number} ==="
+                    echo "=== Start Building Image #${env.CURRENT_TAG} ==="
                     echo "- Build Base Image"
                     sh ("""
                         docker build -f Dockerfile.base \
@@ -54,14 +54,14 @@ pipeline {
                         -t inff-api .
                     """)
 
-                    echo "=== Complete Building #${currentBuild.number} ==="
+                    echo "=== Complete Building #${env.CURRENT_TAG} ==="
                 }
             }
         }
         stage('Push Backend Image') {
             steps {
                 script {
-                    echo "=== Start Pushing Image ==="
+                    echo "=== Start Pushing Image #${env.CURRENT_TAG} ==="
                     echo "- Login to ECR ${ECR_URL}"
                     withAWS(credentials: 'uat_ci_access_key', region: env.AWS_CONFIGURE_REGION) {
                         sh "aws ecr get-login-password --region ${AWS_CONFIGURE_REGION} | docker login --username AWS --password-stdin ${ECR_URL}"
@@ -76,7 +76,7 @@ pipeline {
                     echo "- Push image ${BACKEND_API_ECR_REPO} to ECR"
                     sh "docker push ${ECR_URL}/${BACKEND_API_ECR_REPO}:${env.CURRENT_TAG}"
 
-                    echo "=== Complete Pushing Image ==="
+                    echo "=== Complete Pushing Image #${env.CURRENT_TAG} ==="
                 }
             }
         }
@@ -140,11 +140,11 @@ pipeline {
 
     post {
         success {
-            echo "*** Deployment completed successfully ***"
+            echo "*** Deployment completed successfully #${env.CURRENT_TAG} ***"
             // todo notification
         }
         failure {
-            echo "!!! Deployment failed !!!"
+            echo "!!! Deployment failed  #${env.CURRENT_TAG}!!!"
             // todo rollback
         }
         always {
