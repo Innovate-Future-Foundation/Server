@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 
+
 namespace InnovateFuture.Api.Controllers.ProfilesController;
 
 [ApiExplorerSettings(IgnoreApi = false, GroupName = nameof(ApiVersion.V1))]
@@ -66,7 +67,24 @@ public class ProfilesController : ControllerBase
     {
         var query = _mapper.Map<GetProfilesQuery>(request);
         var paginatedProfiles = await _mediator.Send(query);
-        var response = _mapper.Map<PaginatedResult<GetProfileResponse>>(paginatedProfiles);
+        var response = _mapper.Map<GetProfilePaginatedResponse>(paginatedProfiles);
         return Ok(response);
     }
+
+    /// <summary>
+    /// Retrieves a list of Profiles with details based on the specified query parameters.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet("profiles-details")]
+    public async Task<IActionResult> GetProfilesWithDetails([FromQuery]QueryProfilesRequest request)
+
+    {
+        var query = _mapper.Map<GetProfilesQuery>(request);
+        var paginatedProfiles = await _mediator.Send(query);
+        var response = _mapper.Map<GetProfileWithDetailsPaginatedResponse>(paginatedProfiles);
+        return Ok(response);
+    }
+
 }

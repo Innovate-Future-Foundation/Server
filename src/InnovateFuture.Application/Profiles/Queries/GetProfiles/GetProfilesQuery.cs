@@ -4,11 +4,10 @@ using MediatR;
 
 namespace InnovateFuture.Application.Profiles.Queries.GetProfiles;
 
-public class GetProfilesQuery : IRequest<PaginatedResult<Profile>>
+public class GetProfilesQuery : IRequest<(List<Profile> data, int totalItems)>
 {
     public QueryProfileFilters? Filters { get; set; }
-    public string? OrderBy { get; set; }
-    public bool? IsAscending { get; set; }
+    public Sorting[]? Sortings { get; set; }
     public int? Offset { get; set; }
     public int Limit { get; set; }
 }

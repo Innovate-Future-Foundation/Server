@@ -6,7 +6,7 @@ using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 
 namespace InnovateFuture.Application.Profiles.Queries.GetProfiles;
 
-public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, PaginatedResult<Profile>>
+public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profile> data, int totalItems)>
 {
     private readonly IProfileRepository _profileRepository;
 
@@ -15,7 +15,7 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, PaginatedRes
         _profileRepository = profileRepository;
     }
 
-    public async Task<PaginatedResult<Profile>> Handle(GetProfilesQuery query, CancellationToken cancellationToken)
+    public async Task<(List<Profile> data, int totalItems)> Handle(GetProfilesQuery query, CancellationToken cancellationToken)
     {
         Expression<Func<Profile, bool>>? queryPredicate = null;
         string? queryOrderBy = null;
@@ -35,24 +35,19 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, PaginatedRes
                     (!filters.IsActive.HasValue || p.IsActive == filters.IsActive);
             }
 
-            if (!string.IsNullOrEmpty(query.OrderBy))
+            if (query.Sortings != null && query.Sortings.Any())
             {
-                string orderBy = query.OrderBy;
-                string direction = query.IsAscending != null ? (query.IsAscending.Value ? "asc" : "desc") : "";
-                queryOrderBy = $"{orderBy} {direction}";
+                foreach (var sorting in query.Sortings)
+                {
+                    string orderBy = sorting.OrderBy;
+                    string direction = sorting.IsAscending ? "asc" : "desc";
+                    queryOrderBy += string.IsNullOrEmpty(queryOrderBy) ? $"{orderBy} {direction}" : $", {orderBy} {direction}";
+                }
             }
         }
         
         var (data, totalItems) = await _profileRepository.GetPagedAsync(queryPredicate, query.Limit, query.Offset ?? 0, queryOrderBy);
         
-        return new PaginatedResult<Profile>
-        {
-            Data = data.ToArray(),
-            Meta = new Meta
-            {
-                Limit = query.Limit,
-                TotalItems = totalItems,
-            }
-        };
+        return (data, totalItems);
     }
 }

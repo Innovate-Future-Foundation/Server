@@ -24,10 +24,11 @@ public class UserRepository:IUserRepository
             .Include(u => u.Profiles)
             .ThenInclude(p => p.Role)
             .Include(u => u.Profiles)
-            .ThenInclude(p => p.InvitedByProfile)
+            .ThenInclude(p => p.InviterProfile)
             .Include(u => u.Profiles)
-            .ThenInclude(p => p.SupervisedByProfile)
+            .ThenInclude(p => p.SupervisorProfile)
             .FirstOrDefaultAsync(u => u.UserId == id);
+
         
         if (user == null)
         {
@@ -44,11 +45,12 @@ public class UserRepository:IUserRepository
             .Include(u => u.Profiles)
             .ThenInclude(p => p.Role)
             .Include(u => u.Profiles)
-            .ThenInclude(p => p.InvitedByProfile)
+            .ThenInclude(p => p.InviterProfile)
             .Include(u => u.Profiles)
-            .ThenInclude(p => p.SupervisedByProfile)
+            .ThenInclude(p => p.SupervisorProfile)
             .Where(predicate)
             .ToListAsync();
+
         
         return users;
     }

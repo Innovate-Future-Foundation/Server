@@ -11,14 +11,14 @@ public class Profile
     public Role Role { get; private set; }
     public Boolean IsActive { get; private set; }
     public string? Email { get; private set; }
-    public Guid? InvitedBy { get; private set; }
-    public Profile? InvitedByProfile { get; private set; }
-    public Guid? SupervisedBy { get; private set; }
-    public Profile? SupervisedByProfile { get; private set; }
+    public Guid? Inviter { get; private set; }
+    public Profile? InviterProfile { get; private set; }
+    public Guid? Supervisor { get; private set; }
+    public Profile? SupervisorProfile { get; private set; }
     public string? Name { get; private set; }
     public string? Phone { get; private set; }
     public string? Avatar { get; private set; }
-
+    public Boolean IsConfirmed { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Profile() { }
@@ -26,8 +26,8 @@ public class Profile
         Guid userId,
         Guid roleId,
         Guid? orgId = null,
-        Guid? invitedBy = null,
-        Guid? supervisedBy = null,
+        Guid? inviter = null,
+        Guid? supervisor = null,
         Guid? profileId = null
     )
     {
@@ -35,21 +35,24 @@ public class Profile
         UserId = userId;
         RoleId = roleId;
         OrgId = orgId;
-        InvitedBy = invitedBy;
-        SupervisedBy = supervisedBy;
+        Inviter = inviter;
+        Supervisor = supervisor;
         IsActive = true;
+        IsConfirmed = false;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateProfile(string? email, string? name, string? phone, string? avatar, Boolean? isActive)
+    public void UpdateProfile(string? email, string? name, string? phone, string? avatar, Boolean? isActive, Boolean? isConfirmed)
     {
         Email = string.IsNullOrWhiteSpace(email)? Email : email;
         Name = string.IsNullOrWhiteSpace(name)? Name : name;
         Phone = string.IsNullOrWhiteSpace(phone)? Phone : phone;
         Avatar = string.IsNullOrWhiteSpace(avatar)? Avatar : avatar;
         IsActive = isActive?? IsActive;
+        IsConfirmed = isConfirmed?? IsConfirmed;
         UpdatedAt = DateTime.UtcNow;
+        
     }
 
     // Methods to set navigation properties
@@ -71,16 +74,19 @@ public class Profile
         OrgId = organisation?.OrgId;
     }
 
-    public void AddInvitedByProfile(Profile? invitedByProfile)
+    public void AddInviterProfile(Profile? inviterProfile)
     {
-        InvitedByProfile = invitedByProfile;
-        InvitedBy = invitedByProfile?.ProfileId;
+        InviterProfile = inviterProfile;
+        Inviter = inviterProfile?.ProfileId;
     }
 
-    public void AddSupervisedByProfile(Profile? supervisedByProfile)
+
+
+    public void AddSupervisorProfile(Profile? supervisorProfile)
     {
-        SupervisedByProfile = supervisedByProfile;
-        SupervisedBy = supervisedByProfile?.ProfileId;
+        SupervisorProfile = supervisorProfile;
+        Supervisor = supervisorProfile?.ProfileId;
     }  
+
 
 }

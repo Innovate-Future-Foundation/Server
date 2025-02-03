@@ -55,7 +55,23 @@ public class AutoMapperProfile: Profile
         CreateMap<UpdateOrganisationRequest, UpdateOrganisationCommand>();
 
         CreateMap<QueryProfilesRequest, GetProfilesQuery>();
-        CreateMap<InnovateFuture.Api.Controllers.ProfilesController.QueryProfileFilters>();
-        CreateMap<PaginatedResult<Domain.Entities.Profile>, PaginatedResult<GetProfileResponse>>();
+        CreateMap<QueryProfileFilters, 
+            InnovateFuture.Application.Profiles.Queries.GetProfiles.QueryProfileFilters>();
+        CreateMap<(List<Profile> data, int totalItems), GetProfilePaginatedResponse>()
+            .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.data))
+            .ForMember(dest => dest.Meta, opt => opt.MapFrom(src => new Meta { TotalItems = src.totalItems }));
+        
+        CreateMap<(List<Profile> data, int totalItems), GetProfileWithDetailsPaginatedResponse>()
+            .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.data))
+            .ForMember(dest => dest.Meta, opt => opt.MapFrom(src => new Meta { TotalItems = src.totalItems }));
+
+        CreateMap<Profile, GetProfileResponse>();
+
+        CreateMap<Profile, GetProfileWithDetailsResponse>()
+            .ForMember(dest => dest.Inviter, opt => opt.MapFrom(src => src.InviterProfile))
+            .ForMember(dest => dest.Supervisor, opt => opt.MapFrom(src => src.SupervisorProfile))
+            .ForMember(dest => dest.Org, opt => opt.MapFrom(src => src.Organisation))
+            .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.RoleName));
     }
+
 }

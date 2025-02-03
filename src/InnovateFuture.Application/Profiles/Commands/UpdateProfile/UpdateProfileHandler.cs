@@ -22,9 +22,11 @@ public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, Guid>
             command.Email,
             command.Phone,
             command.Avatar,
-            command.IsActive
+            command.IsActive,
+            command.IsConfirmed
             );
         
+
         await _profileRepository.UpdateAsync();
         
         return profile.ProfileId;

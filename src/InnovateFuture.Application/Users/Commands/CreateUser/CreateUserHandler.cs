@@ -29,30 +29,34 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         // Create user
         var user = new User(command.Email);
 
-        Profile? invitedByProfile = null;
-        Profile? supervisedByProfile = null;
+        Profile? inviterProfile = null;
+        Profile? supervisorProfile = null;
         
-        if (command.InvitedBy.HasValue)
+
+        if (command.Inviter.HasValue)
         {
-            invitedByProfile = await _profileRepository.GetByIdAsync(command.InvitedBy.Value);
+            inviterProfile = await _profileRepository.GetByIdAsync(command.Inviter.Value);
         }
-        if (command.SupervisedBy.HasValue)
+
+        if (command.Supervisor.HasValue)
         {
-            supervisedByProfile = await _profileRepository.GetByIdAsync(command.SupervisedBy.Value);
+            supervisorProfile = await _profileRepository.GetByIdAsync(command.Supervisor.Value);
         }
+
         
         var profile = new Profile(
             user.UserId,
             role.RoleId,
             organisation.OrgId,
-            invitedByProfile?.ProfileId,
-            supervisedByProfile?.ProfileId
+            inviterProfile?.ProfileId,
+            supervisorProfile?.ProfileId
         );
         profile.AddUser(user);
         profile.AddRole(role);
         profile.AddOrganisation(organisation);
-        profile.AddInvitedByProfile(invitedByProfile);
-        profile.AddSupervisedByProfile(supervisedByProfile);
+        profile.AddInviterProfile(inviterProfile);
+        profile.AddSupervisorProfile(supervisorProfile);
+
         
         // Add profile to user's navigation property
         user.AddProfile(profile);

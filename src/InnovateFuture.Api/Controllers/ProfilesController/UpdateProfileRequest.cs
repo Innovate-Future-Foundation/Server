@@ -7,4 +7,5 @@ public class UpdateProfileRequest
     public string? Phone { get; set; } 
     public string? Avatar { get; set; } 
     public bool? IsActive { get; set; }
+    public bool? IsConfirmed { get; set; }
 }
