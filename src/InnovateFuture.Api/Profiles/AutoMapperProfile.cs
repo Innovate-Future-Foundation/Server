@@ -14,6 +14,8 @@ using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Domain.Entities;
 using Profile = AutoMapper.Profile;
 using QueryOrganisationsFilters = InnovateFuture.Application.Organisations.Queries.GetOrganisations.QueryOrganisationsFilters;
+using InnovateFuture.Application.Profiles.Queries.GetProfiles;
+using QueryProfileFilters = InnovateFuture.Application.Profiles.Queries.GetProfiles.QueryProfileFilters;
 
 namespace InnovateFuture.Api.Profiles;
 
@@ -51,5 +53,9 @@ public class AutoMapperProfile: Profile
             .ForMember(desc=>desc.Meta,opt=>opt.MapFrom(src=>new Meta(){TotalItems = src.totalItems}));
         
         CreateMap<UpdateOrganisationRequest, UpdateOrganisationCommand>();
+
+        CreateMap<QueryProfilesRequest, GetProfilesQuery>();
+        CreateMap<InnovateFuture.Api.Controllers.ProfilesController.QueryProfileFilters>();
+        CreateMap<PaginatedResult<Domain.Entities.Profile>, PaginatedResult<GetProfileResponse>>();
     }
 }

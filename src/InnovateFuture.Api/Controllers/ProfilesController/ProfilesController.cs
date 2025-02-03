@@ -5,6 +5,8 @@ using InnovateFuture.Application.Profiles.Queries.GetProfile;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using InnovateFuture.Application.Common.Models;
+using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 
 namespace InnovateFuture.Api.Controllers.ProfilesController;
 
@@ -51,5 +53,20 @@ public class ProfilesController : ControllerBase
         var profile = await _mediator.Send(query);
         var profileResponse =  _mapper.Map<GetProfileResponse>(profile);
         return Ok(profileResponse);
+    }
+
+    /// <summary>
+    /// Retrieves a list of Profiles based on the specified query parameters.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult> GetProfiles([FromQuery]QueryProfilesRequest request)
+    {
+        var query = _mapper.Map<GetProfilesQuery>(request);
+        var paginatedProfiles = await _mediator.Send(query);
+        var response = _mapper.Map<PaginatedResult<GetProfileResponse>>(paginatedProfiles);
+        return Ok(response);
     }
 }
