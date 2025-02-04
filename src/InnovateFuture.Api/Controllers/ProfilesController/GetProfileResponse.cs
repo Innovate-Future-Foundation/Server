@@ -21,4 +21,6 @@ public class GetProfileResponse
     public Guid? Supervisor { get; set; }
     public string? Phone { get; set; }
     public string? AvatarUrl { get; set; }
+    public DateTime CreatedAt{ get;  set; }
+    public DateTime UpdatedAt { get;  set; }
 }

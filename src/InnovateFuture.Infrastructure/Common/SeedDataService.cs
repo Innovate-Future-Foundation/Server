@@ -182,7 +182,8 @@ public class SeedDataService:ISeedDataService
             _org01Id,
             _profile04Id,
             null,
-            _profile10Id)
+            _profile10Id
+            )
     ];
     public void Initialize()
     {
