@@ -18,8 +18,8 @@ public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, Guid>
         
         // update
         profile.UpdateProfile(
-            command.Name,
             command.Email,
+            command.Name,
             command.Phone,
             command.AvatarUrl,
             command.IsActive,
