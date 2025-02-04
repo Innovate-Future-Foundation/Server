@@ -1,22 +1,11 @@
 name: PR Discord Notification
 
-on:
-  pull_request_target:
-    types: [opened, reopened, synchronize, closed]
+on: pull_request
 
 jobs:
   notify:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
     steps:
-      - name: Debug Event
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "Action: ${{ github.event.action }}"
-          echo "PR state: ${{ github.event.pull_request.state }}"
-          echo "Is draft: ${{ github.event.pull_request.draft }}"
-
       - name: Discord PR Notification
         if: github.event.pull_request.draft == false
         uses: tsickert/discord-webhook@v6.0.0
