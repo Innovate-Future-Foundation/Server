@@ -1,7 +1,7 @@
 name: PR Discord Notification
 
 on:
-  workflow_dispatch:  # Allow manual trigger for testing
+  workflow_dispatch:
   pull_request:
     types: [opened, reopened, synchronize, closed]
 
@@ -18,22 +18,24 @@ jobs:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
           content: ""
-          embed-title: ${{ github.event.action == 'opened' && '🆕 New Pull Request' || '🔄 Pull Request Updated' }}
+          embed-title: ${{ github.event.pull_request.title }}
           embed-description: |
-            **Title:** ${{ github.event.pull_request.title }}
+            **Repository**
+            ${{ github.repository }}
 
-            **Branch:** `${{ github.event.pull_request.head.ref }}` → `${{ github.event.pull_request.base.ref }}`
-            **Changes:** +${{ github.event.pull_request.additions }} -${{ github.event.pull_request.deletions }}
-            **Files Changed:** ${{ github.event.pull_request.changed_files }}
+            **Ref**
+            refs/pull/${{ github.event.pull_request.number }}/merge
 
-            ${{ github.event.pull_request.body }}
+            **Event** - pull_request
+            #${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}
+
+            **Triggered by**
+            ${{ github.event.pull_request.user.login }}
+
+            **Workflow**
+            PR Discord Notification
           embed-url: ${{ github.event.pull_request.html_url }}
-          embed-color: ${{ github.event.action == 'opened' && '5763719' || '15844367' }}
-          embed-author-name: ${{ github.event.pull_request.user.login }}
-          embed-author-url: ${{ github.event.pull_request.user.html_url }}
-          embed-author-icon-url: ${{ github.event.pull_request.user.avatar_url }}
-          embed-footer-text: "Repository: ${{ github.repository }}"
-          embed-timestamp: ${{ github.event.pull_request.updated_at }}
+          embed-color: "5793E6"
           wait: true
 
       - name: Create PR merged notification
@@ -43,21 +45,22 @@ jobs:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
           content: ""
-          embed-title: "🎉 Pull Request Merged"
+          embed-title: "Success: PR Discord Notification"
           embed-description: |
-            **Title:** ${{ github.event.pull_request.title }}
+            **Repository**
+            ${{ github.repository }}
 
-            **Branch:** `${{ github.event.pull_request.head.ref }}` → `${{ github.event.pull_request.base.ref }}`
-            **Changes:** +${{ github.event.pull_request.additions }} -${{ github.event.pull_request.deletions }}
-            **Files Changed:** ${{ github.event.pull_request.changed_files }}
+            **Ref**
+            refs/pull/${{ github.event.pull_request.number }}/merge
 
-            **Merged by:** ${{ github.event.pull_request.merged_by.login }}
-            **Merge Commit:** ${{ github.event.pull_request.merge_commit_sha }}
+            **Event** - pull_request
+            #${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}
+
+            **Triggered by**
+            ${{ github.event.pull_request.merged_by.login }}
+
+            **Workflow**
+            PR Discord Notification
           embed-url: ${{ github.event.pull_request.html_url }}
-          embed-color: "3066993"
-          embed-author-name: ${{ github.event.pull_request.user.login }}
-          embed-author-url: ${{ github.event.pull_request.user.html_url }}
-          embed-author-icon-url: ${{ github.event.pull_request.user.avatar_url }}
-          embed-footer-text: "Repository: ${{ github.repository }}"
-          embed-timestamp: ${{ github.event.pull_request.merged_at }}
+          embed-color: "3BA55D"
           wait: true
