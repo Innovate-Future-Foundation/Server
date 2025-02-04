@@ -14,20 +14,18 @@ jobs:
       - name: Discord PR Notification
         if: github.event.pull_request.draft == false
         continue-on-error: true
-        run: |
-          curl -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "content": "${{ github.event.action == '\''opened'\'' && ''🆕 New PR:'' || ''🔄 PR Updated:'' }} ${{ github.event.pull_request.html_url }}",
-              "thread_id": "1330422313769893938"
-            }'
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=1330422313769893938
+        with:
+          args: |
+            ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
 
       - name: Discord PR Merged Notification
         if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
-        run: |
-          curl -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "content": "🎉 PR Merged: ${{ github.event.pull_request.html_url }}",
-              "thread_id": "1330422313769893938"
-            }'
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=1330422313769893938
+        with:
+          args: |
+            🎉 PR Merged: ${{ github.event.pull_request.html_url }}
