@@ -14,9 +14,9 @@ public class GetProfilesQuery : IRequest<(List<Profile> data, int totalItems)>
 
 public class QueryProfileFilters
 {
-    public string? Email { get; set; }
-    public string? Name { get; set; }
-    public Guid? OrgId { get; set; }
-    public Guid? RoleId { get; set; }
+    public string? NameOrEmailOrPhone { get; set; }
+    public string? RoleId { get; set; }
+    public string? OrgId { get; set; }
     public bool? IsActive { get; set; }
+    public bool? IsConfirmed { get; set; }
 }

@@ -23,10 +23,9 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
         builder.Property(p => p.Inviter).HasColumnType("uuid").HasColumnName("inviter");
         builder.Property(p => p.Supervisor).HasColumnType("uuid").HasColumnName("supervisor");
         builder.Property(p => p.Name).HasColumnName("name").HasMaxLength(100);
-
         builder.Property(p => p.Email).HasColumnName("email").HasMaxLength(100);
         builder.Property(p => p.Phone).HasColumnName("phone").HasMaxLength(50);
-        builder.Property(p => p.Avatar).HasColumnName("avatar").HasMaxLength(500);
+        builder.Property(p => p.AvatarUrl).HasColumnName("avatar_url").HasMaxLength(500);
         builder.Property(p => p.IsActive).HasColumnType("boolean").HasColumnName("is_active").IsRequired();
         builder.Property(p => p.IsConfirmed).HasColumnType("boolean").HasColumnName("is_confirmed").IsRequired();
         builder.Property(p => p.CreatedAt).HasColumnType("timestamptz").HasColumnName("created_at").IsRequired();
@@ -51,14 +50,10 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
             .WithMany()
             .HasForeignKey(p => p.Inviter)
             .OnDelete(DeleteBehavior.SetNull);
-
         
-
         builder.HasOne(p => p.SupervisorProfile)
             .WithMany()
             .HasForeignKey(p => p.Supervisor)
             .OnDelete(DeleteBehavior.SetNull);
-
-
     }
 }

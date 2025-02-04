@@ -28,14 +28,17 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
             {
                 var filters = query.Filters;
                 queryPredicate = p =>
-                    (string.IsNullOrEmpty(filters.Email) || p.Email.Contains(filters.Email)) &&
-                    (string.IsNullOrEmpty(filters.Name) || p.Name.Contains(filters.Name)) &&
-                    (!filters.OrgId.HasValue || p.OrgId == filters.OrgId) &&
-                    (!filters.RoleId.HasValue || p.RoleId == filters.RoleId) &&
+                    (string.IsNullOrEmpty(filters.NameOrEmailOrPhone) || 
+                     (!string.IsNullOrEmpty(p.Name) && p.Name.Contains(filters.NameOrEmailOrPhone)) ||
+                    (!string.IsNullOrEmpty(p.Email) && p.Email.Contains(filters.NameOrEmailOrPhone)) ||
+                    (!string.IsNullOrEmpty(p.Phone) && p.Phone.Contains(filters.NameOrEmailOrPhone))) &&
+                    (string.IsNullOrEmpty(filters.OrgId) || p.OrgId.Equals(filters.OrgId)) &&
+                    (string.IsNullOrEmpty(filters.RoleId) || p.RoleId.Equals(filters.RoleId)) &&
+                    (!filters.IsConfirmed.HasValue || p.IsConfirmed == filters.IsConfirmed) &&
                     (!filters.IsActive.HasValue || p.IsActive == filters.IsActive);
             }
 
-            if (query.Sortings != null && query.Sortings.Any())
+            if (query.Sortings != null && query.Sortings!.Length>0)
             {
                 foreach (var sorting in query.Sortings)
                 {
@@ -46,7 +49,7 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
             }
         }
         
-        var (data, totalItems) = await _profileRepository.GetPagedAsync(queryPredicate, query.Limit, query.Offset ?? 0, queryOrderBy);
+        var (data, totalItems) = await _profileRepository.GetAnyAsync(queryPredicate, query.Limit, query.Offset ?? 0, queryOrderBy);
         
         return (data, totalItems);
     }

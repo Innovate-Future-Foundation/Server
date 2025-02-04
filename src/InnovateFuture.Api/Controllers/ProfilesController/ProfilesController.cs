@@ -67,24 +67,11 @@ public class ProfilesController : ControllerBase
     {
         var query = _mapper.Map<GetProfilesQuery>(request);
         var paginatedProfiles = await _mediator.Send(query);
-        var response = _mapper.Map<GetProfilePaginatedResponse>(paginatedProfiles);
+        
+        var response = request.IncludeDetails ?? false
+            ? (object)_mapper.Map<GetProfileWithDetailsPaginatedResponse>(paginatedProfiles)
+            : _mapper.Map<GetProfilePaginatedResponse>(paginatedProfiles);
+        
         return Ok(response);
     }
-
-    /// <summary>
-    /// Retrieves a list of Profiles with details based on the specified query parameters.
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [AllowAnonymous]
-    [HttpGet("profiles-details")]
-    public async Task<IActionResult> GetProfilesWithDetails([FromQuery]QueryProfilesRequest request)
-
-    {
-        var query = _mapper.Map<GetProfilesQuery>(request);
-        var paginatedProfiles = await _mediator.Send(query);
-        var response = _mapper.Map<GetProfileWithDetailsPaginatedResponse>(paginatedProfiles);
-        return Ok(response);
-    }
-
 }

@@ -9,16 +9,16 @@ public class Profile
     public Organisation? Organisation { get; private set; }
     public Guid RoleId { get; private set; }
     public Role Role { get; private set; }
-    public Boolean IsActive { get; private set; }
-    public string? Email { get; private set; }
     public Guid? Inviter { get; private set; }
     public Profile? InviterProfile { get; private set; }
     public Guid? Supervisor { get; private set; }
     public Profile? SupervisorProfile { get; private set; }
+    public string? Email { get; private set; }
     public string? Name { get; private set; }
     public string? Phone { get; private set; }
-    public string? Avatar { get; private set; }
-    public Boolean IsConfirmed { get; private set; }
+    public string? AvatarUrl { get; private set; }
+    public bool IsActive { get; private set; }
+    public bool IsConfirmed { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Profile() { }
@@ -42,51 +42,42 @@ public class Profile
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
-
-    public void UpdateProfile(string? email, string? name, string? phone, string? avatar, Boolean? isActive, Boolean? isConfirmed)
+    public void UpdateProfile(string? email, string? name, string? phone, string? avatarUrl, bool? isActive, bool? isConfirmed)
     {
         Email = string.IsNullOrWhiteSpace(email)? Email : email;
         Name = string.IsNullOrWhiteSpace(name)? Name : name;
         Phone = string.IsNullOrWhiteSpace(phone)? Phone : phone;
-        Avatar = string.IsNullOrWhiteSpace(avatar)? Avatar : avatar;
+        AvatarUrl = string.IsNullOrWhiteSpace(AvatarUrl)? AvatarUrl : avatarUrl;
         IsActive = isActive?? IsActive;
         IsConfirmed = isConfirmed?? IsConfirmed;
         UpdatedAt = DateTime.UtcNow;
         
     }
-
     // Methods to set navigation properties
     public void AddUser(User user)
     {
         User = user?? throw new ArgumentNullException(nameof(user));
         UserId = user.UserId;
     }
-
     public void AddRole(Role role)
     {
         Role = role?? throw new ArgumentNullException(nameof(role));
         RoleId = role.RoleId;
     }
-
     public void AddOrganisation(Organisation? organisation)
     {
         Organisation = organisation;
         OrgId = organisation?.OrgId;
     }
-
     public void AddInviterProfile(Profile? inviterProfile)
     {
         InviterProfile = inviterProfile;
         Inviter = inviterProfile?.ProfileId;
     }
-
-
-
+    
     public void AddSupervisorProfile(Profile? supervisorProfile)
     {
         SupervisorProfile = supervisorProfile;
         Supervisor = supervisorProfile?.ProfileId;
     }  
-
-
 }
