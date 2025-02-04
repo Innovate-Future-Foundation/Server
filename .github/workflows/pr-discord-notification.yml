@@ -11,20 +11,34 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Discord PR Notification
+      - name: Create PR notification
         if: github.event.pull_request.draft == false
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
-          content: ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
+          content: ""  # Empty content, using embed instead
+          embed-title: ${{ github.event.action == 'opened' && '🆕 New Pull Request' || '🔄 Pull Request Updated' }}
+          embed-description: ${{ github.event.pull_request.title }}
+          embed-url: ${{ github.event.pull_request.html_url }}
+          embed-color: ${{ github.event.action == 'opened' && '5763719' || '15844367' }}
+          embed-author-name: ${{ github.event.pull_request.user.login }}
+          embed-author-url: ${{ github.event.pull_request.user.html_url }}
+          embed-author-icon-url: ${{ github.event.pull_request.user.avatar_url }}
           wait: true
 
-      - name: Discord PR Merged Notification
+      - name: Create PR merged notification
         if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
-          content: 🎉 PR Merged: ${{ github.event.pull_request.html_url }}
+          content: ""  # Empty content, using embed instead
+          embed-title: "🎉 Pull Request Merged"
+          embed-description: ${{ github.event.pull_request.title }}
+          embed-url: ${{ github.event.pull_request.html_url }}
+          embed-color: "3066993"  # Green color
+          embed-author-name: ${{ github.event.pull_request.merged_by.login }}
+          embed-author-url: ${{ github.event.pull_request.merged_by.html_url }}
+          embed-author-icon-url: ${{ github.event.pull_request.merged_by.avatar_url }}
           wait: true
