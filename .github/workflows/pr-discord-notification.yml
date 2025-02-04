@@ -7,13 +7,9 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
-    concurrency:
-      group: discord-notification-${{ github.ref }}
-      cancel-in-progress: true
     steps:
       - name: Discord PR Notification
         if: github.event.pull_request.draft == false
-        continue-on-error: true
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
