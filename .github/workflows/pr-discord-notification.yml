@@ -1,0 +1,31 @@
+name: PR Discord Notification
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: discord-notification-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Discord PR Notification
+        if: github.event.pull_request.draft == false
+        continue-on-error: true
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          thread-id: 1330422313769893938
+          content: |
+            ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
+
+      - name: Discord PR Merged Notification
+        if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          thread-id: 1330422313769893938
+          content: |
+            🎉 PR Merged: ${{ github.event.pull_request.html_url }}

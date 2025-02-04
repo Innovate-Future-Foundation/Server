@@ -3,6 +3,9 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# secrets file for discord webhook
+.secrets
+
 # dotenv files
 .env
 
