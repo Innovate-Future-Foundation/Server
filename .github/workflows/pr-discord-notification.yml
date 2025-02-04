@@ -7,20 +7,24 @@ on:
 
 jobs:
   notify:
-    if: ${{ !github.event.pull_request.draft }}  # Move draft check to job level
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Discord PR Notification
+        if: github.event.pull_request.draft == false
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
           content: ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
+          wait: true
 
       - name: Discord PR Merged Notification
-        if: github.event.pull_request.merged == true
+        if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
           content: 🎉 PR Merged: ${{ github.event.pull_request.html_url }}
+          wait: true
