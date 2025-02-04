@@ -14,18 +14,16 @@ jobs:
       - name: Discord PR Notification
         if: github.event.pull_request.draft == false
         continue-on-error: true
-        uses: hugoalh/send-discord-webhook-ghaction@v6.0.0
+        uses: tsickert/discord-webhook@v6.0.0
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          thread: 1330422313769893938
-          content: |
-            ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          thread-id: "1330422313769893938"
+          content: ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
 
       - name: Discord PR Merged Notification
         if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
-        uses: hugoalh/send-discord-webhook-ghaction@v6.0.0
+        uses: tsickert/discord-webhook@v6.0.0
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          thread: 1330422313769893938
-          content: |
-            🎉 PR Merged: ${{ github.event.pull_request.html_url }}
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          thread-id: "1330422313769893938"
+          content: 🎉 PR Merged: ${{ github.event.pull_request.html_url }}
