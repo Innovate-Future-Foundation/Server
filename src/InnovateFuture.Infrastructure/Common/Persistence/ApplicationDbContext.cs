@@ -7,7 +7,14 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Profile> Profiles { get; set; }
+
     public DbSet<Organisation> Organisations { get; set; }
+    public DbSet<Tour> Tours { get; set; }
+    public DbSet<TourTemplate> TourTemplates { get; set; }
+    public DbSet<Day> Days { get; set; }
+    public DbSet<DayTemplate> DayTemplates { get; set; }
+    public DbSet<Activity> Activities { get; set; }
+    public DbSet<ActivityTemplate> ActivityTemplates { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
