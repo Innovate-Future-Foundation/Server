@@ -14,44 +14,20 @@ jobs:
       - name: Discord PR Notification
         if: github.event.pull_request.draft == false
         continue-on-error: true
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const webhook = process.env.DISCORD_WEBHOOK;
-            const threadId = '1330422313769893938';
-            const message = `${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}`;
-
-            await fetch(`${webhook}/messages`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                content: message,
-                thread_id: threadId
-              })
-            });
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "content": "${{ github.event.action == '\''opened'\'' && ''🆕 New PR:'' || ''🔄 PR Updated:'' }} ${{ github.event.pull_request.html_url }}",
+              "thread_id": "1330422313769893938"
+            }'
 
       - name: Discord PR Merged Notification
         if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const webhook = process.env.DISCORD_WEBHOOK;
-            const threadId = '1330422313769893938';
-            const message = `🎉 PR Merged: ${{ github.event.pull_request.html_url }}`;
-
-            await fetch(`${webhook}/messages`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                content: message,
-                thread_id: threadId
-              })
-            });
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "content": "🎉 PR Merged: ${{ github.event.pull_request.html_url }}",
+              "thread_id": "1330422313769893938"
+            }'
