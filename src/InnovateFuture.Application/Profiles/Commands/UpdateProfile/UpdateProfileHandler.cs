@@ -21,7 +21,7 @@ public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, Guid>
             command.Name,
             command.Email,
             command.Phone,
-            command.Avatar,
+            command.AvatarUrl,
             command.IsActive,
             command.IsConfirmed
             );
