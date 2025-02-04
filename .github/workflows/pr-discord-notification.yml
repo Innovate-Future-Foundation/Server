@@ -17,26 +17,11 @@ jobs:
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
-          content: ""
-          embed-title: ${{ github.event.pull_request.title }}
-          embed-description: |
-            **Repository**
-            ${{ github.repository }}
-
-            **Ref**
-            refs/pull/${{ github.event.pull_request.number }}/merge
-
-            **Event** - pull_request
-            #${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}
-
-            **Triggered by**
-            ${{ github.event.pull_request.user.login }}
-
-            **Workflow**
-            PR Discord Notification
-          embed-url: ${{ github.event.pull_request.html_url }}
+          username: "PR Bot"
+          avatar-url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          content: "🔄 PR Updated: ${{ github.event.pull_request.html_url }}"
+          embed-title: "Success: PR Discord Notification"
           embed-color: "5793E6"
-          wait: true
 
       - name: Create PR merged notification
         if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
@@ -44,23 +29,8 @@ jobs:
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
-          content: ""
+          username: "PR Bot"
+          avatar-url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          content: "🎉 PR Merged: ${{ github.event.pull_request.html_url }}"
           embed-title: "Success: PR Discord Notification"
-          embed-description: |
-            **Repository**
-            ${{ github.repository }}
-
-            **Ref**
-            refs/pull/${{ github.event.pull_request.number }}/merge
-
-            **Event** - pull_request
-            #${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}
-
-            **Triggered by**
-            ${{ github.event.pull_request.merged_by.login }}
-
-            **Workflow**
-            PR Discord Notification
-          embed-url: ${{ github.event.pull_request.html_url }}
           embed-color: "3BA55D"
-          wait: true
