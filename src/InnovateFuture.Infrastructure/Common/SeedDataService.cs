@@ -34,10 +34,39 @@ public class SeedDataService:ISeedDataService
     
     
     private static readonly Guid _user01Id = Guid.Parse("725f77b0-258a-4a92-827a-f5c4adfcba49");
+    private static readonly Guid _user02Id = Guid.Parse("529b4745-1d71-492e-901b-4227120155ff");
+    private static readonly Guid _user03Id = Guid.Parse("922e21f3-ae20-4deb-9af7-26ff459eedef");
+    private static readonly Guid _user04Id = Guid.Parse("1f269532-300a-4793-a151-d717b3cb9086");
+    private static readonly Guid _user05Id = Guid.Parse("28ed4bfe-0fcc-4109-bcd0-013415a780a3");
+    private static readonly Guid _user06Id = Guid.Parse("b6eaaead-edbf-4981-b1b8-9bbbc9c85145");
+    private static readonly Guid _user07Id = Guid.Parse("2e8a59f0-5b5f-450d-a80d-222933e36dbf");
+    private static readonly Guid _user08Id = Guid.Parse("134a16ab-07a7-41be-9471-0779b862ba34");
+    private static readonly Guid _user09Id = Guid.Parse("09918989-ff19-4549-9a72-586059b88747");
+    private static readonly Guid _user10Id = Guid.Parse("6f953d78-0eaf-4cee-a2aa-b135162e0a64");
+
     private static readonly Guid _profile01Id = Guid.Parse("4d69456b-9b86-43b9-b8f7-09a88062eb6b");
+    private static readonly Guid _profile02Id = Guid.Parse("e09de84e-4799-40e9-9164-83826e9b6432");
+    private static readonly Guid _profile03Id = Guid.Parse("7986eff2-8fa2-444e-8db2-294d9050137b");
+    private static readonly Guid _profile04Id = Guid.Parse("e5a98a0c-0f68-4092-9769-68b2d9653351");
+    private static readonly Guid _profile05Id = Guid.Parse("a7722a22-5c2e-46ff-949d-8c32835334ae");
+    private static readonly Guid _profile06Id = Guid.Parse("7c050778-5945-47d5-880f-a38980b79c8a");
+    private static readonly Guid _profile07Id = Guid.Parse("53ff570f-4427-4e16-8358-8fc33de8a511");
+    private static readonly Guid _profile08Id = Guid.Parse("37742c25-4c58-4e61-9b23-4092ed51cc10");
+    private static readonly Guid _profile09Id = Guid.Parse("e9f3e6d8-a92a-49ec-9b0d-2646880f664a");
+    private static readonly Guid _profile10Id = Guid.Parse("31ed1e3e-20f3-4ff0-a4fe-013886a94552");
+
     
-    private static readonly Guid _cognitoUuid = Guid.Parse("e95e0498-b0c1-700b-bb76-f571c5ec3f7c");
-    
+    private static readonly Guid _cognitoUuid01 = Guid.Parse("e95e0498-b0c1-700b-bb76-f571c5ec3f7c");
+    private static readonly Guid _cognitoUuid02 = Guid.Parse("27d2c05b-4cde-43f7-879e-1333994d325d");
+    private static readonly Guid _cognitoUuid03 = Guid.Parse("37686b84-ff3f-4f4c-84e7-4a08bf64f05d");
+    private static readonly Guid _cognitoUuid04 = Guid.Parse("c804bc94-76f3-4de5-9ad4-3724e1d498b0");
+    private static readonly Guid _cognitoUuid05 = Guid.Parse("d9d96d0a-57f3-49fc-b390-24147b69b1c2");
+    private static readonly Guid _cognitoUuid06 = Guid.Parse("e9762744-b2c2-49b9-9b41-237b60939af1");
+    private static readonly Guid _cognitoUuid07 = Guid.Parse("eaf10250-42f4-4dd4-9639-bb67245f449c");
+    private static readonly Guid _cognitoUuid08 = Guid.Parse("85cd92de-03bb-479f-97ab-cb6db54fc001");
+    private static readonly Guid _cognitoUuid09 = Guid.Parse("33f540c0-06a6-43bc-b6ba-fc2aef45706e");
+    private static readonly Guid _cognitoUuid10 = Guid.Parse("db19ac57-e96e-41f6-9416-329762fae260");
+
     
     // Seed roles
     private static Role[] GetRoles() =>
@@ -68,7 +97,16 @@ public class SeedDataService:ISeedDataService
     // Seed users
     private static User[] GetUsers() =>
     [
-        new User("yangqingyan0@gmail.com", _user01Id, _cognitoUuid)
+        new User("example0@gmail.com", _user01Id, _cognitoUuid01,null,"example0"),
+        new User("example1@gmail.com", _user02Id, _cognitoUuid02,null,"example1"),
+        new User("example2@gmail.com", _user03Id, _cognitoUuid03,null,"example2"),
+        new User("example3@gmail.com", _user04Id, _cognitoUuid04,null,"example3"),
+        new User("example4@gmail.com", _user05Id, _cognitoUuid05,null,"example4"),
+        new User("example5@gmail.com", _user06Id, _cognitoUuid06,null,"example5"),
+        new User("example6@gmail.com", _user07Id, _cognitoUuid07,null,"example6"),
+        new User("example7@gmail.com", _user08Id, _cognitoUuid08,null,"example7"),
+        new User("example8@gmail.com", _user09Id, _cognitoUuid09,null,"example8"),
+        new User("example9@gmail.com", _user10Id, _cognitoUuid10,null,"example9"),
     ];
 
     // Seed profiles
@@ -77,10 +115,75 @@ public class SeedDataService:ISeedDataService
         new Profile(
             _user01Id,
             _role01Id,
+            null,
+        null,
+        null,
+            _profile01Id),
+        new Profile(
+            _user02Id,
+            _role02Id,
             _org01Id,
-        null,
-        null,
-            _profile01Id)
+            null,
+            null,
+            _profile02Id),
+        new Profile(
+            _user03Id,
+            _role03Id,
+            _org01Id,
+            _profile02Id,
+            null,
+            _profile03Id),
+        new Profile(
+            _user04Id,
+            _role03Id,
+            _org01Id,
+            _profile02Id,
+            null,
+            _profile04Id),
+        new Profile(
+            _user05Id,
+            _role04Id,
+            _org01Id,
+            _profile04Id,
+            null,
+            _profile05Id),
+        new Profile(
+            _user06Id,
+            _role05Id,
+            _org01Id,
+            _profile05Id,
+            null,
+            _profile06Id),
+        new Profile(
+            _user07Id,
+            _role06Id,
+            _org01Id,
+            _profile05Id,
+            _profile06Id,
+            _profile07Id),
+        //
+        new Profile(
+            _user08Id,
+            _role03Id,
+            _org01Id,
+            _profile02Id,
+            null,
+            _profile08Id),
+        new Profile(
+            _user09Id,
+            _role03Id,
+            _org01Id,
+            _profile02Id,
+            null,
+            _profile09Id),
+        new Profile(
+            _user10Id,
+            _role04Id,
+            _org01Id,
+            _profile04Id,
+            null,
+            _profile10Id
+            )
     ];
     public void Initialize()
     {

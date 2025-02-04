@@ -18,6 +18,7 @@ using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
+using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
@@ -159,12 +160,18 @@ namespace InnovateFuture.Api
             builder.Services.AddSwaggerEXT();
 
             #region fluent validators
+            // Users
             builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetUsersQueryValidator>();
+            // Roles
             builder.Services.AddValidatorsFromAssemblyContaining<GetRolesQueryValidator>();
+            // Profiles
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<GetProfilesQueryValidator>();
+            // Organisations
             builder.Services.AddValidatorsFromAssemblyContaining<CreateOrganisationCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<UpdateOrganisationCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetOrganisationsQueryValidator>();
             #endregion
 

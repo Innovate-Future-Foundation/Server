@@ -21,10 +21,12 @@ public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, Guid>
             command.Name,
             command.Email,
             command.Phone,
-            command.Avatar,
-            command.IsActive
+            command.AvatarUrl,
+            command.IsActive,
+            command.IsConfirmed
             );
         
+
         await _profileRepository.UpdateAsync();
         
         return profile.ProfileId;

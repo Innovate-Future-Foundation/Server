@@ -14,7 +14,7 @@ public class UpdateProfileCommandValidator : AbstractValidator<UpdateProfileComm
             .MaximumLength(255).WithMessage("Name must not exceed 255 characters.");
         RuleFor(x => x.Phone)
             .Matches("^\\+61\\s4\\d{8}$").WithMessage("Kindly enter a valid AU Phone Number.");
-        RuleFor(x => x.Avatar)
+        RuleFor(x => x.AvatarUrl)
             .MaximumLength(500).WithMessage("Avatar must not exceed 500 characters.");
     }
 }

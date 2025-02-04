@@ -7,9 +7,9 @@ public class GetOrganisationsQueryValidator : AbstractValidator<GetOrganisations
     { 
         When(x => x.Filters != null, () =>
         {
-            RuleFor(x => x.Filters.OrgNameOrEmail)
+            RuleFor(x => x.Filters!.OrgNameOrEmail)
                 .MaximumLength(100).WithMessage("Organisation name must not exceed 100 characters.")
-                .When(x => !string.IsNullOrEmpty(x.Filters.OrgNameOrEmail));
+                .When(x => x.Filters!=null&&!string.IsNullOrEmpty(x.Filters.OrgNameOrEmail));
         });
 
         RuleFor(x => x.Limit)

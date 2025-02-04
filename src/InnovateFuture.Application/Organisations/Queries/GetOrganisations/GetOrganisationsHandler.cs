@@ -31,11 +31,10 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, (L
                     (string.IsNullOrEmpty(filters.OrgNameOrEmail) || o.OrgName.Contains(filters.OrgNameOrEmail) || 
                      (!string.IsNullOrEmpty(o.Email) && o.Email!.Contains(filters.OrgNameOrEmail)) )&&
                     (!filters.Status.HasValue || o.Status == filters.Status)&&
-                    (!filters.Subscription.HasValue || o.Subscription == filters.Subscription)
-                    ;
+                    (!filters.Subscription.HasValue || o.Subscription == filters.Subscription);
             }
 
-            if (query.Sortings!=null || query.Sortings!.Any())
+            if (query.Sortings!=null && query.Sortings!.Length>0)
             {
                 foreach (var sorting in query.Sortings!)
                 {
