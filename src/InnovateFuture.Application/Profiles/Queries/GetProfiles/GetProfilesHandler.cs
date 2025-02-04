@@ -32,8 +32,8 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
                      (!string.IsNullOrEmpty(p.Name) && p.Name.Contains(filters.NameOrEmailOrPhone)) ||
                     (!string.IsNullOrEmpty(p.Email) && p.Email.Contains(filters.NameOrEmailOrPhone)) ||
                     (!string.IsNullOrEmpty(p.Phone) && p.Phone.Contains(filters.NameOrEmailOrPhone))) &&
-                    (string.IsNullOrEmpty(filters.OrgId) || p.OrgId.Equals(filters.OrgId)) &&
-                    (string.IsNullOrEmpty(filters.RoleId) || p.RoleId.Equals(filters.RoleId)) &&
+                    (filters.OrgId==null || p.OrgId==filters.OrgId) &&
+                    (filters.RoleId==null || p.RoleId==filters.RoleId) &&
                     (!filters.IsConfirmed.HasValue || p.IsConfirmed == filters.IsConfirmed) &&
                     (!filters.IsActive.HasValue || p.IsActive == filters.IsActive);
             }

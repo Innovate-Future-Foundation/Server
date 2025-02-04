@@ -14,8 +14,8 @@ public class QueryProfilesRequest : IPaginatedRequest<QueryProfileFilters>
 public class QueryProfileFilters
 {
     public string? NameOrEmailOrPhone { get; set; }
-    public string? RoleId { get; set; }
-    public string? OrgId { get; set; }
+    public Guid? RoleId { get; set; }
+    public Guid? OrgId { get; set; }
     public bool? IsActive { get; set; }
     public bool? IsConfirmed { get; set; }
 }
