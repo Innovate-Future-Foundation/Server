@@ -27,13 +27,21 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
             if (query.Filters != null)
             {
                 var filters = query.Filters;
+                
+                var roleIds = filters.RoleIds?.Split(",")??[];
+                
+                var validGuids = roleIds
+                    .Where(s => Guid.TryParse(s, out _))
+                    .Select(Guid.Parse)
+                    .ToList();
+                
                 queryPredicate = p =>
                     (string.IsNullOrEmpty(filters.NameOrEmailOrPhone) || 
                      (!string.IsNullOrEmpty(p.Name) && p.Name.Contains(filters.NameOrEmailOrPhone)) ||
                     (!string.IsNullOrEmpty(p.Email) && p.Email.Contains(filters.NameOrEmailOrPhone)) ||
                     (!string.IsNullOrEmpty(p.Phone) && p.Phone.Contains(filters.NameOrEmailOrPhone))) &&
                     (filters.OrgId==null || p.OrgId==filters.OrgId) &&
-                    (filters.RoleId==null || p.RoleId==filters.RoleId) &&
+                    (validGuids.Contains(p.RoleId)) &&
                     (!filters.IsConfirmed.HasValue || p.IsConfirmed == filters.IsConfirmed) &&
                     (!filters.IsActive.HasValue || p.IsActive == filters.IsActive);
             }

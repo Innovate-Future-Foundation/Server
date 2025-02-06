@@ -52,7 +52,7 @@ public class ProfilesController : ControllerBase
     {
         var query = new GetProfileQuery { ProfileId = id };
         var profile = await _mediator.Send(query);
-        var profileResponse =  _mapper.Map<GetProfileResponse>(profile);
+        var profileResponse =  _mapper.Map<GetProfileWithDetailsResponse>(profile);
         return Ok(profileResponse);
     }
 
