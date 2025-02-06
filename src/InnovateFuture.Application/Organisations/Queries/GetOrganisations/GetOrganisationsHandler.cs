@@ -33,15 +33,15 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, (L
                 // Build predicate based on query conditions
                 predicate = predicate.And(o =>
                     (!filters.Status.HasValue || o.Status == filters.Status) &&
-                    (!filters.Subscription.HasValue || o.Subscription == filters.Subscription)
-                    );
+                    (!filters.Subscription.HasValue || o.Subscription == filters.Subscription));
             }
 
             if (!string.IsNullOrEmpty(query.SearchKey))
             {
                 var searchKey = query.SearchKey;
-                predicate = predicate.And(o=>( o.OrgName.Contains(searchKey) || 
-                                               (!string.IsNullOrEmpty(o.Email) && o.Email.Contains(searchKey)) ));
+                predicate = predicate.And(o=>
+                     (o.OrgName.Contains(searchKey) || 
+                     (!string.IsNullOrEmpty(o.Email) && o.Email.Contains(searchKey))));
             }
 
             if (query.Sortings!=null && query.Sortings!.Length>0)

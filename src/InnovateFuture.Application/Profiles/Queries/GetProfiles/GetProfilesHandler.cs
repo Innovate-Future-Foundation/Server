@@ -38,7 +38,7 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
                 
                 predicate = predicate.And(p =>
                     (filters.OrgId==null || p.OrgId==filters.OrgId) &&
-                    (validGuids.Count==0||validGuids.Contains(p.RoleId)) &&
+                    (validGuids.Count==0 || validGuids.Contains(p.RoleId)) &&
                     (!filters.IsConfirmed.HasValue || p.IsConfirmed == filters.IsConfirmed) &&
                     (!filters.IsActive.HasValue || p.IsActive == filters.IsActive));
             }
@@ -47,9 +47,9 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
             {
                 var searchKeys = query.SearchKey;
                 predicate = predicate.And((p=> 
-                                                (!string.IsNullOrEmpty(p.Name) && p.Name.Contains(searchKeys)) ||
-                                                (!string.IsNullOrEmpty(p.Email) && p.Email.Contains(searchKeys)) ||
-                                                (!string.IsNullOrEmpty(p.Phone) && p.Phone.Contains(searchKeys))));
+                    (!string.IsNullOrEmpty(p.Name) && p.Name.Contains(searchKeys)) || 
+                    (!string.IsNullOrEmpty(p.Email) && p.Email.Contains(searchKeys)) || 
+                    (!string.IsNullOrEmpty(p.Phone) && p.Phone.Contains(searchKeys))));
             }
             if (query.Sortings != null && query.Sortings!.Length>0)
             {
