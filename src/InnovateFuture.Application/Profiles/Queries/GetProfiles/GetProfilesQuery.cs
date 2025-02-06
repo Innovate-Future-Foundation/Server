@@ -7,6 +7,7 @@ namespace InnovateFuture.Application.Profiles.Queries.GetProfiles;
 public class GetProfilesQuery : IRequest<(List<Profile> data, int totalItems)>
 {
     public QueryProfileFilters? Filters { get; set; }
+    public string? SearchKey { get; set; }
     public Sorting[]? Sortings { get; set; }
     public int? Offset { get; set; }
     public int Limit { get; set; }
@@ -14,7 +15,6 @@ public class GetProfilesQuery : IRequest<(List<Profile> data, int totalItems)>
 
 public class QueryProfileFilters
 {
-    public string? NameOrEmailOrPhone { get; set; }
     public string? RoleIds { get; set; }
     public Guid? OrgId { get; set; }
     public bool? IsActive { get; set; }

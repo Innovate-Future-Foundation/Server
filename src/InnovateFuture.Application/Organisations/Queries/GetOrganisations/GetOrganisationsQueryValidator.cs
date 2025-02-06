@@ -5,13 +5,11 @@ public class GetOrganisationsQueryValidator : AbstractValidator<GetOrganisations
 {
     public GetOrganisationsQueryValidator()
     { 
-        When(x => x.Filters != null, () =>
-        {
-            RuleFor(x => x.Filters!.OrgNameOrEmail)
-                .MaximumLength(100).WithMessage("Organisation name must not exceed 100 characters.")
-                .When(x => x.Filters!=null&&!string.IsNullOrEmpty(x.Filters.OrgNameOrEmail));
-        });
-
+        
+        RuleFor(x => x.SearchKey)
+            .MaximumLength(100).WithMessage("Search content must not exceed 100 characters.")
+            .When(x => !string.IsNullOrEmpty(x.SearchKey));
+            
         RuleFor(x => x.Limit)
             .GreaterThan(0).WithMessage("Limit must be greater than zero.");
         
