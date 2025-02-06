@@ -15,12 +15,12 @@ jobs:
         if: github.event.pull_request.draft == false
         uses: tsickert/discord-webhook@v6.0.0
         with:
-          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook-url: ${{ secrets.DEV_PR_DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
           username: "PR Bot"
           avatar-url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
           content: |
-            ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
+            <@&1315850473391001674> ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
             **Title:** ${{ github.event.pull_request.title }}
             **Author:** ${{ github.event.pull_request.user.login }}
 
@@ -28,11 +28,11 @@ jobs:
         if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
         uses: tsickert/discord-webhook@v6.0.0
         with:
-          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook-url: ${{ secrets.DEV_PR_DISCORD_WEBHOOK }}
           thread-id: "1330422313769893938"
           username: "PR Bot"
           avatar-url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
           content: |
-            🎉 PR Merged: ${{ github.event.pull_request.html_url }}
+            <@&1315850473391001674> 🎉 PR Merged: ${{ github.event.pull_request.html_url }}
             **Title:** ${{ github.event.pull_request.title }}
             **Merged by:** ${{ github.event.pull_request.merged_by.login }}
