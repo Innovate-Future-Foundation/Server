@@ -48,11 +48,14 @@ public class ProfilesController : ControllerBase
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetProfile(Guid id)
+    public async Task<IActionResult> GetProfile(Guid id,[FromQuery] bool includeDetails=false)
     {
         var query = new GetProfileQuery { ProfileId = id };
         var profile = await _mediator.Send(query);
-        var profileResponse =  _mapper.Map<GetProfileWithDetailsResponse>(profile);
+        
+        var profileResponse =  includeDetails? (object)_mapper.Map<GetProfileWithDetailsResponse>(profile):
+            _mapper.Map<GetProfileResponse>(profile);
+        
         return Ok(profileResponse);
     }
 
@@ -68,10 +71,10 @@ public class ProfilesController : ControllerBase
         var query = _mapper.Map<GetProfilesQuery>(request);
         var paginatedProfiles = await _mediator.Send(query);
         
-        var response = request.IncludeDetails ?? false
+        var profilesResponse = request.IncludeDetails ?? false
             ? (object)_mapper.Map<GetProfileWithDetailsPaginatedResponse>(paginatedProfiles)
             : _mapper.Map<GetProfilePaginatedResponse>(paginatedProfiles);
         
-        return Ok(response);
+        return Ok(profilesResponse);
     }
 }
