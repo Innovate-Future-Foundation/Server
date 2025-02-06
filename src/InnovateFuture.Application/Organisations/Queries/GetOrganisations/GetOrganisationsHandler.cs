@@ -19,7 +19,7 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, (L
     public async Task<(List<Organisation> data, int totalItems)> Handle(GetOrganisationsQuery query, CancellationToken cancellationToken)
     {
         
-        var predicate = PredicateBuilder.New<Organisation>();
+        var predicate = PredicateBuilder.New<Organisation>(true);
         
         string? queryOrderBy=null;
             

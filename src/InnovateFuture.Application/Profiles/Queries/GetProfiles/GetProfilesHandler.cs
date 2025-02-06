@@ -18,7 +18,7 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
 
     public async Task<(List<Profile> data, int totalItems)> Handle(GetProfilesQuery query, CancellationToken cancellationToken)
     {
-        var predicate = PredicateBuilder.New<Profile>();
+        var predicate = PredicateBuilder.New<Profile>(true);
         string? queryOrderBy = null;
         
         var queriesEmpty = query.GetType().GetProperties().All(p => p.GetValue(query) == null);
