@@ -17,5 +17,6 @@ public class QueryProfileFilters
     public string? RoleIds { get; set; }
     public Guid? OrgId { get; set; }
     public bool? IsActive { get; set; }
+    public Guid? Supervisor { get; set; }
     public bool? IsConfirmed { get; set; }
 }
