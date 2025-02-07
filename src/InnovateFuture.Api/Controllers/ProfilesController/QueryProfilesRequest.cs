@@ -5,6 +5,7 @@ namespace InnovateFuture.Api.Controllers.ProfilesController;
 public class QueryProfilesRequest : IPaginatedRequest<QueryProfileFilters>
 {
     public QueryProfileFilters? Filters { get; set; }
+    public string? SearchKey { get; set; }
     public Sorting[]? Sortings { get; set; }
     public int? Offset { get; set; }
     public int Limit { get; set; }
@@ -13,8 +14,7 @@ public class QueryProfilesRequest : IPaginatedRequest<QueryProfileFilters>
 
 public class QueryProfileFilters
 {
-    public string? NameOrEmailOrPhone { get; set; }
-    public Guid? RoleId { get; set; }
+    public string? RoleIds { get; set; }
     public Guid? OrgId { get; set; }
     public bool? IsActive { get; set; }
     public bool? IsConfirmed { get; set; }

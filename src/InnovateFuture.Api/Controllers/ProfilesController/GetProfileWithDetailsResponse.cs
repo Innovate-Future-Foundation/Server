@@ -22,7 +22,7 @@ public class GetProfileWithDetailsResponse
     public string? Phone { get; set; }
     public string? AvatarUrl { get; set; }
     public GetOrganisationsResponse? Organisation { get; set; }
-    public GetProfileResponse? InviterProfile { get; set; }    
+    public GetProfileResponse? InviterProfile { get; set; }   
     public GetProfileResponse? SupervisorProfile { get; set; }
     public DateTime CreatedAt{ get;  set; }
     public DateTime UpdatedAt { get;  set; }

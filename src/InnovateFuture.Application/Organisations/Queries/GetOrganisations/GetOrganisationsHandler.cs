@@ -2,6 +2,8 @@ using System.Linq.Expressions;
 using MediatR;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
+using LinqKit;
+
 
 namespace InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 
@@ -16,7 +18,9 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, (L
 
     public async Task<(List<Organisation> data, int totalItems)> Handle(GetOrganisationsQuery query, CancellationToken cancellationToken)
     {
-        Expression<Func<Organisation, bool>>? queryPredicate=null;
+        
+        var predicate = PredicateBuilder.New<Organisation>(true);
+        
         string? queryOrderBy=null;
             
         var queriesEmpty = query.GetType().GetProperties().All(p=>p.GetValue(query)==null);
@@ -27,11 +31,17 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, (L
             {
                 var filters = query.Filters;
                 // Build predicate based on query conditions
-                queryPredicate = o =>
-                    (string.IsNullOrEmpty(filters.OrgNameOrEmail) || o.OrgName.Contains(filters.OrgNameOrEmail) || 
-                     (!string.IsNullOrEmpty(o.Email) && o.Email!.Contains(filters.OrgNameOrEmail)) )&&
-                    (!filters.Status.HasValue || o.Status == filters.Status)&&
-                    (!filters.Subscription.HasValue || o.Subscription == filters.Subscription);
+                predicate = predicate.And(o =>
+                    (!filters.Status.HasValue || o.Status == filters.Status) &&
+                    (!filters.Subscription.HasValue || o.Subscription == filters.Subscription));
+            }
+
+            if (!string.IsNullOrEmpty(query.SearchKey))
+            {
+                var searchKey = query.SearchKey;
+                predicate = predicate.And(o=>
+                     (o.OrgName.Contains(searchKey) || 
+                     (!string.IsNullOrEmpty(o.Email) && o.Email.Contains(searchKey))));
             }
 
             if (query.Sortings!=null && query.Sortings!.Length>0)
@@ -45,7 +55,7 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, (L
             }
         }
         
-        var (data,totalItems) = await _orgRepository.GetAnyAsync(queryPredicate,query.Limit,query.Offset??0,queryOrderBy);
+        var (data,totalItems) = await _orgRepository.GetAnyAsync(predicate,query.Limit,query.Offset??0,queryOrderBy);
 
         return (data, totalItems);
     }

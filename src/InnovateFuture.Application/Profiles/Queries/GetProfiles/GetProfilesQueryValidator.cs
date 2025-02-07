@@ -5,12 +5,9 @@ public class GetProfilesQueryValidator : AbstractValidator<GetProfilesQuery>
 {
     public GetProfilesQueryValidator()
     { 
-        When(x => x.Filters != null, () =>
-        {
-            RuleFor(x => x.Filters!.NameOrEmailOrPhone)
-                .MaximumLength(100).WithMessage("Searching content must not exceed 100 characters.")
-                .When(x => x.Filters!=null&&!string.IsNullOrEmpty(x.Filters.NameOrEmailOrPhone));
-        });
+        RuleFor(x => x.SearchKey)
+            .MaximumLength(100).WithMessage("Search content must not exceed 100 characters.")
+            .When(x => !string.IsNullOrEmpty(x.SearchKey));
 
         RuleFor(x => x.Limit)
             .GreaterThan(0).WithMessage("Limit must be greater than zero.");
