@@ -1,0 +1,37 @@
+name: PR Discord Notification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create PR notification
+        if: github.event.pull_request.draft == false
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.DEV_PR_DISCORD_WEBHOOK }}
+          thread-id: "1330422313769893938"
+          username: "Server PR Bot"
+          content: |
+            ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
+            **Title:** ${{ github.event.pull_request.title }}
+            <@&1315850473391001674>
+
+      - name: Create PR merged notification
+        if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.DEV_PR_DISCORD_WEBHOOK }}
+          thread-id: "1330422313769893938"
+          username: "ServerPR Bot"
+          content: |
+            🎉 PR Merged: ${{ github.event.pull_request.html_url }}
+            **Title:** ${{ github.event.pull_request.title }}
+            **Merged by:** ${{ github.event.pull_request.merged_by.login }}
+            <@&1315850473391001674>
