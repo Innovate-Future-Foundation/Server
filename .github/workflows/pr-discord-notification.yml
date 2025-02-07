@@ -19,10 +19,9 @@ jobs:
           thread-id: "1330422313769893938"
           username: "Server PR Bot"
           content: |
-            <@&1315850473391001674>
             ${{ github.event.action == 'opened' && '🆕 New PR:' || '🔄 PR Updated:' }} ${{ github.event.pull_request.html_url }}
             **Title:** ${{ github.event.pull_request.title }}
-            **Author:** ${{ github.event.pull_request.user.login }}
+            <@&1315850473391001674>
 
       - name: Create PR merged notification
         if: github.event.pull_request.merged == true && github.event.pull_request.draft == false
@@ -32,7 +31,7 @@ jobs:
           thread-id: "1330422313769893938"
           username: "ServerPR Bot"
           content: |
-            <@&1315850473391001674>
             🎉 PR Merged: ${{ github.event.pull_request.html_url }}
             **Title:** ${{ github.event.pull_request.title }}
             **Merged by:** ${{ github.event.pull_request.merged_by.login }}
+            <@&1315850473391001674>
