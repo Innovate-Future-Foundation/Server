@@ -5,6 +5,7 @@ using InnovateFuture.Infrastructure.Exceptions;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace InnovateFuture.Infrastructure.Organisations.Persistence.Repositories;
 
@@ -16,7 +17,16 @@ public class OrgRepository:IOrgRepository
     {
         _dbContext = dbContext;
     }
-    public async Task<Organisation> GetByIdAsync(Guid id)
+
+    
+    public async Task AddAsync(Organisation organisation, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Organisations.AddAsync(organisation, cancellationToken);
+    }
+    
+    
+    
+    public async Task<Organisation> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var org = await _dbContext.Organisations
             .Include(o => o.Profiles)
@@ -27,13 +37,7 @@ public class OrgRepository:IOrgRepository
         }
         return org;
     }
-
-    public async Task AddAsync(Organisation organisation)
-    {
-        await _dbContext.Organisations.AddAsync(organisation);
-        await _dbContext.SaveChangesAsync();
-    }
-
+    
     public async Task UpdateAsync()
     {
         await _dbContext.SaveChangesAsync();

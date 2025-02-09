@@ -17,15 +17,15 @@ public class UpdateOrganisationHandler : IRequestHandler<UpdateOrganisationComma
     {
         var organisation = await _orgRepository.GetByIdAsync(request.OrgId);
         
-        organisation.UpdateOrganisationDetails(
-            request.OrgName,
-            request.LogoUrl,
-            request.WebsiteUrl,
-            request.Address,
-            request.Email,
-            request.Subscription,
-            request.Status
-        );
+        // organisation.UpdateOrganisationDetails(
+        //     request.OrgName,
+        //     request.LogoUrl,
+        //     request.WebsiteUrl,
+        //     request.Address,
+        //     request.Email,
+        //     request.Subscription,
+        //     request.Status
+        // );
 
         await _orgRepository.UpdateAsync();
 

@@ -29,7 +29,7 @@ public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, Guid>
 
         await _profileRepository.UpdateAsync();
         
-        return profile.ProfileId;
+        return profile.Id;
     }
 }
 

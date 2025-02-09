@@ -8,32 +8,16 @@ public class UserConfig : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.HasKey(p => p.UserId);
+        // Column Mappings
+        builder.Property(u => u.IdpSubject).HasColumnType("uuid").HasColumnName("idp_subject").IsRequired(false);
+        builder.Property(u => u.DefaultProfileId).HasColumnType("uuid").HasColumnName("profile_id").IsRequired(false);
+        builder.Property(u => u.CreatedAt).HasColumnType("timestamptz").HasColumnName("created_at").IsRequired();
+        builder.Property(u => u.UpdatedAt).HasColumnType("timestamptz").HasColumnName("updated_at").IsRequired();
+        builder.Property(u => u.Email).IsRequired();
         
         // Set indexes
         builder.HasIndex(u => u.Email)
             .IsUnique()
             .HasDatabaseName("IX_Users_email");
-        
-        builder.HasIndex(u => u.CognitoUuid)
-            .IsUnique()
-            .HasDatabaseName("IX_Users_cognito_uuid");
-        
-        // Column Mappings
-        builder.Property(u => u.UserId).HasColumnType("uuid").HasColumnName("user_id").IsRequired();
-        builder.Property(u => u.CognitoUuid).HasColumnType("uuid").HasColumnName("cognito_uuid");
-        builder.Property(u => u.DefaultProfile).HasColumnType("uuid").HasColumnName("default_profile");
-        builder.Property(u => u.FullName).HasColumnName("full_name").HasMaxLength(100);
-        builder.Property(u => u.Email).HasColumnName("email").HasMaxLength(255).IsRequired();
-        builder.Property(u => u.Phone).HasColumnName("phone").HasMaxLength(50);
-        builder.Property(u => u.Birthday).HasColumnType("date").HasColumnName("birthday");
-        builder.Property(u => u.CreatedAt).HasColumnType("timestamptz").HasColumnName("created_at").IsRequired();
-        builder.Property(u => u.UpdatedAt).HasColumnType("timestamptz").HasColumnName("updated_at").IsRequired();
-        
-        // navigation property
-        builder.HasOne<Profile>()
-            .WithOne()
-            .HasForeignKey<User>(u => u.DefaultProfile)
-            .OnDelete(DeleteBehavior.SetNull);
     }
 }

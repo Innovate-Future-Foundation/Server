@@ -1,4 +1,5 @@
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Domain.Enums;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Exceptions;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
@@ -16,25 +17,25 @@ public class ProfileRepository:IProfileRepository
     {
         _dbContext = dbContext;
     }
-    public async Task<Profile> GetByIdAsync(Guid id)
+
+    public async Task AddAsync(Profile profile, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Profiles.AddAsync(profile, cancellationToken);
+    }
+
+    public async Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var profile = await _dbContext.Profiles
             .Include(p => p.User)
             .Include(p=>p.Organisation)
             .Include(p=>p.InviterProfile)
             .Include(p=>p.SupervisorProfile)
-            .FirstOrDefaultAsync(p=>p.ProfileId == id);
+            .FirstOrDefaultAsync(p=>p.Id == id);
         if (profile == null)
         {
             throw new IFEntityNotFoundException("Profile",id);
         }
         return profile;
-    }
-
-    public async Task AddAsync(Profile profile)
-    {
-        await _dbContext.Profiles.AddAsync(profile);
-        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateAsync()

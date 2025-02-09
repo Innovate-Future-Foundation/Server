@@ -1,16 +1,19 @@
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
 using InnovateFuture.Infrastructure.Common.Persistence;
+using Microsoft.AspNetCore.Identity;
 
 namespace InnovateFuture.Infrastructure.Common;
 
 public class SeedDataService:ISeedDataService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly UserManager<User> _userManager;
 
-    public SeedDataService(ApplicationDbContext dbContext)
+    public SeedDataService(ApplicationDbContext dbContext, UserManager<User> userManager)
     {
         _dbContext = dbContext;
+        _userManager = userManager;
     }
     
     private static readonly Guid _org01Id = Guid.Parse("d96e643e-a7aa-42b0-a8cd-1cdd8610e857");

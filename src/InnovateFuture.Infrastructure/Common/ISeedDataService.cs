@@ -4,6 +4,6 @@ namespace InnovateFuture.Infrastructure.Common;
 
 public interface ISeedDataService
 {
-    void Initialize();
-    bool CanSeed();
+    // Task InitializeAsync();
+    // bool CanSeed();
 }

@@ -13,10 +13,10 @@ public static class SeedDataExtension
             var seedDataService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
             
             // Check if data already exists
-            if (seedDataService.CanSeed())
-            {
-                seedDataService.Initialize();
-            }
+            // if (seedDataService.CanSeed())
+            // {
+            //     seedDataService.Initialize();
+            // }
         }
     }
 }

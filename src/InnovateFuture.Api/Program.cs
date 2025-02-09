@@ -17,6 +17,10 @@ using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Domain.Enums;
+using InnovateFuture.Application.Services.Auth.ConfirmEmail;
+using InnovateFuture.Application.Services.Auth.UserService;
+using InnovateFuture.Application.Services.SendEmail;
+using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
@@ -31,6 +35,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
+using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
+using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Repositiories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace InnovateFuture.Api
@@ -45,6 +53,13 @@ namespace InnovateFuture.Api
             var builder = WebApplication.CreateBuilder(args);
             
             var connectionString = builder.Configuration["DBConnection"];
+
+            #region Email Service Configuration
+            // bind EmailSettings from appsettings.Development.json
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+            // register EmailSettings as signleton
+            builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailSettings>>().Value);
+            #endregion
             
             #region filter
             builder.Services.AddControllers(option =>
@@ -73,15 +88,20 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(CreateOrganisationHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(UpdateOrganisationHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
+
+                configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
             });
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
             builder.Services.AddScoped<ISeedDataService, SeedDataService>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IOrgRepository, OrgRepository>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
-            builder.Services.AddScoped<IOrgRepository, OrgRepository>();
+            builder.Services.AddScoped<IEmailService, SendEmailService>();
+
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
@@ -117,6 +137,15 @@ namespace InnovateFuture.Api
                     .EnableDetailedErrors()
             );
             #endregion
+            
+            #region Identity 
+            builder.Services.AddIdentity<User, IdentityRole<Guid>>()
+                .AddEntityFrameworkStores<ApplicationDbContext>() 
+                .AddTokenProvider<DataProtectorTokenProvider<User>>("InnovateFuture")
+                .AddDefaultTokenProviders();
+            #endregion
+            
+
             
             // Disable auto model validation
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
@@ -185,6 +214,8 @@ namespace InnovateFuture.Api
             });
             
             var app = builder.Build();
+            app.UseCors(policyName);
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

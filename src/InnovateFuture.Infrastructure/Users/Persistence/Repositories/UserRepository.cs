@@ -3,32 +3,26 @@ using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Exceptions;
 using InnovateFuture.Infrastructure.Users.Persistence.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace InnovateFuture.Infrastructure.Users.Persistence.Repositories;
 
 public class UserRepository:IUserRepository
 {
+    private readonly UserManager<User> _userManager;
     private readonly ApplicationDbContext _dbContext;
 
-    public UserRepository(ApplicationDbContext dbContext)
+    public UserRepository(UserManager<User> userManager, ApplicationDbContext dbContext)
     {
+        _userManager = userManager;
         _dbContext = dbContext;
     }
-
+    
     public async Task<User> GetByIdAsync(Guid id)
     {
-        var user = await _dbContext.Users
-            .Include(u => u.Profiles)
-            .ThenInclude(p => p.Organisation)
-            .Include(u => u.Profiles)
-            .ThenInclude(p => p.Role)
-            .Include(u => u.Profiles)
-            .ThenInclude(p => p.InviterProfile)
-            .Include(u => u.Profiles)
-            .ThenInclude(p => p.SupervisorProfile)
-            .FirstOrDefaultAsync(u => u.UserId == id);
-
+        var user = await _userManager.FindByIdAsync(id.ToString());
         
         if (user == null)
         {

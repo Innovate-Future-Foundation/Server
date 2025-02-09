@@ -40,11 +40,11 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         }
         
         var profile = new Profile(
-            user.UserId,
+            user.Id,
             command.RoleEnum,
             organisation.OrgId,
-            inviterProfile?.ProfileId,
-            supervisorProfile?.ProfileId
+            inviterProfile?.Id,
+            supervisorProfile?.Id
         );
         
         profile.AddUser(user);
@@ -60,7 +60,7 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         
         await _userRepository.AddAsync(user); // This will make sure user and its profile be created at the same time
 
-        return user.UserId;
+        return user.Id;
     }
 }
 

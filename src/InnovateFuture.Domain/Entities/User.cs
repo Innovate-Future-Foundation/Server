@@ -1,62 +1,35 @@
+using Microsoft.AspNetCore.Identity;
 
 namespace InnovateFuture.Domain.Entities;
 
-public class User
+public class User: IdentityUser<Guid>
 {
-    public Guid UserId { get; private set; }
-    public string Email { get; private set; }
-    public Guid? CognitoUuid { get; private set; }
-    public Guid? DefaultProfile { get; private set; }
-    public string? FullName { get; private set; }
-    public string? Phone { get; private set; }
-    public DateTime? Birthday { get; private set; }
-    // navigation properties
-    public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
+    public Guid? DefaultProfileId { get; private set; }
+    public Guid? IdpSubject { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public User(){}
+    
+    // Navigation
+    public virtual ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
+
     public User(
-        string email, 
-        Guid?userId=null, 
-        Guid? cognitoUuid=null, 
-        Guid? updatedDefaultProfile=null,
-        string? fullName=null, 
-        string? phone=null, 
-        DateTime? birthday=null)
+        string userName,
+        string email,
+        Guid? defaultProfileId=null,
+        Guid? idpSubject = null
+        )
     {
-        UserId = userId??Guid.NewGuid();
-        CognitoUuid = cognitoUuid;
-        DefaultProfile = updatedDefaultProfile;
-        Email = email;
-        FullName = fullName;
-        Phone = phone;
-        Birthday = birthday;
+        UserName = userName ?? throw new ArgumentNullException(nameof(userName));
+        Email = email ?? throw new ArgumentNullException(nameof(email));
+        DefaultProfileId = defaultProfileId;
+        IdpSubject = idpSubject;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
-    public void UpdateDefaultProfile(Guid updatedDefaultProfile)
+
+    public void UpdateProfile(Guid profileId)
     {
-        DefaultProfile = updatedDefaultProfile;
+        DefaultProfileId = profileId;
         UpdatedAt = DateTime.UtcNow;
-    }
-    
-    public void UpdateUserDetails(Guid? cognitoUuid, Guid? updatedDefaultProfile, string? email, string? fullName, string? phone, DateTime? birthday)
-    {
-        CognitoUuid = cognitoUuid??CognitoUuid;
-        DefaultProfile = updatedDefaultProfile??DefaultProfile;
-        Email = string.IsNullOrWhiteSpace(email)?Email:email;
-        FullName = string.IsNullOrWhiteSpace(fullName)?fullName:FullName;
-        Phone = string.IsNullOrWhiteSpace(phone)?Phone:phone;
-        Birthday = birthday??Birthday;
-        UpdatedAt = DateTime.UtcNow;
-    }
-    public void AddProfile(Profile profile)
-    {
-        if (profile == null)
-        {
-            // to programmer
-            throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
-        }
-        Profiles?.Add(profile);
     }
 }

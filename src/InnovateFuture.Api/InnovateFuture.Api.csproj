@@ -30,4 +30,8 @@
     <ProjectReference Include="..\InnovateFuture.Application\InnovateFuture.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="appsettings.Development.json" />
+  </ItemGroup>
+
 </Project>
