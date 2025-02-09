@@ -30,7 +30,7 @@ public class CreateOrganisationHandler : IRequestHandler<CreateOrganisationComma
         _logger = logger;
     }
     
-    // Use ACID transaction
+    // Use ACID transactionLogoUrl
     // Create Organisation, Organisation Admin and Profile at same time
     // TODO: Validate company not repeat
     public async Task<Guid> Handle(CreateOrganisationCommand command, CancellationToken cancellationToken)
@@ -41,6 +41,7 @@ public class CreateOrganisationHandler : IRequestHandler<CreateOrganisationComma
             // 1⃣️ Create Organisation
             var organisation = new Organisation(
                 command.OrgName,
+                null,
                 command.LogoUrl,
                 command.WebsiteUrl,
                 command.Address,

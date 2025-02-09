@@ -31,44 +31,44 @@ public class SeedDataService:ISeedDataService
     ];
 
     // Seed users
-    private static User[] GetUsers() =>
-    [
-        new User("example0@gmail.com", _user01Id, _cognitoUuid01,null,null,"example0")
-    ];
-
-    // Seed profiles
-    private static Profile[] GetProfiles() =>
-    [
-        new Profile(
-            _user01Id,
-            RoleEnum.PlatformAdmin,
-            null,
-        null,
-        null,
-            _profile01Id),
-    ];
-    public void Initialize()
-    {
-        _dbContext.Organisations.AddRange(GetOrganisations());
-        var users = GetUsers();
-        _dbContext.Users.AddRange(users);
-        var profiles = GetProfiles();
-        _dbContext.Profiles.AddRange(profiles);
-        _dbContext.SaveChanges();
-        
-        // update default profile of each user
-        users.ToList().ForEach(u =>
-        {
-            var defaultProfileId =profiles.FirstOrDefault(p=>p.UserId==u.UserId)!.ProfileId;
-            u.UpdateDefaultProfile(defaultProfileId);
-        });
-        
-        _dbContext.Users.UpdateRange(users);
-        _dbContext.SaveChanges();
-    }
-    public bool CanSeed()
-    {
-        return (!_dbContext.Users.Any() && !_dbContext.Profiles.Any() &&
-                !_dbContext.Organisations.Any());
-    }
+    // private static User[] GetUsers() =>
+    // [
+    //     new User("example0@gmail.com", _user01Id, _cognitoUuid01,null,null,"example0")
+    // ];
+    //
+    // // Seed profiles
+    // private static Profile[] GetProfiles() =>
+    // [
+    //     new Profile(
+    //         _user01Id,
+    //         RoleEnum.PlatformAdmin,
+    //         null,
+    //     null,
+    //     null,
+    //         _profile01Id),
+    // ];
+    // public void Initialize()
+    // {
+    //     _dbContext.Organisations.AddRange(GetOrganisations());
+    //     var users = GetUsers();
+    //     _dbContext.Users.AddRange(users);
+    //     var profiles = GetProfiles();
+    //     _dbContext.Profiles.AddRange(profiles);
+    //     _dbContext.SaveChanges();
+    //     
+    //     // update default profile of each user
+    //     users.ToList().ForEach(u =>
+    //     {
+    //         var defaultProfileId =profiles.FirstOrDefault(p=>p.UserId==u.UserId)!.ProfileId;
+    //         u.UpdateDefaultProfile(defaultProfileId);
+    //     });
+    //     
+    //     _dbContext.Users.UpdateRange(users);
+    //     _dbContext.SaveChanges();
+    // }
+    // public bool CanSeed()
+    // {
+    //     return (!_dbContext.Users.Any() && !_dbContext.Profiles.Any() &&
+    //             !_dbContext.Organisations.Any());
+    // }
 }

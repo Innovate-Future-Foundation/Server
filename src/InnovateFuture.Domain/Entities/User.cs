@@ -32,4 +32,14 @@ public class User: IdentityUser<Guid>
         DefaultProfileId = profileId;
         UpdatedAt = DateTime.UtcNow;
     }
+    
+    public void AddProfile(Profile profile)
+    {
+        if (profile == null)
+        {
+            // to programmer
+            throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
+        }
+        Profiles?.Add(profile);
+    }
 }

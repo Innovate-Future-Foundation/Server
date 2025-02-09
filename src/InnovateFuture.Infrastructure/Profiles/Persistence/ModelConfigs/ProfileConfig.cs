@@ -13,7 +13,7 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
         // Column Mappings
         builder.Property(p => p.Id).HasColumnType("uuid").HasColumnName("profile_id").IsRequired();
         builder.Property(p => p.UserId).HasColumnType("uuid").HasColumnName("user_id").IsRequired();
-        builder.Property(p => p.Role).HasConversion<int>().IsRequired();
+        builder.Property(p => p.Role).HasColumnType("role_enum").HasColumnName("role").IsRequired();
         builder.Property(p => p.OrgId).HasColumnType("uuid").HasColumnName("org_id").IsRequired(false);
         builder.Property(p => p.Inviter).HasColumnType("uuid").HasColumnName("inviter").IsRequired(false);
         builder.Property(p => p.Supervisor).HasColumnType("uuid").HasColumnName("supervisor").IsRequired(false);

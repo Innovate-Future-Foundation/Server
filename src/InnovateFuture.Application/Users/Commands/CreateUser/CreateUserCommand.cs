@@ -8,6 +8,8 @@ public class CreateUserCommand : IRequest<Guid>
     public string Password { get; set; } = null!;
     public string Email { get; set; } = null!;
     
+    public Guid ProfileId { get; set; }
+    
     public Guid OrgId { get; set; }
     public RoleEnum RoleEnum { get; set; }
     
