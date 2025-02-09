@@ -1,16 +1,19 @@
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
 using InnovateFuture.Infrastructure.Common.Persistence;
+using Microsoft.AspNetCore.Identity;
 
 namespace InnovateFuture.Infrastructure.Common;
 
 public class SeedDataService:ISeedDataService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly UserManager<User> _userManager;
 
-    public SeedDataService(ApplicationDbContext dbContext)
+    public SeedDataService(ApplicationDbContext dbContext, UserManager<User> userManager)
     {
         _dbContext = dbContext;
+        _userManager = userManager;
     }
     
     private static readonly Guid _org01Id = Guid.Parse("d96e643e-a7aa-42b0-a8cd-1cdd8610e857");
@@ -28,44 +31,44 @@ public class SeedDataService:ISeedDataService
     ];
 
     // Seed users
-    private static User[] GetUsers() =>
-    [
-        new User("example0@gmail.com", _user01Id, _cognitoUuid01,null,null,"example0")
-    ];
-
-    // Seed profiles
-    private static Profile[] GetProfiles() =>
-    [
-        new Profile(
-            _user01Id,
-            RoleEnum.PlatformAdmin,
-            null,
-        null,
-        null,
-            _profile01Id),
-    ];
-    public void Initialize()
-    {
-        _dbContext.Organisations.AddRange(GetOrganisations());
-        var users = GetUsers();
-        _dbContext.Users.AddRange(users);
-        var profiles = GetProfiles();
-        _dbContext.Profiles.AddRange(profiles);
-        _dbContext.SaveChanges();
-        
-        // update default profile of each user
-        users.ToList().ForEach(u =>
-        {
-            var defaultProfileId =profiles.FirstOrDefault(p=>p.UserId==u.UserId)!.ProfileId;
-            u.UpdateDefaultProfile(defaultProfileId);
-        });
-        
-        _dbContext.Users.UpdateRange(users);
-        _dbContext.SaveChanges();
-    }
-    public bool CanSeed()
-    {
-        return (!_dbContext.Users.Any() && !_dbContext.Profiles.Any() &&
-                !_dbContext.Organisations.Any());
-    }
+    // private static User[] GetUsers() =>
+    // [
+    //     new User("example0@gmail.com", _user01Id, _cognitoUuid01,null,null,"example0")
+    // ];
+    //
+    // // Seed profiles
+    // private static Profile[] GetProfiles() =>
+    // [
+    //     new Profile(
+    //         _user01Id,
+    //         RoleEnum.PlatformAdmin,
+    //         null,
+    //     null,
+    //     null,
+    //         _profile01Id),
+    // ];
+    // public void Initialize()
+    // {
+    //     _dbContext.Organisations.AddRange(GetOrganisations());
+    //     var users = GetUsers();
+    //     _dbContext.Users.AddRange(users);
+    //     var profiles = GetProfiles();
+    //     _dbContext.Profiles.AddRange(profiles);
+    //     _dbContext.SaveChanges();
+    //     
+    //     // update default profile of each user
+    //     users.ToList().ForEach(u =>
+    //     {
+    //         var defaultProfileId =profiles.FirstOrDefault(p=>p.UserId==u.UserId)!.ProfileId;
+    //         u.UpdateDefaultProfile(defaultProfileId);
+    //     });
+    //     
+    //     _dbContext.Users.UpdateRange(users);
+    //     _dbContext.SaveChanges();
+    // }
+    // public bool CanSeed()
+    // {
+    //     return (!_dbContext.Users.Any() && !_dbContext.Profiles.Any() &&
+    //             !_dbContext.Organisations.Any());
+    // }
 }

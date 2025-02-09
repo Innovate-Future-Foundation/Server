@@ -12,10 +12,12 @@ public class Organisation
     public string? Email { get; private set; }
     public SubscriptionEnum? Subscription { get; private set; }
     public StatusEnum Status { get; private set; }
-    
-    public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    
+    // Navigation
+    public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
+    
     public Organisation(){}
     public Organisation(string orgName, Guid? orgId= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null, SubscriptionEnum? subscription=null)
     {
@@ -48,6 +50,7 @@ public class Organisation
         Status = status;
         UpdatedAt = DateTime.UtcNow;
     }
+    
     public void AddProfile(Profile profile)
     {
         if (profile == null)

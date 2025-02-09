@@ -1,12 +1,12 @@
-using System.Linq.Expressions;
 using InnovateFuture.Domain.Entities;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace InnovateFuture.Infrastructure.Users.Persistence.Interfaces;
 
 public interface IUserRepository
 {
+   
+    // Generate Email Confirmation Token
     Task<User> GetByIdAsync(Guid id);
-    Task AddAsync(User user); 
-    Task UpdateAsync();
-    Task<IEnumerable<User>>GetAnyAsync(Expression<Func<User, bool>> predicate);
+    // Get all Users
 }

@@ -36,7 +36,7 @@ public class ProfilesController : ControllerBase
     public async Task<IActionResult> UpdateProfile(Guid id, [FromBody] UpdateProfileRequest request)
     {
         var command = _mapper.Map<UpdateProfileCommand>(request);
-        command.ProfileId = id;
+        command.Id = id;
         var profileId = await _mediator.Send(command);
         return Ok(new {  profileId });
     }

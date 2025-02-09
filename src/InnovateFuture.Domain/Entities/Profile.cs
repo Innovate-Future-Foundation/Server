@@ -5,38 +5,52 @@ namespace InnovateFuture.Domain.Entities;
 
 public class Profile
 {
-    public Guid ProfileId { get; private set; }
-    public Guid UserId { get; private set; }
-    public User User { get; private set; }
-    public Guid? OrgId { get; private set; }
-    public Organisation? Organisation { get; private set; }
+    public Guid Id { get; private set; }
+    public Guid UserId { get;  set; }
     public RoleEnum Role { get; private set; }
+    public Guid? OrgId { get; private set; }
     public Guid? Inviter { get; private set; }
-    public Profile? InviterProfile { get; private set; }
     public Guid? Supervisor { get; private set; }
-    public Profile? SupervisorProfile { get; private set; }
-    public string? Email { get; private set; }
     public string? Name { get; private set; }
+    public string? Email { get; private set; }
     public string? Phone { get; private set; }
     public string? AvatarUrl { get; private set; }
     public bool IsActive { get; private set; }
     public bool IsConfirmed { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public Profile() { }
+    
+    // Navigation
+    public User User { get;  private set; } = null!;
+    public Organisation? Organisation { get; private set; } = null!;
+    public Profile? InviterProfile { get; private set; }
+    public Profile? SupervisorProfile { get; private set; }
+    
+    public Profile() {}
+    
     public Profile(
         Guid userId,
         RoleEnum role,
         Guid? orgId = null,
         Guid? inviter = null,
         Guid? supervisor = null,
-        Guid? profileId = null
+        string? name = null,
+        string? email = null,
+        string? phone = null,
+        string? avatarUrl = null,
+        Guid? id=null
     )
     {
-        ProfileId = profileId?? Guid.NewGuid();
+        Id = id?? Guid.NewGuid();
         UserId = userId;
         Role = role;
         OrgId = orgId;
+        Inviter = inviter;
+        Supervisor = supervisor;
+        Name = name;
+        Email = email;
+        Phone = phone;
+        AvatarUrl = avatarUrl;
         Inviter = inviter;
         Supervisor = supervisor;
         IsActive = true;
@@ -44,6 +58,7 @@ public class Profile
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
+
     public void UpdateProfile(string? email, string? name, string? phone, string? avatarUrl, bool? isActive, bool? isConfirmed)
     {
         Email = string.IsNullOrWhiteSpace(email)? Email : email;
@@ -52,14 +67,13 @@ public class Profile
         AvatarUrl = string.IsNullOrWhiteSpace(AvatarUrl)? AvatarUrl : avatarUrl;
         IsActive = isActive?? IsActive;
         IsConfirmed = isConfirmed?? IsConfirmed;
-        UpdatedAt = DateTime.UtcNow;
         
     }
     // Methods to set navigation properties
     public void AddUser(User user)
     {
         User = user?? throw new ArgumentNullException(nameof(user));
-        UserId = user.UserId;
+        UserId = user.Id;
     }
     public void AddOrganisation(Organisation? organisation)
     {
@@ -69,12 +83,18 @@ public class Profile
     public void AddInviterProfile(Profile? inviterProfile)
     {
         InviterProfile = inviterProfile;
-        Inviter = inviterProfile?.ProfileId;
+        Inviter = inviterProfile?.Id;
     }
     
     public void AddSupervisorProfile(Profile? supervisorProfile)
     {
         SupervisorProfile = supervisorProfile;
-        Supervisor = supervisorProfile?.ProfileId;
+        Supervisor = supervisorProfile?.Id;
     }  
+
+    public void ConfirmRole()
+    {
+        IsConfirmed = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

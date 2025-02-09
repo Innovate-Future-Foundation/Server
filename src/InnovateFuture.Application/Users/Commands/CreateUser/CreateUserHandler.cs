@@ -24,7 +24,9 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         var organisation = await _orgRepository.GetByIdAsync(command.OrgId);
         
         // Create user
-        var user = new User(command.Email);
+        var user = new User(
+            userName: command.UserName, 
+            email: command.Email);
 
         Profile? inviterProfile = null;
         Profile? supervisorProfile = null;
@@ -40,27 +42,27 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         }
         
         var profile = new Profile(
-            user.UserId,
+            user.Id,
             command.RoleEnum,
             organisation.OrgId,
-            inviterProfile?.ProfileId,
-            supervisorProfile?.ProfileId
+            inviterProfile?.Id,
+            supervisorProfile?.Id
         );
         
-        profile.AddUser(user);
-        profile.AddOrganisation(organisation);
-        profile.AddInviterProfile(inviterProfile);
-        profile.AddSupervisorProfile(supervisorProfile);
-        
-        // Add profile to user's navigation property
-        user.AddProfile(profile);
-        
-        // Fill profile id
-        user.UpdateDefaultProfile(profile.ProfileId);
-        
-        await _userRepository.AddAsync(user); // This will make sure user and its profile be created at the same time
+        // profile.AddUser(user);
+        // profile.AddOrganisation(organisation);
+        // profile.AddInviterProfile(inviterProfile);
+        // profile.AddSupervisorProfile(supervisorProfile);
+        //
+        // // Add profile to user's navigation property
+        // user.AddProfile(profile);
+        //
+        // // Fill profile id
+        // user.UpdateDefaultProfile(profile.ProfileId);
+        //
+        // await _userRepository.AddAsync(user); // This will make sure user and its profile be created at the same time
 
-        return user.UserId;
+        return user.Id;
     }
 }
 

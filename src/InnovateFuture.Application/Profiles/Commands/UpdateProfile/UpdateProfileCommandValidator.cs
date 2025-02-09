@@ -5,7 +5,7 @@ public class UpdateProfileCommandValidator : AbstractValidator<UpdateProfileComm
 {
     public UpdateProfileCommandValidator()
     {
-        RuleFor(x => x.ProfileId)
+        RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Profile Id is required.");
         
         When(x => !string.IsNullOrEmpty(x.Email), () =>
