@@ -14,10 +14,13 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             .MaximumLength(255).WithMessage("Email must not exceed 255 characters.")
             .EmailAddress().WithMessage("Kindly enter a valid Email Address.");
         RuleFor(x => x.FullName)
-            .MaximumLength(100).WithMessage("Full name must not exceed 100 characters.");
+            .MaximumLength(100).WithMessage("Full name must not exceed 100 characters.")
+            .When(x=>!string.IsNullOrWhiteSpace(x.FullName));
         RuleFor(x => x.Phone)
-            .Matches("^\\+61\\s4\\d{8}$").WithMessage("Kindly enter a valid AU Phone Number.");
+            .Matches("^\\+61\\s4\\d{8}$").WithMessage("Kindly enter a valid AU Phone Number.")
+            .When(x=>!string.IsNullOrWhiteSpace(x.Phone));
         RuleFor(x => x.Birthday)
-            .LessThanOrEqualTo(DateTime.Now).WithMessage("Birthday must be greater than or equal to now.");
+            .LessThanOrEqualTo(DateTime.Now).WithMessage("Birthday must be greater than or equal to now.")
+            .When(x => x.Birthday != null);
     }
 }
