@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using InnovateFuture.Domain.Enums;
+
 namespace InnovateFuture.Domain.Entities;
 
 public class Profile
@@ -7,8 +10,7 @@ public class Profile
     public User User { get; private set; }
     public Guid? OrgId { get; private set; }
     public Organisation? Organisation { get; private set; }
-    public Guid RoleId { get; private set; }
-    public Role Role { get; private set; }
+    public RoleEnum Role { get; private set; }
     public Guid? Inviter { get; private set; }
     public Profile? InviterProfile { get; private set; }
     public Guid? Supervisor { get; private set; }
@@ -24,7 +26,7 @@ public class Profile
     public Profile() { }
     public Profile(
         Guid userId,
-        Guid roleId,
+        RoleEnum role,
         Guid? orgId = null,
         Guid? inviter = null,
         Guid? supervisor = null,
@@ -33,7 +35,7 @@ public class Profile
     {
         ProfileId = profileId?? Guid.NewGuid();
         UserId = userId;
-        RoleId = roleId;
+        Role = role;
         OrgId = orgId;
         Inviter = inviter;
         Supervisor = supervisor;
@@ -58,11 +60,6 @@ public class Profile
     {
         User = user?? throw new ArgumentNullException(nameof(user));
         UserId = user.UserId;
-    }
-    public void AddRole(Role role)
-    {
-        Role = role?? throw new ArgumentNullException(nameof(role));
-        RoleId = role.RoleId;
     }
     public void AddOrganisation(Organisation? organisation)
     {

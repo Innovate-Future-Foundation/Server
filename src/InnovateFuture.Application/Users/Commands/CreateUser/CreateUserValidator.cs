@@ -1,12 +1,14 @@
 using FluentValidation;
+using InnovateFuture.Domain.Enums;
 
 namespace InnovateFuture.Application.Users.Commands.CreateUser;
 public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
     public CreateUserCommandValidator()
     {
-        RuleFor(x => x.RoleId)
-            .NotEmpty().WithMessage("Role Id is required.");
+        RuleFor(x => x.RoleEnum)
+            .NotEmpty().WithMessage("Role is required.")
+            .Must(role => role != RoleEnum.UndefinedRole).WithMessage("Role Code provided is not found.");
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")
             .MaximumLength(255).WithMessage("Email must not exceed 255 characters.")

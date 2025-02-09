@@ -16,7 +16,7 @@ public class GetProfileWithDetailsResponse
     public Guid ProfileId { get; set; }
     public string Name { get; set; }
     public string? Email { get; set; }
-    public string RoleName { get; set; }
+    public string RoleCode { get; set; }
     public bool IsActive { get; set; }
     public bool IsConfirmed { get; set; }
     public string? Phone { get; set; }

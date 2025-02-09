@@ -14,7 +14,7 @@ public class GetProfileResponse
     public string Name { get; set; }
     public string? Email { get; set; }
     public Guid? OrgId { get; set; }
-    public Guid? RoleId { get; set; }
+    public string? RoleCode { get; set; }
     public bool IsActive { get; set; }
     public bool IsConfirmed { get; set; }
     public Guid? Inviter { get; set; }

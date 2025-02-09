@@ -3,7 +3,6 @@ using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
-using InnovateFuture.Infrastructure.Roles.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Users.Persistence.Interfaces;
 using Moq;
 
@@ -16,19 +15,16 @@ public class CreateUserHandlerTest
         // Arrange
         var mockedUserRepository = new Mock<IUserRepository>();
         var mockedOrgRepository = new Mock<IOrgRepository>();
-        var mockedRoleRepository = new Mock<IRoleRepository>();
         var mockedProfileRepository = new Mock<IProfileRepository>();
-        var handler = new CreateUserHandler(mockedUserRepository.Object, mockedRoleRepository.Object, mockedOrgRepository.Object,mockedProfileRepository.Object);
+        var handler = new CreateUserHandler(mockedUserRepository.Object,mockedOrgRepository.Object,mockedProfileRepository.Object);
         var command = new CreateUserCommand
         {
             Email = "test@example.com",
-            RoleId = Guid.NewGuid(),
+            RoleEnum = RoleEnum.Parent,
             OrgId = Guid.NewGuid(),
         };
         mockedOrgRepository.Setup(o=>o.GetByIdAsync(command.OrgId))
             .ReturnsAsync(new Organisation("org_name_test01"));
-        mockedRoleRepository.Setup(r => r.GetByIdAsync(command.RoleId))
-            .ReturnsAsync(new Role("organisation_admin",RoleEnum.OrgAdmin));
         mockedUserRepository.Setup(u => u.AddAsync(It.IsAny<User>()))
             .Returns(Task.CompletedTask);
        
@@ -37,7 +33,6 @@ public class CreateUserHandlerTest
         
         // Assert
         Assert.NotEqual(Guid.Empty, userId);
-        mockedRoleRepository.Verify(r => r.GetByIdAsync(command.RoleId), Times.Once);
         mockedOrgRepository.Verify(o => o.GetByIdAsync(command.OrgId), Times.Once);
         
         mockedUserRepository.Verify(u => u.AddAsync(It.Is<User>(user =>
