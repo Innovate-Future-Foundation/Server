@@ -21,7 +21,6 @@ public class ProfileRepository:IProfileRepository
         var profile = await _dbContext.Profiles
             .Include(p => p.User)
             .Include(p=>p.Organisation)
-            .Include(p=>p.Role)
             .Include(p=>p.InviterProfile)
             .Include(p=>p.SupervisorProfile)
             .FirstOrDefaultAsync(p=>p.ProfileId == id);
@@ -48,7 +47,6 @@ public class ProfileRepository:IProfileRepository
         IQueryable<Profile> query =  _dbContext.Profiles
             .Include(p => p.User)
             .Include(p => p.Organisation)
-            .Include(p => p.Role)
             .Include(p => p.InviterProfile)
             .Include(p => p.SupervisorProfile);
         

@@ -1,5 +1,6 @@
 using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Domain.Enums;
 using MediatR;
 
 namespace InnovateFuture.Application.Profiles.Queries.GetProfiles;
@@ -15,7 +16,7 @@ public class GetProfilesQuery : IRequest<(List<Profile> data, int totalItems)>
 
 public class QueryProfileFilters
 {
-    public string? RoleIds { get; set; }
+    public RoleEnum[] RoleEnums { get; set; } = [];
     public Guid? OrgId { get; set; }
     public Guid? Supervisor { get; set; }
     public bool? IsActive { get; set; }

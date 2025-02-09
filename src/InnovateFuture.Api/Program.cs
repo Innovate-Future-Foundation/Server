@@ -6,8 +6,6 @@ using InnovateFuture.Api.Middleware;
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Profiles.Queries.GetProfile;
-using InnovateFuture.Application.Roles.Queries.GetRole;
-using InnovateFuture.Application.Roles.Queries.GetRoles;
 using InnovateFuture.Application.Services.Security;
 using InnovateFuture.Application.Users.Commands.CreateUser;
 using InnovateFuture.Application.Users.Commands.UpdateUser;
@@ -16,17 +14,15 @@ using InnovateFuture.Application.Users.Queries.GetUsers;
 using InnovateFuture.Infrastructure.Common;
 using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
-using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
+using InnovateFuture.Domain.Enums;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Repositories;
-using InnovateFuture.Infrastructure.Roles.Persistence.Interfaces;
-using InnovateFuture.Infrastructure.Roles.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Users.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Users.Persistence.Repositories;
 using MediatR;
@@ -35,7 +31,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
-using InnovateFuture.Infrastructure.Common;
+using Npgsql;
 
 namespace InnovateFuture.Api
 {
@@ -74,9 +70,6 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(UpdateProfileHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetProfileHandler).Assembly);
                 
-                configuration.RegisterServicesFromAssembly(typeof(GetRoleHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(GetRolesHandler).Assembly);
-
                 configuration.RegisterServicesFromAssembly(typeof(CreateOrganisationHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(UpdateOrganisationHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
@@ -88,15 +81,12 @@ namespace InnovateFuture.Api
             builder.Services.AddScoped<IOrgRepository, OrgRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
-            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<IOrgRepository, OrgRepository>();
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(GetUsersQueryValidator).Assembly);
-            
-            builder.Services.AddValidatorsFromAssembly(typeof(GetRolesQueryValidator).Assembly);
             
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateProfileCommandValidator).Assembly);
 
@@ -112,9 +102,13 @@ namespace InnovateFuture.Api
             #region DB connection
             builder.Services.Configure<DBConnectionConfig>(builder.Configuration);
             
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+            dataSourceBuilder.MapEnum<RoleEnum>();
+            var dataSource = dataSourceBuilder.Build();
+            
             builder.Services.AddDbContext<ApplicationDbContext>(
                 dbContextOptions => dbContextOptions
-                    .UseNpgsql(connectionString,
+                    .UseNpgsql(dataSource,
                         npgsqlOptions => npgsqlOptions.SetPostgresVersion(new Version(17, 2)))
                     // The following three options help with debugging, but should
                     // be changed or removed for production.
@@ -164,8 +158,6 @@ namespace InnovateFuture.Api
             builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetUsersQueryValidator>();
-            // Roles
-            builder.Services.AddValidatorsFromAssemblyContaining<GetRolesQueryValidator>();
             // Profiles
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetProfilesQueryValidator>();

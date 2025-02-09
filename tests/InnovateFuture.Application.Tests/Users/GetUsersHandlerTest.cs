@@ -24,8 +24,8 @@ public class GetUsersHandlerTest
         var query = new GetUsersQuery();
         var expectedUsers = new List<User>
         {
-            new User ("test1@example.com"),
-            new User ("test2@example.com" ),
+            new User ("test1@example.com",null,null,null,"test1"),
+            new User ("test2@example.com",null,null,null,"test1" ),
         };
 
         _mockedUserRepository
@@ -70,9 +70,9 @@ public class GetUsersHandlerTest
             Email = "test@example.com",
             FullName = "John Doe"
         };
-        
+
         var correctUser = new User
-            ("test@example.com",null,null,null,"John Doe");
+            ("test@example.com", null,null,null,"John Doe");
         var wrongUser = new User
             ("wrong@example.com",null,null,null,"Mary Green");
 

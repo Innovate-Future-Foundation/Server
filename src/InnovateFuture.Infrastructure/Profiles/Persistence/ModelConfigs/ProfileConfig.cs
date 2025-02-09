@@ -1,4 +1,5 @@
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,14 +12,14 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
         builder.HasKey(p => p.ProfileId);
         
         // Set indexes
-        builder.HasIndex(p=> new {p.UserId, p.RoleId, p.OrgId})
+        builder.HasIndex(p=> new {p.UserId, p.Role, p.OrgId})
             .IsUnique()
-            .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
+            .HasDatabaseName("IX_Profiles_user_id_role_org_id");
         
         // Column Mappings
         builder.Property(p => p.ProfileId).HasColumnType("uuid").HasColumnName("profile_id").IsRequired();
         builder.Property(p => p.UserId).HasColumnType("uuid").HasColumnName("user_id").IsRequired();
-        builder.Property(p => p.RoleId).HasColumnType("uuid").HasColumnName("role_id").IsRequired();
+        builder.Property(p => p.Role).HasColumnType("role_enum").HasColumnName("role").IsRequired();
         builder.Property(p => p.OrgId).HasColumnType("uuid").HasColumnName("org_id"); // no need for platform admin
         builder.Property(p => p.Inviter).HasColumnType("uuid").HasColumnName("inviter");
         builder.Property(p => p.Supervisor).HasColumnType("uuid").HasColumnName("supervisor");
@@ -36,10 +37,6 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
             .WithMany(u => u.Profiles)
             .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-        
-        builder.HasOne(p => p.Role)
-            .WithMany()
-            .OnDelete(DeleteBehavior.Restrict);
         
         builder.HasOne(p => p.Organisation)
             .WithMany(o => o.Profiles)
