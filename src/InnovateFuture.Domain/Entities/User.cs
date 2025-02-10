@@ -12,6 +12,10 @@ public class User: IdentityUser<Guid>
     // Navigation
     public virtual ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
 
+    public User()
+    {
+    }
+
     public User(
         string userName,
         string email,

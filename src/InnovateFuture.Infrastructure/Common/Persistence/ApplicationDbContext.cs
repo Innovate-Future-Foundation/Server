@@ -17,18 +17,13 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.HasPostgresEnum<RoleEnum>(name: "role_enum");
-        // Apply all configurations from the current assembly
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-        
-        // Changed default table name 
-        modelBuilder.Entity<User>(e =>
-        {
-            e.ToTable("Users");
-        });
+        modelBuilder.HasPostgresEnum<RoleEnum>(name:"role_enum");
         
         // Remove unnecessary identity tables
         modelBuilder.Ignore<IdentityRole<Guid>>();
         modelBuilder.Ignore<IdentityUserRole<Guid>>();
+        
+        // Apply all configurations from the current assembly
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }
 }

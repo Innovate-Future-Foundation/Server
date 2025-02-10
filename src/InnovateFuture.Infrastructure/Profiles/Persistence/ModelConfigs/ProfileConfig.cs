@@ -11,25 +11,28 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
         builder.HasKey(p => p.Id);
         
         // Column Mappings
-        builder.Property(p => p.Id).HasColumnType("uuid").HasColumnName("profile_id").IsRequired();
-        builder.Property(p => p.UserId).HasColumnType("uuid").HasColumnName("user_id").IsRequired();
-        builder.Property(p => p.Role).HasColumnType("role_enum").HasColumnName("role").IsRequired();
-        builder.Property(p => p.OrgId).HasColumnType("uuid").HasColumnName("org_id").IsRequired(false);
-        builder.Property(p => p.Inviter).HasColumnType("uuid").HasColumnName("inviter").IsRequired(false);
-        builder.Property(p => p.Supervisor).HasColumnType("uuid").HasColumnName("supervisor").IsRequired(false);
-        builder.Property(p => p.Name).HasColumnName("name").HasMaxLength(100).IsRequired(false);
-        builder.Property(p => p.Email).HasColumnName("email").HasMaxLength(100).IsRequired(false);
-        builder.Property(p => p.Phone).HasColumnName("phone").HasMaxLength(50).IsRequired(false);
-        builder.Property(p => p.AvatarUrl).HasColumnName("avatar_url").HasMaxLength(500).IsRequired(false);
-        builder.Property(p => p.IsActive).HasColumnType("boolean").HasColumnName("is_active").IsRequired();
-        builder.Property(p => p.IsConfirmed).HasColumnType("boolean").HasColumnName("is_confirmed").IsRequired();
-        builder.Property(p => p.CreatedAt).HasColumnType("timestamptz").HasColumnName("created_at").IsRequired();
-        builder.Property(p => p.UpdatedAt).HasColumnType("timestamptz").HasColumnName("updated_at").IsRequired();
+        builder.Property(p => p.Id).HasColumnType("uuid").IsRequired();
+        builder.Property(p => p.UserId).HasColumnType("uuid").IsRequired();
+        builder.Property(p => p.Role).HasColumnType("role_enum").IsRequired();
+        builder.Property(p => p.OrgId).HasColumnType("uuid").IsRequired(false);
+        builder.Property(p => p.Inviter).HasColumnType("uuid").IsRequired(false);
+        builder.Property(p => p.Supervisor).HasColumnType("uuid").IsRequired(false);
+        builder.Property(p => p.Name).HasMaxLength(100).IsRequired(false);
+        builder.Property(p => p.Email).HasMaxLength(100).IsRequired(false);
+        builder.Property(p => p.Phone).HasMaxLength(50).IsRequired(false);
+        builder.Property(p => p.AvatarUrl).HasMaxLength(500).IsRequired(false);
+        builder.Property(p => p.IsActive).HasColumnType("boolean").IsRequired();
+        builder.Property(p => p.IsConfirmed).HasColumnType("boolean").IsRequired();
+        builder.Property(p => p.CreatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(p => p.UpdatedAt).HasColumnType("timestamptz").IsRequired();
         
         // Set indexes
         builder.HasIndex(p=> new {p.UserId, p.Role, p.OrgId})
             .IsUnique()
-            .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
+            .HasDatabaseName("IX_Profiles_user_id_role_org_id");
+        
+        builder.HasIndex(p => p.UserId);
+        builder.HasIndex(p => p.Role);
         
         // Relationships
         builder.HasOne(p => p.User)

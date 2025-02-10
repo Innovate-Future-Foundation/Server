@@ -30,7 +30,7 @@ public class OrgRepository:IOrgRepository
     {
         var org = await _dbContext.Organisations
             .Include(o => o.Profiles)
-            .FirstOrDefaultAsync(o=>o.OrgId == id);
+            .FirstOrDefaultAsync(o=>o.Id == id);
         if (org == null)
         {
             throw new IFEntityNotFoundException("Organisation", id);
