@@ -31,6 +31,9 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
             .IsUnique()
             .HasDatabaseName("IX_Profiles_user_id_role_org_id");
         
+        builder.HasIndex(p => p.UserId);
+        builder.HasIndex(p => p.Role);
+        
         // Relationships
         builder.HasOne(p => p.User)
             .WithMany(u => u.Profiles)
