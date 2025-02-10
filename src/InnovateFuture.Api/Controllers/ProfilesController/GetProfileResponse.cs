@@ -10,7 +10,7 @@ public class GetProfilePaginatedResponse : IPaginatedResult<GetProfileResponse>
 
 public class GetProfileResponse
 {
-    public Guid ProfileId { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; }
     public string? Email { get; set; }
     public Guid? OrgId { get; set; }
