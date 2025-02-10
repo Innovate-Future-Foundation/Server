@@ -58,9 +58,9 @@ public class ConfirmEmailHandler: IRequestHandler<ConfirmEmailCommand, bool>
                     throw new Exception("Profile does not belong to any organisation.");
                 }
                 var organisation = await _orgRepository.GetByIdAsync(profile.OrgId.Value, cancellationToken);
-                if (organisation?.Status == StatusEnum.Pending)
+                if (organisation?.OrgStatus == OrgStatusEnum.Pending)
                 {
-                    organisation.ChangeStatus(StatusEnum.Verified);
+                    organisation.ChangeStatus(OrgStatusEnum.Active);
                 }
             }
             await _unitOfWork.SaveChangesAsync(cancellationToken);

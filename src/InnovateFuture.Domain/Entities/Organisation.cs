@@ -11,7 +11,7 @@ public class Organisation
     public string? Address { get; private set; }
     public string? Email { get; private set; }
     public SubscriptionEnum Subscription { get; private set; }
-    public StatusEnum Status { get; private set; }
+    public OrgStatusEnum OrgStatus { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     
@@ -27,13 +27,13 @@ public class Organisation
         WebsiteUrl = websiteUrl;
         Address = address;
         Email = email;
-        Subscription = SubscriptionEnum.free;
-        Status = StatusEnum.Pending;// initial status
+        Subscription = SubscriptionEnum.Free;
+        OrgStatus = OrgStatusEnum.Pending;// initial status
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, SubscriptionEnum? subscription, StatusEnum? status)
+    public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, SubscriptionEnum? subscription, OrgStatusEnum? status)
     {
         OrgName = string.IsNullOrWhiteSpace(orgName) ? OrgName : orgName;
         LogoUrl = string.IsNullOrWhiteSpace(logoUrl) ? LogoUrl : logoUrl;
@@ -41,13 +41,13 @@ public class Organisation
         Address = string.IsNullOrWhiteSpace(address) ? Address : address;
         Email = string.IsNullOrWhiteSpace(email) ? Email : email;
         Subscription = subscription?? Subscription;
-        Status = status??Status;
+        OrgStatus = status??OrgStatus;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void ChangeStatus(StatusEnum status)
+    public void ChangeStatus(OrgStatusEnum orgStatus)
     {
-        Status = status;
+        OrgStatus = orgStatus;
         UpdatedAt = DateTime.UtcNow;
     }
     

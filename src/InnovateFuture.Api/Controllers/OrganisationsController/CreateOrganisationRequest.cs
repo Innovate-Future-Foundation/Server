@@ -8,7 +8,6 @@ public class CreateOrganisationRequest
     public string? LogoUrl { get;  set; }
     public string? WebsiteUrl { get;  set; }
     public string? Address { get;  set; }
-    public SubscriptionEnum? Subscription { get;  set; }
     public string? OrgEmail { get;  set; }
     
     public string UserName { get; set; } = null!;

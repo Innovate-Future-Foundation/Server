@@ -121,9 +121,12 @@ namespace InnovateFuture.Api
             
             #region DB connection
             builder.Services.Configure<DBConnectionConfig>(builder.Configuration);
-            
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+            // register enums
             dataSourceBuilder.MapEnum<RoleEnum>();
+            dataSourceBuilder.MapEnum<SubscriptionEnum>();
+            dataSourceBuilder.MapEnum<OrgStatusEnum>();
+            
             var dataSource = dataSourceBuilder.Build();
             
             builder.Services.AddDbContext<ApplicationDbContext>(
