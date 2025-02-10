@@ -145,7 +145,6 @@ namespace InnovateFuture.Api
                 .AddDefaultTokenProviders();
             #endregion
             
-
             
             // Disable auto model validation
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);

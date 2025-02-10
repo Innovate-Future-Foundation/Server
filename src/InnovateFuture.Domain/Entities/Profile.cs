@@ -7,10 +7,14 @@ public class Profile
 {
     public Guid Id { get; private set; }
     public Guid UserId { get;  set; }
-    public RoleEnum Role { get; private set; }
+    public User User { get;  private set; } = null!;
     public Guid? OrgId { get; private set; }
+    public Organisation? Organisation { get; private set; }
     public Guid? Inviter { get; private set; }
+    public Profile? InviterProfile { get; private set; }
     public Guid? Supervisor { get; private set; }
+    public Profile? SupervisorProfile { get; private set; }
+    public RoleEnum Role { get; private set; }
     public string? Name { get; private set; }
     public string? Email { get; private set; }
     public string? Phone { get; private set; }
@@ -19,13 +23,6 @@ public class Profile
     public bool IsConfirmed { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    
-    // Navigation
-    public User User { get;  private set; } = null!;
-    public Organisation? Organisation { get; private set; } = null!;
-    public Profile? InviterProfile { get; private set; }
-    public Profile? SupervisorProfile { get; private set; }
-    
     public Profile() {}
     
     public Profile(
@@ -78,7 +75,7 @@ public class Profile
     public void AddOrganisation(Organisation? organisation)
     {
         Organisation = organisation;
-        OrgId = organisation?.OrgId;
+        OrgId = organisation?.Id;
     }
     public void AddInviterProfile(Profile? inviterProfile)
     {

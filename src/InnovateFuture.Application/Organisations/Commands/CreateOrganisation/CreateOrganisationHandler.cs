@@ -45,8 +45,7 @@ public class CreateOrganisationHandler : IRequestHandler<CreateOrganisationComma
                 command.LogoUrl,
                 command.WebsiteUrl,
                 command.Address,
-                command.OrgEmail,
-                command.Subscription
+                command.OrgEmail
             );
             await _orgRepository.AddAsync(organisation, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -63,7 +62,7 @@ public class CreateOrganisationHandler : IRequestHandler<CreateOrganisationComma
             var profile = new Profile(
                 userId: organisationAdmin.Id,
                 role: RoleEnum.OrgAdmin,
-                orgId: organisation.OrgId,
+                orgId: organisation.Id,
                 name: command.UserName,
                 email: command.UserEmail
             );
@@ -87,7 +86,7 @@ public class CreateOrganisationHandler : IRequestHandler<CreateOrganisationComma
                         
             await _unitOfWork.CommitTransactionAsync();
             
-            return organisation.OrgId;
+            return organisation.Id;
         }
         catch (Exception ex)
         {

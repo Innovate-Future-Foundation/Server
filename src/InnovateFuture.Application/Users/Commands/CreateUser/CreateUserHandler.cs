@@ -44,7 +44,7 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
         var profile = new Profile(
             user.Id,
             command.RoleEnum,
-            organisation.OrgId,
+            organisation.Id,
             inviterProfile?.Id,
             supervisorProfile?.Id
         );

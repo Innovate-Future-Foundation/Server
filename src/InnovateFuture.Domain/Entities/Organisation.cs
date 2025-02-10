@@ -4,13 +4,13 @@ namespace InnovateFuture.Domain.Entities;
 
 public class Organisation
 {
-    public Guid OrgId { get; private set; }
+    public Guid Id { get; private set; }
     public string OrgName { get; private set; }
     public string? LogoUrl { get; private set; }
     public string? WebsiteUrl { get; private set; }
     public string? Address { get; private set; }
     public string? Email { get; private set; }
-    public SubscriptionEnum? Subscription { get; private set; }
+    public SubscriptionEnum Subscription { get; private set; }
     public StatusEnum Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
@@ -19,15 +19,15 @@ public class Organisation
     public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
     
     public Organisation(){}
-    public Organisation(string orgName, Guid? orgId= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null, SubscriptionEnum? subscription=null)
+    public Organisation(string orgName, Guid? id= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null)
     {
-        OrgId = orgId??Guid.NewGuid();
+        Id = id??Guid.NewGuid();
         OrgName = orgName;
         LogoUrl = logoUrl;
         WebsiteUrl = websiteUrl;
         Address = address;
         Email = email;
-        Subscription = subscription;
+        Subscription = SubscriptionEnum.free;
         Status = StatusEnum.Pending;// initial status
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
