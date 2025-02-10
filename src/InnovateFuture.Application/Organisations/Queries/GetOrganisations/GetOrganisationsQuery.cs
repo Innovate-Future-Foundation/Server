@@ -16,6 +16,6 @@ public class  GetOrganisationsQuery : IRequest<(List<Organisation> data, int tot
 
 public class QueryOrganisationsFilters
 {
-    public StatusEnum? Status { get; set; } 
-    public SubscriptionEnum? Subscription { get; set; }
+    public OrgStatusEnum? OrgStatusEnum { get; set; } 
+    public SubscriptionEnum? SubscriptionEnum { get; set; }
 }

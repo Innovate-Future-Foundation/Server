@@ -18,7 +18,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.HasPostgresEnum<RoleEnum>(name:"role_enum");
-        
+        modelBuilder.HasPostgresEnum<SubscriptionEnum>(name:"subscription_enum");
+        modelBuilder.HasPostgresEnum<OrgStatusEnum>(name:"org_status_enum");
         // Remove unnecessary identity tables
         modelBuilder.Ignore<IdentityRole<Guid>>();
         modelBuilder.Ignore<IdentityUserRole<Guid>>();

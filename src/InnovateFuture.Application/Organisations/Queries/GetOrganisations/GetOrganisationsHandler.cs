@@ -32,8 +32,8 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, (L
                 var filters = query.Filters;
                 // Build predicate based on query conditions
                 predicate = predicate.And(o =>
-                    (!filters.Status.HasValue || o.Status == filters.Status) &&
-                    (!filters.Subscription.HasValue || o.Subscription == filters.Subscription));
+                    (!filters.OrgStatusEnum.HasValue || o.OrgStatus == filters.OrgStatusEnum) &&
+                    (!filters.SubscriptionEnum.HasValue || o.Subscription == filters.SubscriptionEnum));
             }
 
             if (!string.IsNullOrEmpty(query.SearchKey))

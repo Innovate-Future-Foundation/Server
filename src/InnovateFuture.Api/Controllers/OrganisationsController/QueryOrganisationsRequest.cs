@@ -13,6 +13,6 @@ public class QueryOrganisationsRequest :IPaginatedRequest<QueryOrganisationsFilt
 }
 public class QueryOrganisationsFilters
 {
-    public StatusEnum? Status { get; set; } 
-    public SubscriptionEnum? Subscription { get; set; }
+    public string? OrgStatusCode { get; set; } 
+    public string? SubscriptionCode { get; set; }
 }

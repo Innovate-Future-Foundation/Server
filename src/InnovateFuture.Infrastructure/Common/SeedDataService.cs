@@ -22,7 +22,7 @@ public class SeedDataService:ISeedDataService
             .RuleFor(o => o.Email, (f, o) => f.Internet.Email(o.OrgName))
             .RuleFor(o => o.LogoUrl, f => f.Internet.Avatar())
             .RuleFor(o => o.WebsiteUrl, f => f.Internet.UrlWithPath())
-            .RuleFor(o => o.Status, f => f.PickRandom<StatusEnum>())
+            .RuleFor(o => o.OrgStatus, f => f.PickRandom<OrgStatusEnum>())
             .RuleFor(o => o.Subscription, f => f.PickRandom<SubscriptionEnum>())
             .RuleFor(o => o.CreatedAt, f => DateTime.UtcNow )
             .RuleFor(o => o.UpdatedAt, f => DateTime.UtcNow);

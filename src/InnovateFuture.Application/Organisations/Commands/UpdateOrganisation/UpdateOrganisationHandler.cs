@@ -23,8 +23,8 @@ public class UpdateOrganisationHandler : IRequestHandler<UpdateOrganisationComma
             request.WebsiteUrl,
             request.Address,
             request.Email,
-            request.Subscription,
-            request.Status
+            request.SubscriptionEnum,
+            request.OrgStatusEnum
         );
 
         await _orgRepository.UpdateAsync();

@@ -36,8 +36,8 @@ public class AutoMapperProfile: AMProfile
          * User
          */
         CreateMap<CreateUserRequest, CreateUserCommand>()
-            .ForMember(dest=>dest.RoleEnum,opt=>opt.MapFrom<RoleCodeToRoleEnumResolver>());
-        
+            .ForMember(dest => dest.RoleEnum,
+                opt => opt.MapFrom<RoleCodeToRoleEnumResolver>());
         CreateMap<UpdateUserRequest, UpdateUserCommand>();
 
         CreateMap<QueryUsersRequest, GetUsersQuery>();
@@ -47,18 +47,18 @@ public class AutoMapperProfile: AMProfile
          * Profile
          */
         CreateMap<QueryProfilesRequest, GetProfilesQuery>();
+        
+        CreateMap<UpdateProfileRequest, UpdateProfileCommand>();
+        
         CreateMap<APIQueryProfileFilters, 
                 APPQueryProfileFilters>()
             .ForMember(dest => dest.RoleEnums, opt => opt.MapFrom<RoleCodesToRoleEnumsResolver>());
-        
+
         CreateMap<Profile, GetProfileResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
 
         CreateMap<Profile, GetProfileWithDetailsResponse>()
-            .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()))
-            .ForMember(dest => dest.InviterProfile, opt => opt.MapFrom(src => src.InviterProfile))
-            .ForMember(dest => dest.SupervisorProfile, opt => opt.MapFrom(src => src.SupervisorProfile))
-            .ForMember(dest => dest.Organisation, opt => opt.MapFrom(src => src.Organisation));
+            .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
         
         CreateMap<(List<Profile> data, int totalItems), GetProfilePaginatedResponse>()
             .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.data))
@@ -67,29 +67,32 @@ public class AutoMapperProfile: AMProfile
         CreateMap<(List<Profile> data, int totalItems), GetProfileWithDetailsPaginatedResponse>()
             .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.data))
             .ForMember(dest => dest.Meta, opt => opt.MapFrom(src => new Meta { TotalItems = src.totalItems }));
-        
-        CreateMap<UpdateProfileRequest, UpdateProfileCommand>();
         /*
          * Organisation
          */
-
-        CreateMap<InnovateFuture.Domain.Entities.Profile, GetProfileResponse>();
+        CreateMap<Organisation, GetOrganisationsResponse>()
+            .ForMember(dest=>dest.SubscriptionCode,opt=>opt.MapFrom(src=>src.Subscription.ToString()))
+            .ForMember(dest=>dest.OrgStatusCode,opt=>opt.MapFrom(src=>src.OrgStatus.ToString()));
         
         CreateMap<CreateOrganisationRequest, CreateOrganisationCommand>();
-        
+        CreateMap<UpdateOrganisationRequest, UpdateOrganisationCommand>()
+            .ForMember(dest => dest.SubscriptionEnum,
+                opt => opt.MapFrom<UpdateOrgSubscriptionCodeToSubscriptionEnumResolver>())
+            .ForMember(dest => dest.OrgStatusEnum,
+                opt => opt.MapFrom<UpdateOrgOrgStatusCodeToOrgStatusEnumResolver>());
+
         CreateMap<QueryOrganisationsRequest, GetOrganisationsQuery>();
         
         CreateMap<APIQueryOrganisationsFilters,
-                APPQueryOrganisationsFilters>();
-
-        CreateMap<Organisation, GetOrganisationsResponse>();
+                APPQueryOrganisationsFilters>()
+            .ForMember(dest => dest.SubscriptionEnum,
+                opt => opt.MapFrom<FiltersSubscriptionCodeToSubscriptionEnumResolver>())
+            .ForMember(dest => dest.OrgStatusEnum,
+                opt => opt.MapFrom<FiltersOrgStatusCodeToOrgStatusEnumResolver>());
 
         CreateMap<(List<Organisation> data, int totalItems), GetOrganisationPaginatedResponse>()
             .ForMember(desc=>desc.Data, opt=>opt.MapFrom(src=>src.data))
             .ForMember(desc=>desc.Meta,opt=>opt.MapFrom(src=>new Meta(){TotalItems = src.totalItems}));
-        
-        CreateMap<UpdateOrganisationRequest, UpdateOrganisationCommand>();
-        
     }
 }
 public class RoleCodesToRoleEnumsResolver : IValueResolver<APIQueryProfileFilters, APPQueryProfileFilters, RoleEnum[]>
@@ -111,5 +114,42 @@ public class RoleCodeToRoleEnumResolver : IValueResolver<CreateUserRequest, Crea
         ResolutionContext context)
     {
         return  Enum.TryParse<RoleEnum>(source.RoleCode.Trim(), out var roleEnum) ? roleEnum : default;
+    }
+}
+
+public class UpdateOrgSubscriptionCodeToSubscriptionEnumResolver : IValueResolver<UpdateOrganisationRequest, UpdateOrganisationCommand, SubscriptionEnum?>
+{
+    public SubscriptionEnum? Resolve(UpdateOrganisationRequest source, UpdateOrganisationCommand destination, SubscriptionEnum? destMember,
+        ResolutionContext context)
+    {
+        return  Enum.TryParse<SubscriptionEnum>(source.SubscriptionCode?.Trim(), out var subscriptionEnum) ? subscriptionEnum : null;
+    }
+}
+public class UpdateOrgOrgStatusCodeToOrgStatusEnumResolver : IValueResolver<UpdateOrganisationRequest, UpdateOrganisationCommand, OrgStatusEnum?>
+{
+    public OrgStatusEnum? Resolve(UpdateOrganisationRequest source, UpdateOrganisationCommand destination, OrgStatusEnum? destMember,
+        ResolutionContext context)
+    {
+        return  Enum.TryParse<OrgStatusEnum>(source.OrgStatusCode?.Trim(), out var orgStatusEnum) ? orgStatusEnum : null;
+    }
+}
+
+public class FiltersSubscriptionCodeToSubscriptionEnumResolver : IValueResolver<APIQueryOrganisationsFilters,
+    APPQueryOrganisationsFilters, SubscriptionEnum?>
+{
+    public SubscriptionEnum? Resolve(APIQueryOrganisationsFilters source, APPQueryOrganisationsFilters destination, SubscriptionEnum? destMember,
+        ResolutionContext context)
+    {
+        return  Enum.TryParse<SubscriptionEnum>(source.SubscriptionCode?.Trim(), out var subscriptionEnum) ? subscriptionEnum : null;
+    }
+}
+
+public class FiltersOrgStatusCodeToOrgStatusEnumResolver : IValueResolver<APIQueryOrganisationsFilters,
+    APPQueryOrganisationsFilters, OrgStatusEnum?>
+{
+    public OrgStatusEnum? Resolve(APIQueryOrganisationsFilters source, APPQueryOrganisationsFilters destination, OrgStatusEnum? destMember,
+        ResolutionContext context)
+    {
+        return  Enum.TryParse<OrgStatusEnum>(source.OrgStatusCode?.Trim(), out var orgStatusEnum) ? orgStatusEnum : null;
     }
 }
