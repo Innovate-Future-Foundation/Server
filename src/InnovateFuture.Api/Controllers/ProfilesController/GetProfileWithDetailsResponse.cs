@@ -13,7 +13,7 @@ public class GetProfileWithDetailsPaginatedResponse : IPaginatedResult<GetProfil
 
 public class GetProfileWithDetailsResponse
 {
-    public Guid ProfileId { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; }
     public string? Email { get; set; }
     public string RoleCode { get; set; }

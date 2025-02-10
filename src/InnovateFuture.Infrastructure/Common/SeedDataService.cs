@@ -58,7 +58,8 @@ public class SeedDataService:ISeedDataService
             .RuleFor(p => p.CreatedAt, f => DateTime.UtcNow)
             .RuleFor(p => p.UpdatedAt, f => DateTime.UtcNow)
             .RuleFor(p=>p.AvatarUrl, f => f.Internet.Avatar())
-            .RuleFor(p=>p.IsActive, f => f.Random.Bool());
+            .RuleFor(p=>p.IsActive, f => f.Random.Bool())
+            .RuleFor(p=>p.IsConfirmed, f => f.Random.Bool());
         
         var profiles = new List<Profile>();
 

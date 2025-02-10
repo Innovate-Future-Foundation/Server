@@ -1,8 +1,8 @@
-using System.Linq.Expressions;
 using MediatR;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using LinqKit;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace InnovateFuture.Application.Organisations.Queries.GetOrganisations;
@@ -39,9 +39,10 @@ public class GetOrganisationsHandler : IRequestHandler<GetOrganisationsQuery, (L
             if (!string.IsNullOrEmpty(query.SearchKey))
             {
                 var searchKey = query.SearchKey;
-                predicate = predicate.And(o=>
-                     (o.OrgName.Contains(searchKey) || 
-                     (!string.IsNullOrEmpty(o.Email) && o.Email.Contains(searchKey))));
+                predicate = predicate.And(o => 
+                    EF.Functions.ILike(o.OrgName, $"%{searchKey}%") || 
+                    (!string.IsNullOrEmpty(o.Email) && 
+                     EF.Functions.ILike(o.Email, $"%{searchKey}%")));
             }
 
             if (query.Sortings!=null && query.Sortings!.Length>0)

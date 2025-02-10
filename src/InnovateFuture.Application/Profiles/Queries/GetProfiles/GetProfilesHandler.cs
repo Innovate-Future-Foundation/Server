@@ -2,6 +2,7 @@ using MediatR;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using LinqKit;
+using Microsoft.EntityFrameworkCore;
 
 namespace InnovateFuture.Application.Profiles.Queries.GetProfiles;
 
@@ -26,8 +27,6 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
             if (query.Filters != null)
             {
                 var filters = query.Filters;
-                
-                
                 predicate = predicate.And(p =>
                     (filters.OrgId==null || p.OrgId==filters.OrgId) &&
                     (filters.RoleEnums.Length==0 || filters.RoleEnums.Contains(p.Role)) &&
@@ -38,11 +37,11 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
 
             if (!string.IsNullOrEmpty(query.SearchKey))
             {
-                var searchKeys = query.SearchKey;
+                var searchKey = query.SearchKey;
                 predicate = predicate.And((p=> 
-                    (!string.IsNullOrEmpty(p.Name) && p.Name.Contains(searchKeys)) || 
-                    (!string.IsNullOrEmpty(p.Email) && p.Email.Contains(searchKeys)) || 
-                    (!string.IsNullOrEmpty(p.Phone) && p.Phone.Contains(searchKeys))));
+                    (!string.IsNullOrEmpty(p.Name) && EF.Functions.ILike(p.Name,$"%{searchKey}%")) || 
+                    (!string.IsNullOrEmpty(p.Email) && EF.Functions.ILike(p.Email,$"%{searchKey}%")) || 
+                    (!string.IsNullOrEmpty(p.Phone) && EF.Functions.ILike(p.Phone,$"%{searchKey}%"))));
             }
             if (query.Sortings != null && query.Sortings!.Length>0)
             {
