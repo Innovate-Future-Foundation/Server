@@ -11,18 +11,6 @@ public class UserConfig : IEntityTypeConfiguration<User>
         
         // Changed default table name 
         builder.ToTable("Users");
-
-        // Ignore unused fields
-        builder.Ignore(u => u.LockoutEnabled);
-        builder.Ignore(u => u.AccessFailedCount);
-        builder.Ignore(u => u.PhoneNumberConfirmed);
-        builder.Ignore(u => u.LockoutEnd);
-        builder.Ignore(u => u.TwoFactorEnabled);
-        builder.Ignore(u => u.ConcurrencyStamp);
-        builder.Ignore(u => u.NormalizedEmail);
-        builder.Ignore(u => u.NormalizedUserName);
-        builder.Ignore(u => u.PhoneNumber);
-        builder.Ignore(u => u.SecurityStamp);
         
         // Column Mappings
         builder.Property(u => u.Email).IsRequired();
