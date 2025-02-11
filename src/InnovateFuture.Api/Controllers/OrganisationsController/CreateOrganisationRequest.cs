@@ -9,8 +9,4 @@ public class CreateOrganisationRequest
     public string? WebsiteUrl { get;  set; }
     public string? Address { get;  set; }
     public string? OrgEmail { get;  set; }
-    
-    public string UserName { get; set; } = null!;
-    public string UserEmail { get; set; }
-    public string Password { get; set; } = null!;
 }

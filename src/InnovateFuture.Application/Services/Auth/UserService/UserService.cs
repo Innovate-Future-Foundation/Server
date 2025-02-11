@@ -24,6 +24,16 @@ public class UserService: IUserService
         }
     }
 
+    public async Task<string> GenerateEmailConfirmationTokenAsync(User user, CancellationToken cancellationToken = default)
+    {
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        if (token == null)
+        {
+            throw new Exception($"Failed to create email confirmation token");
+        }
+        return token;
+    }
+
     public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default)
     {
         var result = await _userManager.UpdateAsync(user);

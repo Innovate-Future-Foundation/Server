@@ -1,8 +1,13 @@
 using AutoMapper;
 using InnovateFuture.Api.Configs;
+using InnovateFuture.Api.Controllers.OrganisationsController;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
 using InnovateFuture.Application.Services.Auth.ConfirmEmail;
+using InnovateFuture.Application.Services.Auth.Register;
+using InnovateFuture.Application.Services.Auth.SendVerificationEmail;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace InnovateFuture.Api.Controllers.Auth;
@@ -45,5 +50,30 @@ public class AuthController: ControllerBase
             Console.WriteLine($"[Debug ERROR] Email Verification Failed: {ex.Message}");
             return StatusCode(500, new { Message = "An error occurred during email verification.", Details = ex.Message });
         }
+    }
+    
+    /// <summary>
+    /// Register organisation admin
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpPost("register-organisation-admin")]
+    public async Task<IActionResult> RegisterOrganisationAdmin([FromBody] RegisterOrganisationAdminRequest request)
+    {
+        // 1⃣️ Update tables 
+        var registerCommand = _mapper.Map<RegisterOrganisationAdminCommand>(request);
+        var registerResult = await _mediator.Send(registerCommand);
+        if (registerResult == null)
+        {
+            return BadRequest(new { Message = "Register organisation admin failed" });
+        }
+        
+        var (profileId, user) = registerResult.Value;
+        // 2⃣️ Send Email in the Background (Non-blocking)
+        var sendVerificationEmailCommand = new SendVerificationEmailCommand(user, profileId);;
+        _ = Task.Run(async () => await _mediator.Send(sendVerificationEmailCommand));
+       
+        return Ok("Register organisation admin and send email successful");
     }
 }

@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
+namespace InnovateFuture.Application.Services.Auth.Register;
 
-public class CreateOrganisationCommandValidator : AbstractValidator<CreateOrganisationCommand>
+public class RegisterOrganisationAdminValidator: AbstractValidator<RegisterOrganisationAdminCommand>
 {
-    public CreateOrganisationCommandValidator()
+    public RegisterOrganisationAdminValidator()
     {
         RuleFor(x => x.OrgName)
             .NotEmpty().WithMessage("Organisation name is required.")
@@ -18,9 +18,15 @@ public class CreateOrganisationCommandValidator : AbstractValidator<CreateOrgani
             .Must(BeAValidUrl).WithMessage("Please enter a valid website URL.")
             .When(x => !string.IsNullOrEmpty(x.WebsiteUrl));
         
-        RuleFor(x => x.Email)
+        RuleFor(x => x.OrgEmail)
             .EmailAddress().WithMessage("Please enter a valid organisation email address.")
-            .When(x => !string.IsNullOrEmpty(x.Email));
+            .When(x => !string.IsNullOrEmpty(x.OrgEmail));
+        
+        RuleFor(x => x.UserEmail)
+            .EmailAddress().WithMessage("Please enter a valid user email address.")
+            .When(x => !string.IsNullOrEmpty(x.UserEmail));
+        RuleFor(x => x.UserName)
+            .MaximumLength(100).WithMessage("User name must not exceed 100 characters.");
     }
 
     private static bool BeAValidUrl(string? url)

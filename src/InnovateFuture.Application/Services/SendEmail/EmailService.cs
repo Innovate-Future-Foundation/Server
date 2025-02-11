@@ -9,15 +9,13 @@ using Microsoft.Extensions.Options;
 
 namespace InnovateFuture.Application.Services.SendEmail;
 
-public class SendEmailService: IEmailService
+public class EmailService: IEmailService
 {
     private readonly EmailSettings _emailSettings;
-    private readonly UserManager<User> _userManager;
 
-    public SendEmailService(IOptions<EmailSettings> emailSettings, UserManager<User> userManager)
+    public EmailService(IOptions<EmailSettings> emailSettings)
     {
         _emailSettings = emailSettings.Value;
-        _userManager = userManager;
     }
 
     public async Task SendEmailAsync(string receiver, string subject, string body, CancellationToken cancellationToken)
@@ -73,26 +71,5 @@ public class SendEmailService: IEmailService
         var compiledTemplate = Handlebars.Compile(template);
         // render html with data
         return compiledTemplate(data);
-    }
-
-    public async Task SendVerificationEmailAsync(User user, Guid profileId)
-    {
-        // generate verification token
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        // make the token suitable for url format
-        var encodedToken = UrlEncoder.Default.Encode(token);
-        var encodedEmail = UrlEncoder.Default.Encode(user.Email!);
-        // Fr
-        var verificationLink = $"http://localhost:5173/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={profileId}";
-        // generate email body
-        var emailData = new
-        {
-            name = user.UserName,
-            verificationLink = verificationLink
-        };
-        // send email
-        string templatePath = "Templates/RegisterEmailTemplate.hbs";
-        string emailBody = RenderTemplate(templatePath, emailData);
-        await SendEmailAsync(user.Email!, "Welcome to Innovate feature", emailBody, CancellationToken.None);
     }
 }
