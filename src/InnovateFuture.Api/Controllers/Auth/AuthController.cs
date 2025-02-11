@@ -1,8 +1,12 @@
 using AutoMapper;
 using InnovateFuture.Api.Configs;
+using InnovateFuture.Api.Controllers.OrganisationsController;
+using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
 using InnovateFuture.Application.Services.Auth.ConfirmEmail;
+using InnovateFuture.Application.Services.Auth.Register;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace InnovateFuture.Api.Controllers.Auth;
@@ -45,5 +49,23 @@ public class AuthController: ControllerBase
             Console.WriteLine($"[Debug ERROR] Email Verification Failed: {ex.Message}");
             return StatusCode(500, new { Message = "An error occurred during email verification.", Details = ex.Message });
         }
+    }
+    
+    /// <summary>
+    /// Register organisation admin
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpPost("register-organisation-admin")]
+    public async Task<IActionResult> RegisterOrganisationAdmin([FromBody] RegisterOrganisationAdminRequest request)
+    {
+        var command = _mapper.Map<RegisterOrganisationAdminCommand>(request);
+        bool isSuccess = await _mediator.Send(command);
+        if (!isSuccess)
+        {
+            return BadRequest(new { Message = "Register organisation admin failed" });
+        }
+        return Ok("Register organisation admin successful");
     }
 }

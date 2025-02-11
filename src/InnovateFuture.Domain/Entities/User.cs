@@ -4,7 +4,7 @@ namespace InnovateFuture.Domain.Entities;
 
 public class User: IdentityUser<Guid>
 {
-    public Guid? DefaultProfileId { get; private set; }
+    public Guid? DefaultProfileId { get;  private set; }
     public Guid? IdpSubject { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
@@ -31,7 +31,7 @@ public class User: IdentityUser<Guid>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateProfile(Guid profileId)
+    public void UpdateDefaultProfile(Guid profileId)
     {
         DefaultProfileId = profileId;
         UpdatedAt = DateTime.UtcNow;

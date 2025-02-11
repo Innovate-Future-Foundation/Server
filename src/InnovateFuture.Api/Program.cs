@@ -1,3 +1,4 @@
+using System.Reflection;
 using FluentValidation;
 using HealthChecks.UI.Client;
 using InnovateFuture.Api.Filters;
@@ -18,6 +19,7 @@ using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Domain.Enums;
 using InnovateFuture.Application.Services.Auth.ConfirmEmail;
+using InnovateFuture.Application.Services.Auth.Register;
 using InnovateFuture.Application.Services.Auth.UserService;
 using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Domain.Entities;
@@ -90,6 +92,7 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
 
                 configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
             });
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -104,6 +107,8 @@ namespace InnovateFuture.Api
 
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            builder.Services.AddValidatorsFromAssembly(typeof(RegisterOrganisationAdminValidator).Assembly);
+            
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(GetUsersQueryValidator).Assembly);
@@ -185,6 +190,8 @@ namespace InnovateFuture.Api
             builder.Services.AddSwaggerEXT();
 
             #region fluent validators
+            // Auth
+            builder.Services.AddValidatorsFromAssemblyContaining<RegisterOrganisationAdminValidator>();
             // Users
             builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserCommandValidator>();
