@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InnovateFuture.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250203135109_RecreateTables")]
-    partial class RecreateTables
+    [Migration("20250211114243_TourDayActivityTemplate")]
+    partial class TourDayActivityTemplate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
