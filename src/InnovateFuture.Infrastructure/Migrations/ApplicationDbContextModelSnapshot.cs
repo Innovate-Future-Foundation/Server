@@ -169,10 +169,6 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp");
 
@@ -592,6 +588,41 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.Navigation("Organisation");
 
                     b.Navigation("Tour");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>
+                {
+                    b.OwnsOne("InnovateFuture.Domain.Entities.Address", "Address", b1 =>
+                        {
+                            b1.Property<Guid>("OrganisationId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("City")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Country")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("State")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Street")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("ZipCode")
+                                .HasColumnType("text");
+
+                            b1.HasKey("OrganisationId");
+
+                            b1.ToTable("Organisations");
+
+                            b1.ToJson("Address");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrganisationId");
+                        });
+
+                    b.Navigation("Address");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
