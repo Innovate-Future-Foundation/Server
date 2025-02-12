@@ -6,8 +6,6 @@ using InnovateFuture.Api.Middleware;
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Profiles.Queries.GetProfile;
-using InnovateFuture.Application.Roles.Queries.GetRole;
-using InnovateFuture.Application.Roles.Queries.GetRoles;
 using InnovateFuture.Application.Services.Security;
 using InnovateFuture.Application.Users.Commands.CreateUser;
 using InnovateFuture.Application.Users.Commands.UpdateUser;
@@ -16,16 +14,19 @@ using InnovateFuture.Application.Users.Queries.GetUsers;
 using InnovateFuture.Infrastructure.Common;
 using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
-using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
+using InnovateFuture.Application.Profiles.Queries.GetProfiles;
+using InnovateFuture.Domain.Enums;
+using InnovateFuture.Application.Services.Auth.ConfirmEmail;
+using InnovateFuture.Application.Services.Auth.UserService;
+using InnovateFuture.Application.Services.SendEmail;
+using InnovateFuture.Domain.Entities;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Repositories;
-using InnovateFuture.Infrastructure.Roles.Persistence.Interfaces;
-using InnovateFuture.Infrastructure.Roles.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Users.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Users.Persistence.Repositories;
 using MediatR;
@@ -34,7 +35,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
-using InnovateFuture.Infrastructure.Common;
+using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
+using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Repositiories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace InnovateFuture.Api
 {
@@ -48,6 +53,13 @@ namespace InnovateFuture.Api
             var builder = WebApplication.CreateBuilder(args);
             
             var connectionString = builder.Configuration["DBConnection"];
+
+            #region Email Service Configuration
+            // bind EmailSettings from appsettings.Development.json
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+            // register EmailSettings as signleton
+            builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailSettings>>().Value);
+            #endregion
             
             #region filter
             builder.Services.AddControllers(option =>
@@ -73,29 +85,28 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(UpdateProfileHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetProfileHandler).Assembly);
                 
-                configuration.RegisterServicesFromAssembly(typeof(GetRoleHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(GetRolesHandler).Assembly);
-
                 configuration.RegisterServicesFromAssembly(typeof(CreateOrganisationHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(UpdateOrganisationHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
+
+                configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
             });
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
             builder.Services.AddScoped<ISeedDataService, SeedDataService>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IOrgRepository, OrgRepository>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
-            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-            builder.Services.AddScoped<IOrgRepository, OrgRepository>();
+            builder.Services.AddScoped<IEmailService, SendEmailService>();
+
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(GetUsersQueryValidator).Assembly);
-            
-            builder.Services.AddValidatorsFromAssembly(typeof(GetRolesQueryValidator).Assembly);
             
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateProfileCommandValidator).Assembly);
 
@@ -110,10 +121,17 @@ namespace InnovateFuture.Api
             
             #region DB connection
             builder.Services.Configure<DBConnectionConfig>(builder.Configuration);
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+            // register enums
+            dataSourceBuilder.MapEnum<RoleEnum>();
+            dataSourceBuilder.MapEnum<SubscriptionEnum>();
+            dataSourceBuilder.MapEnum<OrgStatusEnum>();
+            
+            var dataSource = dataSourceBuilder.Build();
             
             builder.Services.AddDbContext<ApplicationDbContext>(
                 dbContextOptions => dbContextOptions
-                    .UseNpgsql(connectionString,
+                    .UseNpgsql(dataSource,
                         npgsqlOptions => npgsqlOptions.SetPostgresVersion(new Version(17, 2)))
                     // The following three options help with debugging, but should
                     // be changed or removed for production.
@@ -122,6 +140,14 @@ namespace InnovateFuture.Api
                     .EnableDetailedErrors()
             );
             #endregion
+            
+            #region Identity 
+            builder.Services.AddIdentity<User, IdentityRole<Guid>>()
+                .AddEntityFrameworkStores<ApplicationDbContext>() 
+                .AddTokenProvider<DataProtectorTokenProvider<User>>("InnovateFuture")
+                .AddDefaultTokenProviders();
+            #endregion
+            
             
             // Disable auto model validation
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
@@ -159,12 +185,16 @@ namespace InnovateFuture.Api
             builder.Services.AddSwaggerEXT();
 
             #region fluent validators
+            // Users
             builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetUsersQueryValidator>();
-            builder.Services.AddValidatorsFromAssemblyContaining<GetRolesQueryValidator>();
+            // Profiles
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<GetProfilesQueryValidator>();
+            // Organisations
             builder.Services.AddValidatorsFromAssemblyContaining<CreateOrganisationCommandValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<UpdateOrganisationCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetOrganisationsQueryValidator>();
             #endregion
 
@@ -186,6 +216,8 @@ namespace InnovateFuture.Api
             });
             
             var app = builder.Build();
+            app.UseCors(policyName);
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

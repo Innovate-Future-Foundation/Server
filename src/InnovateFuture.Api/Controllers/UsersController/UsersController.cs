@@ -35,8 +35,11 @@ public class UsersController : ControllerBase
     {
         var command = _mapper.Map<CreateUserCommand>(request);
         var userId = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetUser),new{id = userId},new { UserId = userId });
+        return CreatedAtAction(nameof(GetUser),new{id = userId} ,new { UserId = userId });
     }
+    
+    // Create root user
+    
     
     /// <summary>
     /// Updates user details by its specified ID.

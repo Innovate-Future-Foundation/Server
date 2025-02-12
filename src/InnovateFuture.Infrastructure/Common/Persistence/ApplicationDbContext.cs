@@ -1,20 +1,24 @@
 using InnovateFuture.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using InnovateFuture.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace InnovateFuture.Infrastructure.Common.Persistence;
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
+
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
-    public DbSet<Profile> Profiles { get; set; }
-
-    public DbSet<Organisation> Organisations { get; set; }
+    public virtual DbSet<Organisation> Organisations { get; set; }
+    public virtual DbSet<Profile> Profiles { get; set; }
     public DbSet<Tour> Tours { get; set; }
     public DbSet<TourTemplate> TourTemplates { get; set; }
     public DbSet<Day> Days { get; set; }
     public DbSet<DayTemplate> DayTemplates { get; set; }
     public DbSet<Activity> Activities { get; set; }
     public DbSet<ActivityTemplate> ActivityTemplates { get; set; }
+
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -23,7 +27,13 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
+        modelBuilder.HasPostgresEnum<RoleEnum>(name:"role_enum");
+        modelBuilder.HasPostgresEnum<SubscriptionEnum>(name:"subscription_enum");
+        modelBuilder.HasPostgresEnum<OrgStatusEnum>(name:"org_status_enum");
+        // Remove unnecessary identity tables
+        modelBuilder.Ignore<IdentityRole<Guid>>();
+        modelBuilder.Ignore<IdentityUserRole<Guid>>();
+        
         // Apply all configurations from the current assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }

@@ -10,7 +10,7 @@ public class GetUsersQueryValidator : AbstractValidator<GetUsersQuery>
             .EmailAddress().WithMessage("Kindly enter a valid Email Address.");
         RuleFor(x => x.FullName)
             .MaximumLength(100).WithMessage("Full name must not exceed 100 characters.");
-        RuleFor(x => x.Phone)
+        RuleFor(x => x.PhoneNumber)
             .Matches("^\\+61\\s4\\d{8}$").WithMessage("Kindly enter a valid AU Phone Number.");
         RuleFor(x => x.Birthday)
             .LessThanOrEqualTo(DateTime.Now).WithMessage("Birthday must be greater than or equal to now.");

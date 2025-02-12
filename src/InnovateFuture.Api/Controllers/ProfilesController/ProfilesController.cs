@@ -5,6 +5,9 @@ using InnovateFuture.Application.Profiles.Queries.GetProfile;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using InnovateFuture.Application.Common.Models;
+using InnovateFuture.Application.Profiles.Queries.GetProfiles;
+
 
 namespace InnovateFuture.Api.Controllers.ProfilesController;
 
@@ -33,7 +36,7 @@ public class ProfilesController : ControllerBase
     public async Task<IActionResult> UpdateProfile(Guid id, [FromBody] UpdateProfileRequest request)
     {
         var command = _mapper.Map<UpdateProfileCommand>(request);
-        command.ProfileId = id;
+        command.Id = id;
         var profileId = await _mediator.Send(command);
         return Ok(new {  profileId });
     }
@@ -45,11 +48,33 @@ public class ProfilesController : ControllerBase
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetProfile(Guid id)
+    public async Task<IActionResult> GetProfile(Guid id,[FromQuery] bool includeDetails=false)
     {
         var query = new GetProfileQuery { ProfileId = id };
         var profile = await _mediator.Send(query);
-        var profileResponse =  _mapper.Map<GetProfileResponse>(profile);
+        
+        var profileResponse =  includeDetails? (object)_mapper.Map<GetProfileWithDetailsResponse>(profile):
+            _mapper.Map<GetProfileResponse>(profile);
+        
         return Ok(profileResponse);
+    }
+
+    /// <summary>
+    /// Retrieves a list of Profiles based on the specified query parameters.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult> GetProfiles([FromQuery]QueryProfilesRequest request)
+    {
+        var query = _mapper.Map<GetProfilesQuery>(request);
+        var paginatedProfiles = await _mediator.Send(query);
+        
+        var profilesResponse = request.IncludeDetails ?? false
+            ? (object)_mapper.Map<GetProfileWithDetailsPaginatedResponse>(paginatedProfiles)
+            : _mapper.Map<GetProfilePaginatedResponse>(paginatedProfiles);
+        
+        return Ok(profilesResponse);
     }
 }

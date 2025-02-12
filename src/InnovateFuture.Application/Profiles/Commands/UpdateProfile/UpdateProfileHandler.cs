@@ -14,20 +14,22 @@ public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, Guid>
     public async Task<Guid> Handle(UpdateProfileCommand command, CancellationToken cancellationToken)
     { 
         // get existing Profile by id
-        Profile profile = await _profileRepository.GetByIdAsync(command.ProfileId);
+        Profile profile = await _profileRepository.GetByIdAsync(command.Id);
         
         // update
         profile.UpdateProfile(
-            command.Name,
             command.Email,
+            command.Name,
             command.Phone,
-            command.Avatar,
-            command.IsActive
+            command.AvatarUrl,
+            command.IsActive,
+            command.IsConfirmed
             );
         
+
         await _profileRepository.UpdateAsync();
         
-        return profile.ProfileId;
+        return profile.Id;
     }
 }
 

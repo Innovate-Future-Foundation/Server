@@ -1,8 +1,11 @@
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Domain.Enums;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Exceptions;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using System.Linq.Dynamic.Core;
 
 namespace InnovateFuture.Infrastructure.Profiles.Persistence.Repositories;
 
@@ -14,15 +17,20 @@ public class ProfileRepository:IProfileRepository
     {
         _dbContext = dbContext;
     }
-    public async Task<Profile> GetByIdAsync(Guid id)
+
+    public async Task AddAsync(Profile profile, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Profiles.AddAsync(profile, cancellationToken);
+    }
+
+    public async Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var profile = await _dbContext.Profiles
             .Include(p => p.User)
             .Include(p=>p.Organisation)
-            .Include(p=>p.Role)
-            .Include(p=>p.InvitedByProfile)
-            .Include(p=>p.SupervisedByProfile)
-            .FirstOrDefaultAsync(p=>p.ProfileId == id);
+            .Include(p=>p.InviterProfile)
+            .Include(p=>p.SupervisorProfile)
+            .FirstOrDefaultAsync(p=>p.Id == id);
         if (profile == null)
         {
             throw new IFEntityNotFoundException("Profile",id);
@@ -30,14 +38,32 @@ public class ProfileRepository:IProfileRepository
         return profile;
     }
 
-    public async Task AddAsync(Profile profile)
-    {
-        await _dbContext.Profiles.AddAsync(profile);
-        await _dbContext.SaveChangesAsync();
-    }
-
     public async Task UpdateAsync()
     {
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<(List<Profile> data, int totalItems)> GetAnyAsync(Expression<Func<Profile, bool>>? predicate = null, int? limit = null, int offset = 0, string? queryOrderBy = null)
+    {
+        IQueryable<Profile> query =  _dbContext.Profiles
+            .Include(p => p.User)
+            .Include(p => p.Organisation)
+            .Include(p => p.InviterProfile)
+            .Include(p => p.SupervisorProfile);
+        
+        if (predicate != null)
+            query = query.Where(predicate);
+
+        int totalItems = await query.CountAsync();
+        
+        if (!string.IsNullOrEmpty(queryOrderBy))
+        {
+            query = query.OrderBy(queryOrderBy);
+        }
+        
+        var profiles = await query.Skip(offset)
+            .Take(limit ?? totalItems).ToListAsync();
+        
+        return (profiles, totalItems);
     }
 }

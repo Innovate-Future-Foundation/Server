@@ -1,10 +1,6 @@
-
-
 using InnovateFuture.Domain.Entities;
-using InnovateFuture.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace InnovateFuture.Infrastructure.Organisations.Persistence.ModelConfigs;
 
@@ -12,24 +8,18 @@ public class OrganisationConfig : IEntityTypeConfiguration<Organisation>
 {
     public void Configure(EntityTypeBuilder<Organisation> builder)
     {
-        builder.HasKey(p => p.OrgId);
+        builder.HasKey(p => p.Id);
         
         // Column Mappings
-        builder.Property(o => o.OrgId).HasColumnType("uuid").HasColumnName("org_id").IsRequired();
-        builder.Property(o => o.OrgName).HasColumnName("org_name").HasMaxLength(100).IsRequired();
-        builder.Property(o => o.LogoUrl).HasColumnName("logo_url").HasMaxLength(500);
-        builder.Property(o => o.WebsiteUrl).HasColumnName("website_url").HasMaxLength(500);
-        builder.Property(o => o.Address).HasColumnName("address").HasMaxLength(255);
-        builder.Property(o => o.Email).HasColumnName("email").HasMaxLength(100);
-        builder.Property(o => o.Subscription).HasColumnType("smallint").HasColumnName("subscription");
-        builder.Property(o => o.Status).HasColumnType("smallint").HasColumnName("status").IsRequired();
-        builder.Property(o => o.CreatedAt).HasColumnType("timestamptz").HasColumnName("created_at").IsRequired();
-        builder.Property(o => o.UpdatedAt).HasColumnType("timestamptz").HasColumnName("updated_at").IsRequired();
-        
-        // Navigation property
-        builder.HasMany(o => o.Profiles)
-            .WithOne(p => p.Organisation)
-            .HasForeignKey(p => p.OrgId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(o => o.Id).HasColumnType("uuid").IsRequired();
+        builder.Property(o => o.OrgName).HasMaxLength(100).IsRequired();
+        builder.Property(o => o.LogoUrl).HasMaxLength(500).IsRequired(false); 
+        builder.Property(o => o.WebsiteUrl).HasMaxLength(500).IsRequired(false); 
+        builder.Property(o => o.Address).HasMaxLength(255).IsRequired(false);
+        builder.Property(o => o.Email).HasMaxLength(100).IsRequired(false);
+        builder.Property(o => o.Subscription).HasColumnType("subscription_enum").IsRequired();
+        builder.Property(o => o.OrgStatus).HasColumnType("org_status_enum").IsRequired();
+        builder.Property(o => o.CreatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(o => o.UpdatedAt).HasColumnType("timestamptz").IsRequired();
     }
 }

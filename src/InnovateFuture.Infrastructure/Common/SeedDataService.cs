@@ -1,110 +1,192 @@
+using Bogus;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
 using InnovateFuture.Infrastructure.Common.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace InnovateFuture.Infrastructure.Common;
 
 public class SeedDataService:ISeedDataService
 {
     private readonly ApplicationDbContext _dbContext;
-
     public SeedDataService(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
-    
-    // Primary IDs for roles, organisations, and users
-    private static readonly Guid _role01Id = Guid.Parse("e114c66a-07b2-4768-b0cf-c111895ce0c4");
-    private static readonly Guid _role02Id = Guid.Parse("d3788298-39b4-4a40-9985-bfa6a830acd9");
-    private static readonly Guid _role03Id = Guid.Parse("3b69fda3-555a-4658-a6ab-31e1f327ef79");
-    private static readonly Guid _role04Id = Guid.Parse("32ef6536-3cb1-4846-bd32-cd34b489fd43");
-    private static readonly Guid _role05Id = Guid.Parse("28c99a2a-e593-4353-8dc2-cb83fc1ebfea");
-    private static readonly Guid _role06Id = Guid.Parse("64fe5f03-b1c4-4b44-9894-a89f5772a751");
-    
-    private static readonly Guid _org01Id = Guid.Parse("d96e643e-a7aa-42b0-a8cd-1cdd8610e857");
-    private static readonly Guid _org02Id = Guid.Parse("0aecbf37-ead3-470c-ad8b-790d7eea3b0a");
-    private static readonly Guid _org03Id = Guid.Parse("b8fff326-d13b-4ade-9822-e9ee8da23129");
-    private static readonly Guid _org04Id = Guid.Parse("806b2ff3-76b4-4139-a417-f63d6b8c04b2");
-    private static readonly Guid _org05Id = Guid.Parse("53700e74-4fd1-4aa2-9a6c-83eefd806efb");
-    private static readonly Guid _org06Id = Guid.Parse("6a4f721b-f71c-4cc4-9b14-8777ffbe0e55");
-    private static readonly Guid _org07Id = Guid.Parse("e2041d02-eeb0-4fa7-b5b4-f313af5d495b");
-    private static readonly Guid _org08Id = Guid.Parse("a8b91013-2f9a-4c2c-9806-6e4a8a2e7875");
-    private static readonly Guid _org09Id = Guid.Parse("5c12a964-b4d2-46a7-bc50-480bd85fde40");
-    private static readonly Guid _org10Id = Guid.Parse("c3ff657e-2770-4963-b49f-cf4d2bf393b0");
-    
-    
-    private static readonly Guid _user01Id = Guid.Parse("725f77b0-258a-4a92-827a-f5c4adfcba49");
-    private static readonly Guid _profile01Id = Guid.Parse("4d69456b-9b86-43b9-b8f7-09a88062eb6b");
-    
-    private static readonly Guid _cognitoUuid = Guid.Parse("e95e0498-b0c1-700b-bb76-f571c5ec3f7c");
-    
-    
-    // Seed roles
-    private static Role[] GetRoles() =>
-    [
-        new Role("Platform Admin", RoleEnum.PlatformAdmin, _role01Id, "Responsible for managing the entire platform, including..."),
-        new Role("Organisation Admin", RoleEnum.OrgAdmin, _role02Id, "Oversees organisational-level operations, including inviting managers..."),
-        new Role("Organisation Manager", RoleEnum.OrgManager, _role03Id, "Oversees organisational-level operations, including..."),
-        new Role("Organisation Teacher", RoleEnum.OrgTeacher, _role04Id, "Handles teaching-related responsibilities within the organisation, such as..."),
-        new Role("Parent", RoleEnum.Parent, _role05Id, "Allows monitoring of a child’s progress..."),
-        new Role("Student", RoleEnum.Student, _role06Id, "Access to tour details...")
-    ];
-
     // Seed organisations
-    private static Organisation[] GetOrganisations() =>
-    [
-        new Organisation("org_name_01_test", _org01Id,null,null,null,"org_01_test@test.com",SubscriptionEnum.basic),
-        new Organisation("org_name_02_test", _org02Id,null,null,null,"org_02_test@test.com",SubscriptionEnum.premium),
-        new Organisation("org_name_03_test", _org03Id,null,null,null,"org_03_test@test.com",SubscriptionEnum.free),
-        new Organisation("org_name_04_test", _org04Id,null,null,null,"org_04_test@test.com",SubscriptionEnum.basic),
-        new Organisation("org_name_05_test", _org05Id,null,null,null,"org_05_test@test.com",SubscriptionEnum.basic),
-        new Organisation("org_f_name_06_test", _org06Id,null,null,null,"org_q_06_test@test.com",SubscriptionEnum.premium),
-        new Organisation("org_f_name_07_test", _org07Id,null,null,null,"org_q_07_test@test.com",SubscriptionEnum.basic),
-        new Organisation("org_f_name_08_test", _org08Id,null,null,null,"org_q_08_test@test.com",SubscriptionEnum.free),
-        new Organisation("org_f_name_09_test", _org09Id,null,null,null,"org_q_09_test@test.com",SubscriptionEnum.basic),
-        new Organisation("org_f_name_10_test", _org10Id,null,null,null,"org_q_10_test@test.com",SubscriptionEnum.free),
-    ];
-
+    private static List<Organisation> GetOrganisations()
+    {
+        var fakeOrganisations = new Faker<Organisation>("en")
+            .RuleFor(o => o.Id, f => Guid.NewGuid())
+            .RuleFor(o => o.OrgName, f => f.Company.CompanyName())
+            .RuleFor(o => o.Email, (f, o) => f.Internet.Email(o.OrgName))
+            .RuleFor(o => o.LogoUrl, f => f.Internet.Avatar())
+            .RuleFor(o => o.WebsiteUrl, f => f.Internet.UrlWithPath())
+            .RuleFor(o => o.OrgStatus, f => f.PickRandom<OrgStatusEnum>())
+            .RuleFor(o => o.Subscription, f => f.PickRandom<SubscriptionEnum>())
+            .RuleFor(o => o.CreatedAt, f => DateTime.UtcNow )
+            .RuleFor(o => o.UpdatedAt, f => DateTime.UtcNow);
+        
+        return fakeOrganisations.Generate(10);
+    }
+    
     // Seed users
-    private static User[] GetUsers() =>
-    [
-        new User("yangqingyan0@gmail.com", _user01Id, _cognitoUuid)
-    ];
+    private static List<User> GetUsers()
+    {
+        var fakeUsers = new Faker<User>("en")
+            .CustomInstantiator(f => new User()) 
+            .RuleFor(u => u.Id, f => Guid.NewGuid())
+            .RuleFor(u => u.UserName, f => f.Name.FullName())
+            .RuleFor(u => u.Email, (f, u) => f.Internet.Email(u.UserName))
+            .RuleFor(u => u.PasswordHash, f => f.Internet.Password())
+            .RuleFor(u => u.EmailConfirmed, f => f.Random.Bool())
+            .RuleFor(u => u.CreatedAt, f => DateTime.UtcNow)
+            .RuleFor(u => u.UpdatedAt, f => DateTime.UtcNow);
+        
+        return fakeUsers.Generate(50);
+    }
 
     // Seed profiles
-    private static Profile[] GetProfiles() =>
-    [
-        new Profile(
-            _user01Id,
-            _role01Id,
-            _org01Id,
-        null,
-        null,
-            _profile01Id)
-    ];
-    public void Initialize()
+    private static List<Profile> GetProfiles(List<User> users, List<Organisation> organisations)
     {
-        _dbContext.Roles.AddRange(GetRoles());
-        _dbContext.Organisations.AddRange(GetOrganisations());
-        var users = GetUsers();
-        _dbContext.Users.AddRange(users);
-        var profiles = GetProfiles();
-        _dbContext.Profiles.AddRange(profiles);
-        _dbContext.SaveChanges();
+        var fakeProfileGenerator = new Faker<Profile>("en")
+            .RuleFor(p => p.Id, f => Guid.NewGuid())
+            .RuleFor(p => p.Name, f => f.Name.FullName())
+            .RuleFor(p => p.Email, f => f.Internet.Email())
+            .RuleFor(p => p.Phone, f => f.Phone.PhoneNumber())
+            .RuleFor(p => p.Role, f => f.PickRandom<RoleEnum>())
+            .RuleFor(p => p.CreatedAt, f => DateTime.UtcNow)
+            .RuleFor(p => p.UpdatedAt, f => DateTime.UtcNow)
+            .RuleFor(p=>p.AvatarUrl, f => f.Internet.Avatar())
+            .RuleFor(p=>p.IsActive, f => f.Random.Bool())
+            .RuleFor(p=>p.IsConfirmed, f => f.Random.Bool());
         
-        // update default profile of each user
-        users.ToList().ForEach(u =>
+        var profiles = new List<Profile>();
+
+        
+        // ✅ Generate Platform Admins (No specific organisation)
+        int countPlatformAdmins = 0;
+        var uniqueUserIdForPlatformAdmins = UniqueUserIdGenerator(5, users);
+            var platformAdmins = fakeProfileGenerator.Clone()
+                .RuleFor(p => p.Role, _ => RoleEnum.PlatformAdmin)
+                .RuleFor(p => p.UserId, (f) => uniqueUserIdForPlatformAdmins[countPlatformAdmins++]) 
+                .Generate(5);
+        
+        profiles.AddRange(platformAdmins);
+        
+        foreach (var organisation in organisations)
         {
-            var defaultProfileId =profiles.FirstOrDefault(p=>p.UserId==u.UserId)!.ProfileId;
-            u.UpdateDefaultProfile(defaultProfileId);
-        });
-        
-        _dbContext.Users.UpdateRange(users);
-        _dbContext.SaveChanges();
+            var orgProfiles = new List<Profile>();
+            // ✅ Org Admins (No inviter, No supervisor)
+            var orgAdmins = fakeProfileGenerator.Clone()
+                .RuleFor(p => p.Role, _ => RoleEnum.OrgAdmin)
+                .RuleFor(p => p.OrgId, _ => organisation.Id)
+                .RuleFor(p => p.UserId, f => f.PickRandom(users).Id)
+                .Generate(1);
+            orgProfiles.AddRange(orgAdmins);
+
+            // ✅ Org Managers (Invited by Org Admin)
+            var countOrgManagers = 0;
+            var uniqueUserIdForOrgManagers = UniqueUserIdGenerator(4, users);
+            var orgManagers = fakeProfileGenerator.Clone()
+                .RuleFor(p => p.Role, _ => RoleEnum.OrgManager)
+                .RuleFor(p => p.OrgId, _ => organisation.Id)
+                .RuleFor(p => p.Inviter, f => f.PickRandom(orgAdmins).Id)
+                .RuleFor(p => p.UserId, f =>uniqueUserIdForOrgManagers[countOrgManagers++])
+                .Generate(4);
+            orgProfiles.AddRange(orgManagers);
+
+            // ✅ Org Teachers (Invited by Org Manager)
+            var countOrgTeachers = 0;
+            var uniqueUserIdForTeachers = UniqueUserIdGenerator(5, users);
+            var orgTeachers = fakeProfileGenerator.Clone()
+                .RuleFor(p => p.Role, _ => RoleEnum.OrgTeacher)
+                .RuleFor(p => p.OrgId, _ => organisation.Id)
+                .RuleFor(p => p.Inviter, f => f.PickRandom(orgManagers).Id)
+                .RuleFor(p => p.UserId, f => uniqueUserIdForTeachers[countOrgTeachers++])
+                .Generate(5);
+            orgProfiles.AddRange(orgTeachers);
+
+            // ✅ Parents (Invited by Org Teacher, No Supervisor)
+            var countParents = 0;
+            var uniqueUserIdForParents = UniqueUserIdGenerator(20, users);
+            var parents = fakeProfileGenerator.Clone()
+                .RuleFor(p => p.Role, _ => RoleEnum.Parent)
+                .RuleFor(p => p.OrgId, _ => organisation.Id)
+                .RuleFor(p => p.Inviter, f => f.PickRandom(orgTeachers).Id)
+                .RuleFor(p => p.UserId, f =>uniqueUserIdForParents[countParents++])
+                .Generate(20);
+            orgProfiles.AddRange(parents);
+
+            // ✅ Students (Must have both an Inviter (Org Teacher) and a Supervisor (Parent))
+            var countStudents = 0;
+            var uniqueUserIdForStudents = UniqueUserIdGenerator(40, users);
+            var students = new List<Profile>();
+            foreach (var parent in parents)
+            {
+                var studentProfiles = fakeProfileGenerator.Clone()
+                    .RuleFor(p => p.Role, _ => RoleEnum.Student)
+                    .RuleFor(p => p.OrgId, _ => organisation.Id)
+                    .RuleFor(p => p.Inviter, f => f.PickRandom(orgTeachers).Id)
+                    .RuleFor(p => p.Supervisor, _ => parent.Id)
+                    .RuleFor(p => p.UserId, f =>uniqueUserIdForStudents[countStudents++])
+                    .Generate(2);
+
+                students.AddRange(studentProfiles);
+            }
+            orgProfiles.AddRange(students);
+
+            profiles.AddRange(orgProfiles);
+        }
+        return profiles;
     }
-    public bool CanSeed()
+
+    public static List<Guid> UniqueUserIdGenerator(int number, List<User> users)
     {
-        return (!_dbContext.Users.Any() && !_dbContext.Profiles.Any() && !_dbContext.Roles.Any() &&
-                !_dbContext.Organisations.Any());
+        if (users.Count < number) 
+            throw new ArgumentException("Not enough users to generate unique IDs.");
+
+        var uniqueUserIds = new HashSet<Guid>();
+        var random = new Random();
+
+        while (uniqueUserIds.Count < number)
+        {
+            var selectedUser = users[random.Next(users.Count)];
+            uniqueUserIds.Add(selectedUser.Id);
+        }
+
+        return uniqueUserIds.ToList();
+    }
+   
+    public async Task InitializeAsync()
+    {
+        var organisations = GetOrganisations();
+        await _dbContext.Organisations.AddRangeAsync(organisations);
+        await _dbContext.SaveChangesAsync();
+
+        var users = GetUsers();
+        await _dbContext.Users.AddRangeAsync(users);
+        await _dbContext.SaveChangesAsync();
+
+        var profiles = GetProfiles(users, organisations);
+        await _dbContext.Profiles.AddRangeAsync(profiles);
+        await _dbContext.SaveChangesAsync();
+
+        foreach (var user in users)
+        {
+            var userProfiles = profiles.Where(p => p.UserId == user.Id).ToList();
+            if (userProfiles.Any())
+            {
+                user.UpdateProfile(userProfiles.First().Id);
+            }
+        }
+
+        await _dbContext.SaveChangesAsync();
+    }
+    public async Task<bool> CanSeedAsync()
+    {
+        return !(await _dbContext.Users.AnyAsync() || 
+                 await _dbContext.Profiles.AnyAsync() || 
+                 await _dbContext.Organisations.AnyAsync());
     }
 }

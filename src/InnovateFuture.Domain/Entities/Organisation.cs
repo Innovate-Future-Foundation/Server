@@ -4,34 +4,36 @@ namespace InnovateFuture.Domain.Entities;
 
 public class Organisation
 {
-    public Guid OrgId { get; private set; }
+    public Guid Id { get; private set; }
     public string OrgName { get; private set; }
     public string? LogoUrl { get; private set; }
     public string? WebsiteUrl { get; private set; }
     public string? Address { get; private set; }
     public string? Email { get; private set; }
-    public SubscriptionEnum? Subscription { get; private set; }
-    public StatusEnum Status { get; private set; }
-    
-    public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
+    public SubscriptionEnum Subscription { get; private set; }
+    public OrgStatusEnum OrgStatus { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    
+    // Navigation
+    public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
+    
     public Organisation(){}
-    public Organisation(string orgName, Guid? orgId= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null, SubscriptionEnum? subscription=null)
+    public Organisation(string orgName, Guid? id= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null)
     {
-        OrgId = orgId??Guid.NewGuid();
+        Id = id??Guid.NewGuid();
         OrgName = orgName;
         LogoUrl = logoUrl;
         WebsiteUrl = websiteUrl;
         Address = address;
         Email = email;
-        Subscription = subscription;
-        Status = StatusEnum.Pending;// initial status
+        Subscription = SubscriptionEnum.Free;
+        OrgStatus = OrgStatusEnum.Pending;// initial status
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, SubscriptionEnum? subscription, StatusEnum? status)
+    public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, SubscriptionEnum? subscription, OrgStatusEnum? status)
     {
         OrgName = string.IsNullOrWhiteSpace(orgName) ? OrgName : orgName;
         LogoUrl = string.IsNullOrWhiteSpace(logoUrl) ? LogoUrl : logoUrl;
@@ -39,15 +41,16 @@ public class Organisation
         Address = string.IsNullOrWhiteSpace(address) ? Address : address;
         Email = string.IsNullOrWhiteSpace(email) ? Email : email;
         Subscription = subscription?? Subscription;
-        Status = status??Status;
+        OrgStatus = status??OrgStatus;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void ChangeStatus(StatusEnum status)
+    public void ChangeStatus(OrgStatusEnum orgStatus)
     {
-        Status = status;
+        OrgStatus = orgStatus;
         UpdatedAt = DateTime.UtcNow;
     }
+    
     public void AddProfile(Profile profile)
     {
         if (profile == null)

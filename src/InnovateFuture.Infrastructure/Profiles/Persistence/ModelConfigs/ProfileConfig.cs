@@ -8,51 +8,55 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
 {
     public void Configure(EntityTypeBuilder<Profile> builder)
     {
-        builder.HasKey(p => p.ProfileId);
-        
-        // Set indexes
-        builder.HasIndex(p=> new {p.UserId, p.RoleId, p.OrgId})
-            .IsUnique()
-            .HasDatabaseName("IX_Profiles_user_id_role_id_org_id");
+        builder.HasKey(p => p.Id);
         
         // Column Mappings
-        builder.Property(p => p.ProfileId).HasColumnType("uuid").HasColumnName("profile_id").IsRequired();
-        builder.Property(p => p.UserId).HasColumnType("uuid").HasColumnName("user_id").IsRequired();
-        builder.Property(p => p.RoleId).HasColumnType("uuid").HasColumnName("role_id").IsRequired();
-        builder.Property(p => p.OrgId).HasColumnType("uuid").HasColumnName("org_id"); // no need for platform admin
-        builder.Property(p => p.InvitedBy).HasColumnType("uuid").HasColumnName("invited_by");
-        builder.Property(p => p.SupervisedBy).HasColumnType("uuid").HasColumnName("supervised_by");
-        builder.Property(p => p.Name).HasColumnName("name").HasMaxLength(100);
-        builder.Property(p => p.Email).HasColumnName("email").HasMaxLength(100);
-        builder.Property(p => p.Phone).HasColumnName("phone").HasMaxLength(50);
-        builder.Property(p => p.Avatar).HasColumnName("avatar").HasMaxLength(500);
-        builder.Property(p => p.IsActive).HasColumnType("boolean").HasColumnName("is_active").IsRequired();
-        builder.Property(p => p.CreatedAt).HasColumnType("timestamptz").HasColumnName("created_at").IsRequired();
-        builder.Property(p => p.UpdatedAt).HasColumnType("timestamptz").HasColumnName("updated_at").IsRequired();
+        builder.Property(p => p.Id).HasColumnType("uuid").IsRequired();
+        builder.Property(p => p.UserId).HasColumnType("uuid").IsRequired();
+        builder.Property(p => p.Role).HasColumnType("role_enum").IsRequired();
+        builder.Property(p => p.OrgId).HasColumnType("uuid").IsRequired(false);
+        builder.Property(p => p.Inviter).HasColumnType("uuid").IsRequired(false);
+        builder.Property(p => p.Supervisor).HasColumnType("uuid").IsRequired(false);
+        builder.Property(p => p.Name).HasMaxLength(100).IsRequired(false);
+        builder.Property(p => p.Email).HasMaxLength(100).IsRequired(false);
+        builder.Property(p => p.Phone).HasMaxLength(50).IsRequired(false);
+        builder.Property(p => p.AvatarUrl).HasMaxLength(500).IsRequired(false);
+        builder.Property(p => p.IsActive).HasColumnType("boolean").IsRequired();
+        builder.Property(p => p.IsConfirmed).HasColumnType("boolean").IsRequired();
+        builder.Property(p => p.CreatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(p => p.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+        
+        // Set indexes
+        builder.HasIndex(p=> new {p.UserId, p.Role, p.OrgId})
+            .IsUnique()
+            .HasDatabaseName("IX_Profiles_user_id_role_org_id");
+        
+        builder.HasIndex(p => p.UserId);
+        builder.HasIndex(p => p.Role);
         
         // Relationships
         builder.HasOne(p => p.User)
             .WithMany(u => u.Profiles)
             .HasForeignKey(p => p.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-        
-        builder.HasOne(p => p.Role)
-            .WithMany()
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
         
         builder.HasOne(p => p.Organisation)
             .WithMany(o => o.Profiles)
             .HasForeignKey(p => p.OrgId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired(false);
         
-        builder.HasOne(p => p.InvitedByProfile)
+        builder.HasOne(p => p.InviterProfile)
             .WithMany()
-            .HasForeignKey(p => p.InvitedBy)
-            .OnDelete(DeleteBehavior.SetNull);
+            .HasForeignKey(p => p.Inviter)
+            .OnDelete(DeleteBehavior.SetNull)
+            .IsRequired(false);
         
-        builder.HasOne(p => p.SupervisedByProfile)
+        builder.HasOne(p => p.SupervisorProfile)
             .WithMany()
-            .HasForeignKey(p => p.SupervisedBy)
-            .OnDelete(DeleteBehavior.SetNull);
+            .HasForeignKey(p => p.Supervisor)
+            .OnDelete(DeleteBehavior.SetNull)
+            .IsRequired(false);
     }
 }

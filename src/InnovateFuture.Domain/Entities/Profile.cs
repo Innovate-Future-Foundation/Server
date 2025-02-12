@@ -1,86 +1,97 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using InnovateFuture.Domain.Enums;
+
 namespace InnovateFuture.Domain.Entities;
 
 public class Profile
 {
-    public Guid ProfileId { get; private set; }
-    public Guid UserId { get; private set; }
-    public User User { get; private set; }
+    public Guid Id { get; private set; }
+    public Guid UserId { get;  set; }
+    public User User { get;  private set; } = null!;
     public Guid? OrgId { get; private set; }
     public Organisation? Organisation { get; private set; }
-    public Guid RoleId { get; private set; }
-    public Role Role { get; private set; }
-    public Boolean IsActive { get; private set; }
-    public string? Email { get; private set; }
-    public Guid? InvitedBy { get; private set; }
-    public Profile? InvitedByProfile { get; private set; }
-    public Guid? SupervisedBy { get; private set; }
-    public Profile? SupervisedByProfile { get; private set; }
+    public Guid? Inviter { get; private set; }
+    public Profile? InviterProfile { get; private set; }
+    public Guid? Supervisor { get; private set; }
+    public Profile? SupervisorProfile { get; private set; }
+    public RoleEnum Role { get; private set; }
     public string? Name { get; private set; }
+    public string? Email { get; private set; }
     public string? Phone { get; private set; }
-    public string? Avatar { get; private set; }
-
+    public string? AvatarUrl { get; private set; }
+    public bool IsActive { get; private set; }
+    public bool IsConfirmed { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public Profile() { }
+    public Profile() {}
+    
     public Profile(
         Guid userId,
-        Guid roleId,
+        RoleEnum role,
         Guid? orgId = null,
-        Guid? invitedBy = null,
-        Guid? supervisedBy = null,
-        Guid? profileId = null
+        Guid? inviter = null,
+        Guid? supervisor = null,
+        string? name = null,
+        string? email = null,
+        string? phone = null,
+        string? avatarUrl = null,
+        Guid? id=null
     )
     {
-        ProfileId = profileId?? Guid.NewGuid();
+        Id = id?? Guid.NewGuid();
         UserId = userId;
-        RoleId = roleId;
+        Role = role;
         OrgId = orgId;
-        InvitedBy = invitedBy;
-        SupervisedBy = supervisedBy;
+        Inviter = inviter;
+        Supervisor = supervisor;
+        Name = name;
+        Email = email;
+        Phone = phone;
+        AvatarUrl = avatarUrl;
+        Inviter = inviter;
+        Supervisor = supervisor;
         IsActive = true;
+        IsConfirmed = false;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateProfile(string? email, string? name, string? phone, string? avatar, Boolean? isActive)
+    public void UpdateProfile(string? email, string? name, string? phone, string? avatarUrl, bool? isActive, bool? isConfirmed)
     {
         Email = string.IsNullOrWhiteSpace(email)? Email : email;
         Name = string.IsNullOrWhiteSpace(name)? Name : name;
         Phone = string.IsNullOrWhiteSpace(phone)? Phone : phone;
-        Avatar = string.IsNullOrWhiteSpace(avatar)? Avatar : avatar;
+        AvatarUrl = string.IsNullOrWhiteSpace(AvatarUrl)? AvatarUrl : avatarUrl;
         IsActive = isActive?? IsActive;
-        UpdatedAt = DateTime.UtcNow;
+        IsConfirmed = isConfirmed?? IsConfirmed;
+        
     }
-
     // Methods to set navigation properties
     public void AddUser(User user)
     {
         User = user?? throw new ArgumentNullException(nameof(user));
-        UserId = user.UserId;
+        UserId = user.Id;
     }
-
-    public void AddRole(Role role)
-    {
-        Role = role?? throw new ArgumentNullException(nameof(role));
-        RoleId = role.RoleId;
-    }
-
     public void AddOrganisation(Organisation? organisation)
     {
         Organisation = organisation;
-        OrgId = organisation?.OrgId;
+        OrgId = organisation?.Id;
     }
-
-    public void AddInvitedByProfile(Profile? invitedByProfile)
+    public void AddInviterProfile(Profile? inviterProfile)
     {
-        InvitedByProfile = invitedByProfile;
-        InvitedBy = invitedByProfile?.ProfileId;
+        InviterProfile = inviterProfile;
+        Inviter = inviterProfile?.Id;
     }
-
-    public void AddSupervisedByProfile(Profile? supervisedByProfile)
+    
+    public void AddSupervisorProfile(Profile? supervisorProfile)
     {
-        SupervisedByProfile = supervisedByProfile;
-        SupervisedBy = supervisedByProfile?.ProfileId;
+        SupervisorProfile = supervisorProfile;
+        Supervisor = supervisorProfile?.Id;
     }  
 
+    public void ConfirmRole()
+    {
+        IsConfirmed = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

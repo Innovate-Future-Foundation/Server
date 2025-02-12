@@ -8,6 +8,7 @@ namespace InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 public class  GetOrganisationsQuery : IRequest<(List<Organisation> data, int totalItems)>
 {
     public QueryOrganisationsFilters? Filters { get; set; }
+    public string? SearchKey { get; set; }
     public Sorting[]? Sortings { get; set; }
     public int? Offset { get; set; }
     public int Limit { get; set; }
@@ -15,7 +16,6 @@ public class  GetOrganisationsQuery : IRequest<(List<Organisation> data, int tot
 
 public class QueryOrganisationsFilters
 {
-    public string? OrgNameOrEmail { get; set; }
-    public StatusEnum? Status { get; set; } 
-    public SubscriptionEnum? Subscription { get; set; }
+    public OrgStatusEnum? OrgStatusEnum { get; set; } 
+    public SubscriptionEnum? SubscriptionEnum { get; set; }
 }

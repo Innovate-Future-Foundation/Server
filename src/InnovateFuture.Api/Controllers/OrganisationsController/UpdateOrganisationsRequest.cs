@@ -9,6 +9,6 @@ public class UpdateOrganisationRequest
     public string? WebsiteUrl { get; set; }
     public string? Address { get; set; }
     public string? Email { get; set; }
-    public SubscriptionEnum? Subscription { get; set; }
-    public StatusEnum? Status { get; set; }
+    public string? SubscriptionCode { get; set; }
+    public string? OrgStatusCode { get; set; }
 }

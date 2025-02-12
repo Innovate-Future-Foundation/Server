@@ -2,14 +2,22 @@
   "Logging": {
     "LogLevel": {
       "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
     }
   },
-  "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=password",
+  "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=postgres",
   "JWTConfig": {
       "SecretKey": "SecretKeyExample",
-      "Issuer": "innovateFuture",
+      "Issuer": "innovateFuture Support",
       "Audience": "innovateFuture",
       "ExpireSeconds": 7200
-    }
+    },
+  "EmailSettings": {
+    "SmtpServer": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "SenderName": "Innovate-feature",
+    "SenderEmail": "xiaobaoxue1@gmail.com",
+    "SenderPassword": "tdlw ervs xwdf yuyo"
+  }
 }

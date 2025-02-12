@@ -11,14 +11,14 @@ public class GetOrganisationPaginatedResponse:IPaginatedResult<GetOrganisationsR
 
 public class GetOrganisationsResponse
 {
-    public Guid OrgId { get;  set; }
+    public Guid Id { get;  set; }
     public string OrgName { get; set; }
     public string? LogoUrl { get;  set; }
     public string? WebsiteUrl { get;  set; }
     public string? Address { get;  set; }
     public string? Email { get;  set; }
-    public SubscriptionEnum? Subscription { get;  set; }
-    public StatusEnum Status { get;  set; }
+    public string SubscriptionCode { get;  set; }
+    public string OrgStatusCode { get;  set; }
     public DateTime CreatedAt{ get;  set; }
     public DateTime UpdatedAt { get;  set; }
 }
