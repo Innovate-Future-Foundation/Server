@@ -24,8 +24,9 @@ using AMProfile = AutoMapper.Profile;
 using Profile = InnovateFuture.Domain.Entities.Profile;
 
 
-namespace InnovateFuture.Api.Profiles;
 
+
+namespace InnovateFuture.Api.Profiles;
 public class AutoMapperProfile: AMProfile
 {
     public AutoMapperProfile()
@@ -54,7 +55,9 @@ public class AutoMapperProfile: AMProfile
         
         CreateMap<APIQueryProfileFilters, 
                 APPQueryProfileFilters>()
-            .ForMember(dest => dest.RoleEnums, opt => opt.MapFrom<RoleCodesToRoleEnumsResolver>());
+            .ForMember(dest => dest.RoleEnums, opt => opt.MapFrom<RoleCodesToRoleEnumsResolver>())
+            .ForMember(dest => dest.Supervisors, opt => opt.MapFrom(src => 
+                RoleCodesToRoleEnumsResolver.ConvertStringToGuidArr(src.Supervisors)));
 
         CreateMap<Profile, GetProfileResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
@@ -97,6 +100,7 @@ public class AutoMapperProfile: AMProfile
             .ForMember(desc=>desc.Meta,opt=>opt.MapFrom(src=>new Meta(){TotalItems = src.totalItems}));
     }
 }
+
 public class RoleCodesToRoleEnumsResolver : IValueResolver<APIQueryProfileFilters, APPQueryProfileFilters, RoleEnum[]>
 {
     public RoleEnum[] Resolve(APIQueryProfileFilters source, APPQueryProfileFilters destination, RoleEnum[] destMember,
@@ -107,6 +111,14 @@ public class RoleCodesToRoleEnumsResolver : IValueResolver<APIQueryProfileFilter
             .Select(roleCode => Enum.TryParse<RoleEnum>(roleCode.Trim(), out var roleEnum) ? roleEnum : default)
             .Where(roleEnum => roleEnum != default)
             .ToArray()??[];
+    }
+    public static Guid[] ConvertStringToGuidArr(string s=""){
+        var res = s.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim())
+            .Where(s => Guid.TryParse(s, out _))
+            .Select(Guid.Parse)
+            .ToArray()??[];
+        return res;
     }
 }
 

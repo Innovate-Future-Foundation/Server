@@ -30,7 +30,7 @@ public class GetProfilesHandler : IRequestHandler<GetProfilesQuery, (List<Profil
                 predicate = predicate.And(p =>
                     (filters.OrgId==null || p.OrgId==filters.OrgId) &&
                     (filters.RoleEnums.Length==0 || filters.RoleEnums.Contains(p.Role)) &&
-                    (filters.Supervisor == null|| p.Supervisor == filters.Supervisor) &&
+                    (filters.Supervisors.Length==0||(p.Supervisor.HasValue&& filters.Supervisors.Contains(p.Supervisor.Value))) &&
                     (!filters.IsConfirmed.HasValue || p.IsConfirmed == filters.IsConfirmed) &&
                     (!filters.IsActive.HasValue || p.IsActive == filters.IsActive));
             }

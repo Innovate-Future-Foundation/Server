@@ -18,7 +18,7 @@ public class QueryProfileFilters
 {
     public RoleEnum[] RoleEnums { get; set; } = [];
     public Guid? OrgId { get; set; }
-    public Guid? Supervisor { get; set; }
+    public Guid[] Supervisors { get; set; } = [];
     public bool? IsActive { get; set; }
     public bool? IsConfirmed { get; set; }
 }
