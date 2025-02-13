@@ -21,6 +21,8 @@ public class Profile
     public string? AvatarUrl { get; private set; }
     public bool IsActive { get; private set; }
     public bool IsConfirmed { get; private set; }
+    
+    public ICollection<Activity>? AssignedActivities { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Profile() {}
