@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Create PR notification
-        if: github.event.pull_request.draft == false
+        if: github.event.pull_request.draft == false && !github.event.pull_request.merged
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DEV_PR_DISCORD_WEBHOOK }}
