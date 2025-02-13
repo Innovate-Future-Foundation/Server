@@ -6,7 +6,6 @@ using InnovateFuture.Api.Middleware;
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Profiles.Queries.GetProfile;
-using InnovateFuture.Application.Services.Security;
 using InnovateFuture.Application.Users.Commands.CreateUser;
 using InnovateFuture.Application.Users.Commands.UpdateUser;
 using InnovateFuture.Application.Users.Queries.GetUser;
@@ -18,6 +17,8 @@ using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Domain.Enums;
 using InnovateFuture.Application.Services.Auth.ConfirmEmail;
+using InnovateFuture.Application.Services.Auth.Register;
+using InnovateFuture.Application.Services.Auth.SendVerificationEmail;
 using InnovateFuture.Application.Services.Auth.UserService;
 using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Domain.Entities;
@@ -88,8 +89,11 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(CreateOrganisationHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(UpdateOrganisationHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
-
+            
+                configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
+                
             });
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -100,10 +104,12 @@ namespace InnovateFuture.Api
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
-            builder.Services.AddScoped<IEmailService, SendEmailService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            builder.Services.AddValidatorsFromAssembly(typeof(RegisterOrganisationAdminValidator).Assembly);
+            
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(GetUsersQueryValidator).Assembly);
@@ -153,18 +159,6 @@ namespace InnovateFuture.Api
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
             
             #region JWT
-            // get jwt config values from appsettings and create an obj using JWTConfig model class, IOC will handle dependency injection
-            builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection(JWTConfig.Section));
-            // directly get jwt config value from appsettings and construct into an obj
-            var jwtConfig = builder.Configuration.GetSection(JWTConfig.Section).Get<JWTConfig>();
-            if (jwtConfig == null)
-            {
-                throw new InvalidOperationException("JWT configuration is missing in appsettings.");
-            }
-            builder.Services.AddJWTEXT(jwtConfig);
-
-            builder.Services.AddTransient<CreateTokenService>();
-
             #endregion
             
             #region cors
@@ -185,6 +179,8 @@ namespace InnovateFuture.Api
             builder.Services.AddSwaggerEXT();
 
             #region fluent validators
+            // Auth
+            builder.Services.AddValidatorsFromAssemblyContaining<RegisterOrganisationAdminValidator>();
             // Users
             builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserCommandValidator>();
