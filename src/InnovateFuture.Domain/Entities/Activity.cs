@@ -21,6 +21,7 @@ public class Activity
     public TourStatusEnum Status { get; private set; }
     public DateTime CreateAt { get; private set; }
     public DateTime UpdateAt { get; private set; }
+    public Day Day { get; private set; }
 
     public ICollection<Profile>? TeachersAssigned { get; private set; } = new List<Profile>();
     
@@ -86,5 +87,11 @@ public class Activity
             throw new ArgumentNullException(nameof(teacher), "Teacher cannot be null.");
         }
         TeachersAssigned?.Remove(teacher);
+    }
+
+    public void AddDay(Day day)
+    {
+        Day = day??throw new ArgumentNullException(nameof(day), "Day cannot be null.");
+        DayId = day.Id;
     }
 }

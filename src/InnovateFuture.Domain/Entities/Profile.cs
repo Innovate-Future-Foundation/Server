@@ -22,7 +22,9 @@ public class Profile
     public bool IsActive { get; private set; }
     public bool IsConfirmed { get; private set; }
     
-    public ICollection<Activity>? AssignedActivities { get; private set; }
+    public ICollection<Activity>? AssignedActivities { get; private set; } = new List<Activity>();
+    
+    public ICollection<Tour>? LeadingTours { get; private set; } = new List<Tour>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Profile() {}

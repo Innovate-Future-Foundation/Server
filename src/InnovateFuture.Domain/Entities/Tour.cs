@@ -3,29 +3,34 @@ using InnovateFuture.Domain.Enums;
 
 namespace InnovateFuture.Domain.Entities;
 
-public class Day
+public class Tour
 {
     public Guid Id { get; private set; }
     public Guid OrgId { get; private set; }
-    public Guid TourId { get; private set; }
     [MaxLength(50)]
     public string Title { get; private set; }
     [MaxLength(255)]
     public string? Description { get; private set; }
+
     [MaxLength(500)]
     public string? CoverImgUrl { get; private set; }
+    public DateTime StartDate{ get; private set; }
+    public DateTime EndDate { get; private set; }
     public TourStatusEnum Status { get; private set; }
+    public Guid? Leader { get; private set; }
+    public Profile? LeaderProfile { get; private set; }
+    public ICollection<Day>? Days { get; private set; }=new List<Day>();
     public DateTime CreateAt { get; private set; }
     public DateTime UpdateAt { get; private set; }
+    
+    public Tour(){}
 
-    public ICollection<Activity>? Activities { get; private set; }=new List<Activity>();
-    public ICollection<Profile>? TeachersAssigned { get; private set; } = new List<Profile>();
-    public Day(){}
-
-    public Day(
-        Guid orgId, 
-        Guid tourId, 
-        string title, 
+    public Tour(
+        Guid orgId,
+        string title,
+        DateTime startDate,
+        DateTime endDate,
+        Guid? leader=null,
         Guid? id=null, 
         string? description=null, 
         string? coverImgUrl=null
@@ -33,18 +38,23 @@ public class Day
     {
         Id = id?? Guid.NewGuid();
         OrgId = orgId;
-        TourId = tourId;
         Title = title;
         Description = description;
         Status = TourStatusEnum.Draft;
         CoverImgUrl = coverImgUrl;
+        StartDate= StartDate == default ? DateTime.UtcNow : startDate;
+        EndDate= EndDate == default ? DateTime.UtcNow: endDate;
+        Leader = leader;
         CreateAt = DateTime.UtcNow;
         UpdateAt = DateTime.UtcNow;
     }
-    public void UpdateDay(
+    public void UpdateTour(
         string? title, 
         string? description, 
         string? coverImgUrl,
+        DateTime? startDate,
+        DateTime? endDate,
+        Guid? leader,
         TourStatusEnum? status
         )
     {
@@ -52,41 +62,33 @@ public class Day
         Description = string.IsNullOrWhiteSpace(description)?Description:description;
         CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl)?CoverImgUrl:coverImgUrl;
         Status = status ?? TourStatusEnum.Draft;
+        Leader = leader??leader;
+        StartDate = startDate??StartDate;
+        EndDate = endDate??EndDate;
         UpdateAt = DateTime.UtcNow;
     }
 
-    public void AssignTeacher(Profile teacher)
+    public void AssignLeader(Profile teacher)
     {
-        if (teacher == null)
-        {
-            throw new ArgumentNullException(nameof(teacher), "Teacher cannot be null.");
-        }
-        TeachersAssigned?.Add(teacher);
-    }
-    public void RemoveTeacher(Profile teacher)
-    {
-        if (teacher == null)
-        {
-            throw new ArgumentNullException(nameof(teacher), "Teacher cannot be null.");
-        }
-        TeachersAssigned?.Remove(teacher);
+        LeaderProfile = teacher?? throw new ArgumentNullException(nameof(teacher));
+        Leader = teacher.Id;
     }
 
-    public void AddActivity(Activity activity)
+    public void AddDay(Day day)
     {
-        if (activity == null)
+        if (day == null)
         {
-            throw new ArgumentNullException(nameof(activity), "Activity cannot be null.");
+            throw new ArgumentNullException(nameof(day), "Day cannot be null.");
         }
-        Activities?.Add(activity);
+        Days?.Add(day);
     }
 
-    public void RemoveActivity(Activity activity)
+    public void RemoveDay(Day day)
     {
-        if(activity == null)
+        if(day == null)
         {
-            throw new ArgumentNullException(nameof(activity), "Activity cannot be null.");
+            throw new ArgumentNullException(nameof(day), "Day cannot be null.");
         }
-        Activities?.Remove(activity);
+        Days?.Remove(day);
     }
 }

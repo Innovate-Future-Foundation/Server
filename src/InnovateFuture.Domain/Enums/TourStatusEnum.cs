@@ -7,5 +7,6 @@ public enum TourStatusEnum
     Published,
     Active,
     Updated,
+    Completed,
     Canceled
 }
