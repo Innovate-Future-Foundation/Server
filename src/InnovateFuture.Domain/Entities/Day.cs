@@ -41,8 +41,8 @@ public class Day
         Text = text;
         Status = TourStatusEnum.Draft;
         CoverImgUrl = coverImgUrl;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
     public void UpdateDay(
         string? title, 
@@ -59,7 +59,7 @@ public class Day
         Text = string.IsNullOrWhiteSpace(text)?Text:text;
         CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl)?CoverImgUrl:coverImgUrl;
         Status = status ?? TourStatusEnum.Draft;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
     public void AddActivity(Activity activity)
     {

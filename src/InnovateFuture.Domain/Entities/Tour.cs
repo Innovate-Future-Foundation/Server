@@ -49,8 +49,8 @@ public class Tour
         StartDate = startDate == default ? DateTime.UtcNow : startDate;
         EndDate = endDate == default ? DateTime.UtcNow : endDate;
         Leader = leader ?? Leader;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
     public void UpdateTour(
         string? title, 
@@ -73,7 +73,7 @@ public class Tour
         Leader = leader??leader;
         StartDate = startDate??StartDate;
         EndDate = endDate??EndDate;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
     public void AddStudentTourEnrollment(StudentTourEnrollment studentTourEnrollment)

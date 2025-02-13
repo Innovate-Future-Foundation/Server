@@ -1,8 +1,7 @@
 using AutoMapper;
 using InnovateFuture.Api.Configs;
-using InnovateFuture.Api.Controllers.OrganisationsController;
-using InnovateFuture.Application.Organisations.Queries.GetOrganisation;
 using InnovateFuture.Application.Services.Auth.ConfirmEmail;
+using InnovateFuture.Application.Services.Auth.Login;
 using InnovateFuture.Application.Services.Auth.Register;
 using InnovateFuture.Application.Services.Auth.SendVerificationEmail;
 using Microsoft.AspNetCore.Mvc;
@@ -27,32 +26,6 @@ public class AuthController: ControllerBase
     }
     
     /// <summary>
-    /// User click "Verify email" button
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPost("email-verification")]
-    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
-    {
-        try
-        {
-            var command = _mapper.Map<ConfirmEmailCommand>(request);
-            bool success = await _mediator.Send(command);
-
-            if (!success)
-            {
-                return BadRequest(new { Message = "Email confirmation failed" });
-            }
-            return Ok("Email confirmation successful");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[Debug ERROR] Email Verification Failed: {ex.Message}");
-            return StatusCode(500, new { Message = "An error occurred during email verification.", Details = ex.Message });
-        }
-    }
-    
-    /// <summary>
     /// Register organisation admin
     /// </summary>
     /// <param name="request"></param>
@@ -64,16 +37,58 @@ public class AuthController: ControllerBase
         // 1⃣️ Update tables 
         var registerCommand = _mapper.Map<RegisterOrganisationAdminCommand>(request);
         var registerResult = await _mediator.Send(registerCommand);
-        if (registerResult == null)
-        {
-            return BadRequest(new { Message = "Register organisation admin failed" });
-        }
         
         var (profileId, user) = registerResult.Value;
         // 2⃣️ Send Email in the Background (Non-blocking)
         var sendVerificationEmailCommand = new SendVerificationEmailCommand(user, profileId);;
         _ = Task.Run(async () => await _mediator.Send(sendVerificationEmailCommand));
-       
+
         return Ok("Register organisation admin and send email successful");
+    }
+
+    
+    /// <summary>
+    /// User click "Verify email" button
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPost("email-verification")]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
+    {
+        var command = _mapper.Map<ConfirmEmailCommand>(request);
+        var accessToken = await _mediator.Send(command);
+        
+        // Store token in HTTP-only Cookie
+        Response.Cookies.Append("access-token", accessToken, new CookieOptions
+        {
+            HttpOnly = true, // prevent JS access
+            Secure = true,   // use https 
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(3)
+        });
+        // TODO: Return dashboard page
+        return Redirect("http://frontend/dashboard");
+    }
+    
+    /// <summary>
+    /// User login by email and password
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    {
+        var command = _mapper.Map<LoginCommand>(request);
+        var accessToken = await _mediator.Send(command);
+        
+        // Store token in HTTP-only Cookie
+        Response.Cookies.Append("access-token", accessToken, new CookieOptions
+        {
+            HttpOnly = true, // prevent JS access
+            Secure = true,   // use https 
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(3)
+        });
+        return Ok("login successful");
     }
 }

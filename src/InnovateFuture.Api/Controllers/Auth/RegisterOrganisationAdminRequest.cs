@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace InnovateFuture.Api.Controllers.Auth;
 
 public class RegisterOrganisationAdminRequest

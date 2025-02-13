@@ -1,3 +1,4 @@
+using System.Text;
 using FluentValidation;
 using HealthChecks.UI.Client;
 using InnovateFuture.Api.Filters;
@@ -17,7 +18,9 @@ using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Domain.Enums;
 using InnovateFuture.Application.Services.Auth.ConfirmEmail;
+using InnovateFuture.Application.Services.Auth.Login;
 using InnovateFuture.Application.Services.Auth.Register;
+using InnovateFuture.Application.Services.Auth.TokenService;
 using InnovateFuture.Application.Services.Auth.SendVerificationEmail;
 using InnovateFuture.Application.Services.Auth.UserService;
 using InnovateFuture.Application.Services.SendEmail;
@@ -46,9 +49,11 @@ using NLog;
 using NLog.Web;
 using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Repositiories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+
 
 namespace InnovateFuture.Api
 {
@@ -66,9 +71,45 @@ namespace InnovateFuture.Api
             #region Email Service Configuration
             // bind EmailSettings from appsettings.Development.json
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-            // register EmailSettings as signleton
-            builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailSettings>>().Value);
             #endregion
+            
+            #region JWT
+            builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection("JWTConfig"));
+            #endregion
+            
+            // Configure JWT Authentication
+            var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]);
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["JWTConfig:Issuer"],
+                        ValidAudience = builder.Configuration["JWTConfig:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(key)
+                    };
+                    
+                    // allow extracting JWT from cookies instead of header
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            // Read Jwt token from cookie
+                            var accessToken = context.Request.Query["access_token"];
+                            if (!string.IsNullOrEmpty(accessToken))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+            builder.Services.AddAuthorization();
             
             #region filter
             builder.Services.AddControllers(option =>
@@ -86,6 +127,8 @@ namespace InnovateFuture.Api
             #region service instances
             builder.Services.AddMediatR(configuration =>
             {
+                configuration.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly);
+                
                 configuration.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetUsersHandler).Assembly);
@@ -101,8 +144,8 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
-                
             });
+                
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
@@ -117,10 +160,13 @@ namespace InnovateFuture.Api
             builder.Services.AddScoped<ITourRepository, TourRepository>();
             builder.Services.AddScoped<IStudentTourEnrollmentRepository, StudentTourEnrollmentRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(RegisterOrganisationAdminValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(LoginValidator).Assembly);
+            
             
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateUserCommandValidator).Assembly);
@@ -172,6 +218,7 @@ namespace InnovateFuture.Api
             // Disable auto model validation
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
             
+
             #region cors
             // cors
             builder.Services.AddCors(option =>
@@ -232,7 +279,7 @@ namespace InnovateFuture.Api
                 app.UseSwaggerEXT();
                 app.Services.SeedDataEXT();
             }
-            
+
             app.UseMiddleware<GlobalExceptionMiddleware>();
             
             app.MapHealthChecks("health",new HealthCheckOptions
