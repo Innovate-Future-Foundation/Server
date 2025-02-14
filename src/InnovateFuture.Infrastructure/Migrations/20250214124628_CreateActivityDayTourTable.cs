@@ -22,6 +22,54 @@ namespace InnovateFuture.Infrastructure.Migrations
                 .OldAnnotation("Npgsql:Enum:role_enum", "undefined_role,platform_admin,org_admin,org_manager,org_teacher,parent,student")
                 .OldAnnotation("Npgsql:Enum:subscription_enum", "undefined_subscription,free,basic,premium");
 
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "UpdatedAt",
+                table: "Users",
+                type: "timestamp",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamptz");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CreatedAt",
+                table: "Users",
+                type: "timestamp",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamptz");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "UpdatedAt",
+                table: "Profiles",
+                type: "timestamp",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamptz");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CreatedAt",
+                table: "Profiles",
+                type: "timestamp",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamptz");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "UpdatedAt",
+                table: "Organisations",
+                type: "timestamp",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamptz");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CreatedAt",
+                table: "Organisations",
+                type: "timestamp",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamptz");
+
             migrationBuilder.CreateTable(
                 name: "Activities",
                 columns: table => new
@@ -33,12 +81,12 @@ namespace InnovateFuture.Infrastructure.Migrations
                     Summary = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Text = table.Column<string>(type: "text", nullable: true),
                     Location = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    StartTime = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "timestamp", nullable: false),
                     CoverImgUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Status = table.Column<TourStatusEnum>(type: "tour_status_enum", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -62,12 +110,12 @@ namespace InnovateFuture.Infrastructure.Migrations
                     Summary = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Text = table.Column<string>(type: "text", nullable: true),
                     CoverImgUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    StartDate = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "timestamp", nullable: false),
                     Status = table.Column<TourStatusEnum>(type: "tour_status_enum", nullable: false),
                     Leader = table.Column<Guid>(type: "uuid", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -123,8 +171,8 @@ namespace InnovateFuture.Infrastructure.Migrations
                     Text = table.Column<string>(type: "text", nullable: true),
                     CoverImgUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Status = table.Column<TourStatusEnum>(type: "tour_status_enum", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -149,11 +197,11 @@ namespace InnovateFuture.Infrastructure.Migrations
                 {
                     ProfileId = table.Column<Guid>(type: "uuid", nullable: false),
                     TourId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EnrollmentDate = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    WithdrawalDate = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    EnrollmentDate = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    WithdrawalDate = table.Column<DateTime>(type: "timestamp", nullable: true),
                     Status = table.Column<EnrollmentStatusEnum>(type: "enrollment_status_enum", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -267,6 +315,54 @@ namespace InnovateFuture.Infrastructure.Migrations
                 .OldAnnotation("Npgsql:Enum:role_enum", "undefined_role,platform_admin,org_admin,org_manager,org_teacher,parent,student")
                 .OldAnnotation("Npgsql:Enum:subscription_enum", "undefined_subscription,free,basic,premium")
                 .OldAnnotation("Npgsql:Enum:tour_status_enum", "undefined_tour,draft,published,active,updated,completed,canceled");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "UpdatedAt",
+                table: "Users",
+                type: "timestamptz",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CreatedAt",
+                table: "Users",
+                type: "timestamptz",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "UpdatedAt",
+                table: "Profiles",
+                type: "timestamptz",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CreatedAt",
+                table: "Profiles",
+                type: "timestamptz",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "UpdatedAt",
+                table: "Organisations",
+                type: "timestamptz",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CreatedAt",
+                table: "Organisations",
+                type: "timestamptz",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp");
         }
     }
 }

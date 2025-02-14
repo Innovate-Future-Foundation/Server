@@ -20,10 +20,10 @@ public class ActivityConfig : IEntityTypeConfiguration<Activity>
         builder.Property(a => a.Location).HasMaxLength(100).IsRequired(false);
         builder.Property(a => a.CoverImgUrl).HasMaxLength(500).IsRequired(false);
         builder.Property(a => a.Status).HasColumnType("tour_status_enum").IsRequired();
-        builder.Property(a => a.StartTime).HasColumnType("timestamptz").IsRequired();
-        builder.Property(a => a.EndTime).HasColumnType("timestamptz").IsRequired();
-        builder.Property(a => a.CreatedAt).HasColumnType("timestamptz").IsRequired();
-        builder.Property(a => a.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(a => a.StartTime).HasColumnType("timestamp").IsRequired();
+        builder.Property(a => a.EndTime).HasColumnType("timestamp").IsRequired();
+        builder.Property(a => a.CreatedAt).HasColumnType("timestamp").IsRequired();
+        builder.Property(a => a.UpdatedAt).HasColumnType("timestamp").IsRequired();
         
         // Relationships
         builder.HasOne(a => a.Organisation)

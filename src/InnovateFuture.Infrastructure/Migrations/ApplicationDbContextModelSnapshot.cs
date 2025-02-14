@@ -73,10 +73,10 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<DateTime>("EndTime")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("Location")
                         .HasMaxLength(100)
@@ -86,7 +86,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<TourStatusEnum>("Status")
                         .HasColumnType("tour_status_enum");
@@ -104,7 +104,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.HasKey("Id");
 
@@ -128,7 +128,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<Guid>("OrgId")
                         .HasColumnType("uuid");
@@ -152,7 +152,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.HasKey("Id");
 
@@ -174,7 +174,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -196,7 +196,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("subscription_enum");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("WebsiteUrl")
                         .HasMaxLength(500)
@@ -218,7 +218,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -251,7 +251,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -284,19 +284,19 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<DateTime>("EnrollmentDate")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<EnrollmentStatusEnum>("Status")
                         .HasColumnType("enrollment_status_enum");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<DateTime?>("WithdrawalDate")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.HasKey("ProfileId", "TourId");
 
@@ -320,10 +320,10 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<Guid?>("Leader")
                         .HasColumnType("uuid");
@@ -332,7 +332,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<TourStatusEnum>("Status")
                         .HasColumnType("tour_status_enum");
@@ -350,7 +350,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.HasKey("Id");
 
@@ -375,7 +375,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<Guid?>("DefaultProfileId")
                         .HasColumnType("uuid");
@@ -422,7 +422,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("UserName")
                         .IsRequired()

@@ -18,8 +18,8 @@ public class UserConfig : IEntityTypeConfiguration<User>
         builder.Property(u=>u.PasswordHash).IsRequired();
         builder.Property(u => u.IdpSubject).HasColumnType("uuid").IsRequired(false);
         builder.Property(u => u.DefaultProfileId).HasColumnType("uuid").IsRequired(false);
-        builder.Property(u => u.CreatedAt).HasColumnType("timestamptz").IsRequired();
-        builder.Property(u => u.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(u => u.CreatedAt).HasColumnType("timestamp").IsRequired();
+        builder.Property(u => u.UpdatedAt).HasColumnType("timestamp").IsRequired();
 
         // Set indexes
         builder.HasIndex(u => u.Email)

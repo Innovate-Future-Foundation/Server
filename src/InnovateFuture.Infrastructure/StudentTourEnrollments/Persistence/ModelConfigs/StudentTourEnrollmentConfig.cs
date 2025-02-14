@@ -13,11 +13,11 @@ public class StudentTourEnrollmentConfig : IEntityTypeConfiguration<StudentTourE
         // Column Mappings
         builder.Property(s => s.ProfileId).HasColumnType("uuid").IsRequired();
         builder.Property(s => s.TourId).HasColumnType("uuid").IsRequired();
-        builder.Property(s => s.EnrollmentDate).HasColumnType("timestamptz").IsRequired();
-        builder.Property(s => s.WithdrawalDate).HasColumnType("timestamptz").IsRequired(false);
+        builder.Property(s => s.EnrollmentDate).HasColumnType("timestamp").IsRequired();
+        builder.Property(s => s.WithdrawalDate).HasColumnType("timestamp").IsRequired(false);
         builder.Property(s => s.Status).HasColumnType("enrollment_status_enum").IsRequired();
-        builder.Property(s => s.CreatedAt).HasColumnType("timestamptz").IsRequired();
-        builder.Property(s => s.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(s => s.CreatedAt).HasColumnType("timestamp").IsRequired();
+        builder.Property(s => s.UpdatedAt).HasColumnType("timestamp").IsRequired();
         
         // Relationships
         builder.HasOne(s => s.Student)

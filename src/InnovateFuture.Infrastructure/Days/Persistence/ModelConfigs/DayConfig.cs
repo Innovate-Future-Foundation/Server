@@ -20,8 +20,8 @@ public class DayConfig : IEntityTypeConfiguration<Day>
         builder.Property(a => a.Text).HasColumnType("text").IsRequired(false); 
         builder.Property(d => d.CoverImgUrl).HasMaxLength(500).IsRequired(false);
         builder.Property(d => d.Status).HasColumnType("tour_status_enum").IsRequired();
-        builder.Property(d => d.CreatedAt).HasColumnType("timestamptz").IsRequired();
-        builder.Property(d => d.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(d => d.CreatedAt).HasColumnType("timestamp").IsRequired();
+        builder.Property(d => d.UpdatedAt).HasColumnType("timestamp").IsRequired();
         
         // Relationships
         builder.HasOne(d => d.Organisation)

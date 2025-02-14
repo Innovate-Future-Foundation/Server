@@ -20,10 +20,10 @@ public class TourConfig : IEntityTypeConfiguration<Tour>
         builder.Property(a => a.Text).HasColumnType("text").IsRequired(false); 
         builder.Property(t => t.CoverImgUrl).HasMaxLength(500).IsRequired(false);
         builder.Property(t => t.Status).HasColumnType("tour_status_enum").IsRequired();
-        builder.Property(t => t.StartDate).HasColumnType("timestamptz").IsRequired();
-        builder.Property(t => t.EndDate).HasColumnType("timestamptz").IsRequired();
-        builder.Property(t => t.CreatedAt).HasColumnType("timestamptz").IsRequired();
-        builder.Property(t => t.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(t => t.StartDate).HasColumnType("timestamp").IsRequired();
+        builder.Property(t => t.EndDate).HasColumnType("timestamp").IsRequired();
+        builder.Property(t => t.CreatedAt).HasColumnType("timestamp").IsRequired();
+        builder.Property(t => t.UpdatedAt).HasColumnType("timestamp").IsRequired();
         
         // Relationships
         builder.HasOne(t => t.Organisation)
