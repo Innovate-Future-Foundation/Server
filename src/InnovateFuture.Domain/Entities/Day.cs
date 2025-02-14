@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using InnovateFuture.Domain.Enums;
 
 namespace InnovateFuture.Domain.Entities;

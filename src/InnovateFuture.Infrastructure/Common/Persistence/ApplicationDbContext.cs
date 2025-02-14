@@ -12,6 +12,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public virtual DbSet<Activity> Activities { get; set; }
     public virtual DbSet<Day> Days { get; set; }
     public virtual DbSet<Tour> Tours { get; set; }
+    
+    public virtual DbSet<StudentTourEnrollment> StudentTourEnrollments { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

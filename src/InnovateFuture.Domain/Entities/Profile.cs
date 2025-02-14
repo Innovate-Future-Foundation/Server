@@ -27,6 +27,7 @@ public class Profile
     public ICollection<Tour>? LeadingTours { get; private set; } = new List<Tour>();
     
     public ICollection<Tour>? EnrolledTours { get; private set; } = new List<Tour>();
+    public ICollection<StudentTourEnrollment>? StudentTourEnrollments { get; private set; } = new List<StudentTourEnrollment>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Profile() {}
@@ -98,5 +99,22 @@ public class Profile
     {
         IsConfirmed = true;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddStudentTourEnrollment(StudentTourEnrollment studentTourEnrollment)
+    {
+        if (studentTourEnrollment == null)
+        {
+            throw new ArgumentNullException(nameof(studentTourEnrollment),"studentTourEnrollment cannot be null.");
+        }
+        StudentTourEnrollments?.Add(studentTourEnrollment);
+    }
+    public void RemoveStudentTourEnrollment(StudentTourEnrollment studentTourEnrollment)
+    {
+        if (studentTourEnrollment == null)
+        {
+            throw new ArgumentNullException(nameof(studentTourEnrollment),"studentTourEnrollment cannot be null.");
+        }
+        StudentTourEnrollments?.Remove(studentTourEnrollment);
     }
 }

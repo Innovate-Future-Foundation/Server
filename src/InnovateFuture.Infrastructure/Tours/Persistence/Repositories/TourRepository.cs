@@ -26,7 +26,7 @@ public class TourRepository:ITourRepository
     {
         var tour = await _dbContext.Tours
             .Include(a=>a.Days)
-            .Include(a=>a.EnrolledStudents)
+            .Include(a=>a.StudentTourEnrollments)
             .Include(a=>a.LeaderProfile)
             .FirstOrDefaultAsync(o=>o.Id == id);
        

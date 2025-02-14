@@ -22,12 +22,20 @@ using InnovateFuture.Application.Services.Auth.SendVerificationEmail;
 using InnovateFuture.Application.Services.Auth.UserService;
 using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Infrastructure.Activities.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Activities.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
+using InnovateFuture.Infrastructure.Days.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Days.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Repositories;
+using InnovateFuture.Infrastructure.StudentTourEnrollments.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.StudentTourEnrollments.Persistence.Repositories;
+using InnovateFuture.Infrastructure.Tours.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Tours.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Users.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Users.Persistence.Repositories;
 using MediatR;
@@ -104,6 +112,10 @@ namespace InnovateFuture.Api
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+            builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+            builder.Services.AddScoped<IDayRepository, DayRepository>();
+            builder.Services.AddScoped<ITourRepository, TourRepository>();
+            builder.Services.AddScoped<IStudentTourEnrollmentRepository, StudentTourEnrollmentRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 
 
@@ -132,6 +144,8 @@ namespace InnovateFuture.Api
             dataSourceBuilder.MapEnum<RoleEnum>();
             dataSourceBuilder.MapEnum<SubscriptionEnum>();
             dataSourceBuilder.MapEnum<OrgStatusEnum>();
+            dataSourceBuilder.MapEnum<TourStatusEnum>();
+            dataSourceBuilder.MapEnum<EnrollmentStatusEnum>();
             
             var dataSource = dataSourceBuilder.Build();
             
@@ -157,9 +171,6 @@ namespace InnovateFuture.Api
             
             // Disable auto model validation
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
-            
-            #region JWT
-            #endregion
             
             #region cors
             // cors

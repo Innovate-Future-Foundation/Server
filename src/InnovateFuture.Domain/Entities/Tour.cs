@@ -21,7 +21,7 @@ public class Tour
     public Profile? LeaderProfile { get; private set; }
     public Organisation Organisation { get; private set; }
     public ICollection<Day>? Days { get; private set; }=new List<Day>();
-    public ICollection<Profile>? EnrolledStudents { get; private set; }=new List<Profile>();
+    public ICollection<StudentTourEnrollment>? StudentTourEnrollments { get; private set; } = new List<StudentTourEnrollment>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     
@@ -70,21 +70,21 @@ public class Tour
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void EnrollStudent(Profile profile)
+    public void AddStudentTourEnrollment(StudentTourEnrollment studentTourEnrollment)
     {
-        if (profile == null)
+        if (studentTourEnrollment == null)
         {
-            throw new ArgumentNullException(nameof(profile));
+            throw new ArgumentNullException(nameof(studentTourEnrollment),"studentTourEnrollment cannot be null.");
         }
-        EnrolledStudents?.Add(profile);
+        StudentTourEnrollments?.Add(studentTourEnrollment);
     }
-    public void DropStudent(Profile profile)
+    public void RemoveStudentTourEnrollment(StudentTourEnrollment studentTourEnrollment)
     {
-        if (profile == null)
+        if (studentTourEnrollment == null)
         {
-            throw new ArgumentNullException(nameof(profile));
+            throw new ArgumentNullException(nameof(studentTourEnrollment),"studentTourEnrollment cannot be null.");
         }
-        EnrolledStudents?.Remove(profile);
+        StudentTourEnrollments?.Remove(studentTourEnrollment);
     }
 
     public void AssignLeader(Profile teacher)
