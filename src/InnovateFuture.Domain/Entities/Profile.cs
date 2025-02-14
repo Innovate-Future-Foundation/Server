@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using InnovateFuture.Domain.Enums;
 
 namespace InnovateFuture.Domain.Entities;
@@ -21,6 +20,10 @@ public class Profile
     public string? AvatarUrl { get; private set; }
     public bool IsActive { get; private set; }
     public bool IsConfirmed { get; private set; }
+    
+    public ICollection<Activity>? AssignedActivities { get; private set; } = new List<Activity>();
+    public ICollection<Tour>? LeadingTours { get; private set; } = new List<Tour>();
+    public ICollection<StudentTourEnrollment>? StudentTourEnrollments { get; private set; } = new List<StudentTourEnrollment>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Profile() {}
@@ -64,7 +67,6 @@ public class Profile
         AvatarUrl = string.IsNullOrWhiteSpace(AvatarUrl)? AvatarUrl : avatarUrl;
         IsActive = isActive?? IsActive;
         IsConfirmed = isConfirmed?? IsConfirmed;
-        
     }
     // Methods to set navigation properties
     public void AddUser(User user)
@@ -93,5 +95,22 @@ public class Profile
     {
         IsConfirmed = true;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddStudentTourEnrollment(StudentTourEnrollment studentTourEnrollment)
+    {
+        if (studentTourEnrollment == null)
+        {
+            throw new ArgumentNullException(nameof(studentTourEnrollment),"studentTourEnrollment cannot be null.");
+        }
+        StudentTourEnrollments?.Add(studentTourEnrollment);
+    }
+    public void RemoveStudentTourEnrollment(StudentTourEnrollment studentTourEnrollment)
+    {
+        if (studentTourEnrollment == null)
+        {
+            throw new ArgumentNullException(nameof(studentTourEnrollment),"studentTourEnrollment cannot be null.");
+        }
+        StudentTourEnrollments?.Remove(studentTourEnrollment);
     }
 }

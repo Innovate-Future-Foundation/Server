@@ -57,7 +57,7 @@ public class AutoMapperProfile: AMProfile
                 APPQueryProfileFilters>()
             .ForMember(dest => dest.RoleEnums, opt => opt.MapFrom<RoleCodesToRoleEnumsResolver>())
             .ForMember(dest => dest.Supervisors, opt => opt.MapFrom(src => 
-                RoleCodesToRoleEnumsResolver.ConvertStringToGuidArr(src.Supervisors)));
+                RoleCodesToRoleEnumsResolver.ConvertStringToGuidArr(src.Supervisors??"")));
 
         CreateMap<Profile, GetProfileResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
@@ -112,8 +112,8 @@ public class RoleCodesToRoleEnumsResolver : IValueResolver<APIQueryProfileFilter
             .Where(roleEnum => roleEnum != default)
             .ToArray()??[];
     }
-    public static Guid[] ConvertStringToGuidArr(string s=""){
-        var res = s.Split(',', StringSplitOptions.RemoveEmptyEntries)
+    public static Guid[] ConvertStringToGuidArr(string combinedString=""){
+        var res = combinedString.Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(s => s.Trim())
             .Where(s => Guid.TryParse(s, out _))
             .Select(Guid.Parse)

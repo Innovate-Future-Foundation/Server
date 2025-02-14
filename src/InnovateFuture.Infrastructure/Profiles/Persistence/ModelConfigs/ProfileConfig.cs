@@ -23,8 +23,8 @@ public class ProfileConfig : IEntityTypeConfiguration<Profile>
         builder.Property(p => p.AvatarUrl).HasMaxLength(500).IsRequired(false);
         builder.Property(p => p.IsActive).HasColumnType("boolean").IsRequired();
         builder.Property(p => p.IsConfirmed).HasColumnType("boolean").IsRequired();
-        builder.Property(p => p.CreatedAt).HasColumnType("timestamptz").IsRequired();
-        builder.Property(p => p.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(p => p.CreatedAt).HasColumnType("timestamp").IsRequired();
+        builder.Property(p => p.UpdatedAt).HasColumnType("timestamp").IsRequired();
         
         // Set indexes
         builder.HasIndex(p=> new {p.UserId, p.Role, p.OrgId})
