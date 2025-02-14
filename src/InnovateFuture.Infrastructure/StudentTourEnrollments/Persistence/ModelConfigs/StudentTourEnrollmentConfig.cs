@@ -2,34 +2,32 @@ using InnovateFuture.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace InnovateFuture.Infrastructure.Days.Persistence.ModelConfigs;
+namespace InnovateFuture.Infrastructure.StudentTourEnrollments.Persistence.ModelConfigs;
 
-public class StudentTourEnrollmentConfig : IEntityTypeConfiguration<Day>
+public class StudentTourEnrollmentConfig : IEntityTypeConfiguration<StudentTourEnrollment>
 {
-    public void Configure(EntityTypeBuilder<Day> builder)
+    public void Configure(EntityTypeBuilder<StudentTourEnrollment> builder)
     {
-        builder.HasKey(d => d.Id);
+        builder.HasKey(s => new { s.ProfileId, s.TourId });
         
         // Column Mappings
-        builder.Property(d => d.Id).HasColumnType("uuid").IsRequired();
-        builder.Property(d => d.OrgId).HasColumnType("uuid").IsRequired();
-        builder.Property(d => d.TourId).HasColumnType("uuid").IsRequired();
-        builder.Property(d => d.Title).HasMaxLength(100).IsRequired();
-        builder.Property(d => d.Description).HasMaxLength(500).IsRequired(false); 
-        builder.Property(d => d.CoverImgUrl).HasMaxLength(500).IsRequired(false);
-        builder.Property(d => d.Status).HasColumnType("tour_status_enum").IsRequired();
-        builder.Property(d => d.CreatedAt).HasColumnType("timestamptz").IsRequired();
-        builder.Property(d => d.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(s => s.ProfileId).HasColumnType("uuid").IsRequired();
+        builder.Property(s => s.TourId).HasColumnType("uuid").IsRequired();
+        builder.Property(s => s.EnrollmentDate).HasColumnType("timestamptz").IsRequired();
+        builder.Property(s => s.WithdrawalDate).HasColumnType("timestamptz").IsRequired(false);
+        builder.Property(s => s.Status).HasColumnType("enrollment_status_enum").IsRequired();
+        builder.Property(s => s.CreatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(s => s.UpdatedAt).HasColumnType("timestamptz").IsRequired();
         
         // Relationships
-        builder.HasOne(d => d.Organisation)
-            .WithMany(u => u.Days)
-            .HasForeignKey(p => p.OrgId)
+        builder.HasOne(s => s.Student)
+            .WithMany(u => u.StudentTourEnrollments)
+            .HasForeignKey(p => p.ProfileId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
         
-        builder.HasOne(d => d.Tour)
-            .WithMany(u => u.Days)
+        builder.HasOne(s => s.Tour)
+            .WithMany(u => u.StudentTourEnrollments)
             .HasForeignKey(p => p.TourId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();

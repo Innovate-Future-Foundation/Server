@@ -22,16 +22,16 @@ public class StudentTourEnrollmentRepository:IStudentTourEnrollmentRepository
         await _dbContext.StudentTourEnrollments.AddAsync(studentTourEnrollment, cancellationToken);
     }
     
-    public async Task<StudentTourEnrollment> GetByIdAsync(Guid profileId, Guid tourId, CancellationToken cancellationToken = default)
+    public async Task<StudentTourEnrollment> GetByIdAsync(Guid profileId, Guid tourId,CancellationToken cancellationToken = default)
     {
         var studentTourEnrollment = await _dbContext.StudentTourEnrollments
             .Include(s=>s.Student)
             .Include(s=>s.Tour)
-            .FirstOrDefaultAsync(s=>(s.ProfileId == profileId && s.TourId == tourId));
+            .FirstOrDefaultAsync(s=>(s.ProfileId == profileId && s.TourId == tourId), cancellationToken);
        
         if (studentTourEnrollment == null)
         {
-            throw new IFEntityNotFoundException("StudentTourEnrollment", $"{profileId} & {tourId}");
+            throw new IFEntityNotFoundException("studentTourEnrollment", $"{profileId} & {tourId}");
         }
         return studentTourEnrollment;
     }
@@ -40,7 +40,6 @@ public class StudentTourEnrollmentRepository:IStudentTourEnrollmentRepository
     {
         await _dbContext.SaveChangesAsync();
     }
-
     public async Task<(List<StudentTourEnrollment> data, int totalItems)> GetAnyAsync(Expression<Func<StudentTourEnrollment, bool>>? predicate=null, int? limit = null, int offset=0,string? queryOrderBy=null)
     {
         IQueryable<StudentTourEnrollment> query = _dbContext.StudentTourEnrollments;
