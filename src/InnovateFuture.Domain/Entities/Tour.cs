@@ -8,7 +8,9 @@ public class Tour
     public Guid Id { get; private set; }
     public Guid OrgId { get; private set; }
     public string Title { get; private set; }
-    public string? Description { get; private set; }
+    public string? Comment { get; private set; }
+    public string? Summary { get; private set; }
+    public string? Text { get; private set; }
     public string? CoverImgUrl { get; private set; }
     public DateTime StartDate{ get; private set; }
     public DateTime EndDate { get; private set; }
@@ -30,14 +32,18 @@ public class Tour
         DateTime endDate,
         Guid? leader=null,
         Guid? id=null, 
-        string? description=null, 
+        string? comment=null, 
+        string? summary=null,
+        string? text=null,
         string? coverImgUrl=null
         )
     {
         Id = id?? Guid.NewGuid();
         OrgId = orgId;
         Title = title;
-        Description = description;
+        Comment = comment;
+        Summary = summary;
+        Text = text;
         Status = TourStatusEnum.Draft;
         CoverImgUrl = coverImgUrl;
         StartDate = startDate == default ? DateTime.UtcNow : startDate;
@@ -48,7 +54,9 @@ public class Tour
     }
     public void UpdateTour(
         string? title, 
-        string? description, 
+        string? comment,
+        string? summary,
+        string? text, 
         string? coverImgUrl,
         DateTime? startDate,
         DateTime? endDate,
@@ -57,7 +65,9 @@ public class Tour
         )
     {
         Title = string.IsNullOrWhiteSpace(title)?Title:title;
-        Description = string.IsNullOrWhiteSpace(description)?Description:description;
+        Comment = string.IsNullOrWhiteSpace(comment)?Comment:comment;
+        Summary = string.IsNullOrWhiteSpace(summary)?Summary:summary;
+        Text = string.IsNullOrWhiteSpace(text)?Text:text;
         CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl)?CoverImgUrl:coverImgUrl;
         Status = status ?? TourStatusEnum.Draft;
         Leader = leader??leader;

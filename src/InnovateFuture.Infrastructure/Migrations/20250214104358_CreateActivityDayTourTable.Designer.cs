@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InnovateFuture.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250214055105_CreateActivityDayTourTable")]
+    [Migration("20250214104358_CreateActivityDayTourTable")]
     partial class CreateActivityDayTourTable
     {
         /// <inheritdoc />
@@ -67,16 +67,16 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<string>("CoverImgUrl")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamptz");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamptz");
@@ -94,10 +94,17 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.Property<TourStatusEnum>("Status")
                         .HasColumnType("tour_status_enum");
 
+                    b.Property<string>("Summary")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text");
+
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamptz");
@@ -115,6 +122,10 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<string>("CoverImgUrl")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
@@ -122,20 +133,23 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamptz");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
                     b.Property<Guid>("OrgId")
                         .HasColumnType("uuid");
 
                     b.Property<TourStatusEnum>("Status")
                         .HasColumnType("tour_status_enum");
 
+                    b.Property<string>("Summary")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text");
+
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<Guid>("TourId")
                         .HasColumnType("uuid");
@@ -300,16 +314,16 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<string>("CoverImgUrl")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamptz");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamptz");
@@ -320,19 +334,23 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.Property<Guid>("OrgId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ProfileId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamptz");
 
                     b.Property<TourStatusEnum>("Status")
                         .HasColumnType("tour_status_enum");
 
+                    b.Property<string>("Summary")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text");
+
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamptz");
@@ -342,8 +360,6 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.HasIndex("Leader");
 
                     b.HasIndex("OrgId");
-
-                    b.HasIndex("ProfileId");
 
                     b.ToTable("Tours");
                 });
@@ -637,18 +653,13 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.HasOne("InnovateFuture.Domain.Entities.Profile", "LeaderProfile")
                         .WithMany("LeadingTours")
                         .HasForeignKey("Leader")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("InnovateFuture.Domain.Entities.Organisation", "Organisation")
                         .WithMany("Tours")
                         .HasForeignKey("OrgId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("InnovateFuture.Domain.Entities.Profile", null)
-                        .WithMany("EnrolledTours")
-                        .HasForeignKey("ProfileId");
 
                     b.Navigation("LeaderProfile");
 
@@ -703,8 +714,6 @@ namespace InnovateFuture.Infrastructure.Migrations
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
                 {
-                    b.Navigation("EnrolledTours");
-
                     b.Navigation("LeadingTours");
 
                     b.Navigation("StudentTourEnrollments");

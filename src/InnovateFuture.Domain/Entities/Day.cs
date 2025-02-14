@@ -8,7 +8,9 @@ public class Day
     public Guid OrgId { get; private set; }
     public Guid TourId { get; private set; }
     public string Title { get; private set; }
-    public string? Description { get; private set; }
+    public string? Comment { get; private set; }
+    public string? Summary { get; private set; }
+    public string? Text { get; private set; }
     public string? CoverImgUrl { get; private set; }
     public TourStatusEnum Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -24,7 +26,9 @@ public class Day
         Guid tourId, 
         string title, 
         Guid? id=null, 
-        string? description=null, 
+        string? comment=null,
+        string? summary=null,
+        string? text=null,
         string? coverImgUrl=null
         )
     {
@@ -32,7 +36,9 @@ public class Day
         OrgId = orgId;
         TourId = tourId;
         Title = title;
-        Description = description;
+        Comment = comment;
+        Summary = summary;
+        Text = text;
         Status = TourStatusEnum.Draft;
         CoverImgUrl = coverImgUrl;
         CreatedAt = DateTime.UtcNow;
@@ -40,13 +46,17 @@ public class Day
     }
     public void UpdateDay(
         string? title, 
-        string? description, 
+        string? comment,
+        string? summary,
+        string? text, 
         string? coverImgUrl,
         TourStatusEnum? status
         )
     {
         Title = string.IsNullOrWhiteSpace(title)?Title:title;
-        Description = string.IsNullOrWhiteSpace(description)?Description:description;
+        Comment = string.IsNullOrWhiteSpace(comment)?Comment:comment;
+        Summary = string.IsNullOrWhiteSpace(summary)?Summary:summary;
+        Text = string.IsNullOrWhiteSpace(text)?Text:text;
         CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl)?CoverImgUrl:coverImgUrl;
         Status = status ?? TourStatusEnum.Draft;
         UpdatedAt = DateTime.UtcNow;

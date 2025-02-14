@@ -28,8 +28,10 @@ namespace InnovateFuture.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     OrgId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Summary = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Text = table.Column<string>(type: "text", nullable: true),
                     Location = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     StartTime = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     EndTime = table.Column<DateTime>(type: "timestamptz", nullable: false),
@@ -55,16 +57,17 @@ namespace InnovateFuture.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     OrgId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Summary = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Text = table.Column<string>(type: "text", nullable: true),
                     CoverImgUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     StartDate = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     Status = table.Column<TourStatusEnum>(type: "tour_status_enum", nullable: false),
                     Leader = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    ProfileId = table.Column<Guid>(type: "uuid", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,11 +84,6 @@ namespace InnovateFuture.Infrastructure.Migrations
                         principalTable: "Profiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_Tours_Profiles_ProfileId",
-                        column: x => x.ProfileId,
-                        principalTable: "Profiles",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -119,8 +117,10 @@ namespace InnovateFuture.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     OrgId = table.Column<Guid>(type: "uuid", nullable: false),
                     TourId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Summary = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Text = table.Column<string>(type: "text", nullable: true),
                     CoverImgUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Status = table.Column<TourStatusEnum>(type: "tour_status_enum", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
@@ -235,11 +235,6 @@ namespace InnovateFuture.Infrastructure.Migrations
                 name: "IX_Tours_OrgId",
                 table: "Tours",
                 column: "OrgId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tours_ProfileId",
-                table: "Tours",
-                column: "ProfileId");
         }
 
         /// <inheritdoc />

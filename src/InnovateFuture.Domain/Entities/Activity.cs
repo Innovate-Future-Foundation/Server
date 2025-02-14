@@ -8,7 +8,9 @@ public class Activity
     public Guid Id { get; private set; }
     public Guid OrgId { get; private set; }
     public string Title { get; private set; }
-    public string? Description { get; private set; }
+    public string? Comment { get; private set; }
+    public string? Summary { get; private set; }
+    public string? Text { get; private set; }
     public string? Location { get; private set; }
     public DateTime StartTime { get; private set; }
     public DateTime EndTime { get; private set; }
@@ -25,11 +27,13 @@ public class Activity
 
     public Activity(
         Guid orgId, 
-        string title, 
+        string title,
         DateTime startTime, 
         DateTime endTime, 
         Guid? id=null, 
-        string? description=null, 
+        string? comment=null, 
+        string? summary=null,
+        string? text=null,
         string? coverImgUrl=null,
         string? location=null
         )
@@ -37,7 +41,9 @@ public class Activity
         Id = id?? Guid.NewGuid();
         OrgId = orgId;
         Title = title;
-        Description = description;
+        Comment = comment;
+        Summary = summary;
+        Text = text;
         Status = TourStatusEnum.Draft;
         CoverImgUrl = coverImgUrl;
         StartTime = startTime == default ? DateTime.UtcNow : startTime;
@@ -50,7 +56,9 @@ public class Activity
         string? title, 
         DateTime? startTime, 
         DateTime? endTime, 
-        string? description, 
+        string? comment,
+        string? summary,
+        string? text, 
         string? coverImgUrl,
         string? location,
         TourStatusEnum? status
@@ -59,7 +67,9 @@ public class Activity
         Title = string.IsNullOrWhiteSpace(title)?Title:title;
         StartTime = startTime??StartTime;
         EndTime = endTime??EndTime;
-        Description = string.IsNullOrWhiteSpace(description)?Description:description;
+        Comment = string.IsNullOrWhiteSpace(comment)?Comment:comment;
+        Summary = string.IsNullOrWhiteSpace(summary)?Summary:summary;
+        Text = string.IsNullOrWhiteSpace(text)?Text:text;
         CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl)?CoverImgUrl:coverImgUrl;
         Location = string.IsNullOrWhiteSpace(location)?Location:location;
         Status = status ?? TourStatusEnum.Draft;

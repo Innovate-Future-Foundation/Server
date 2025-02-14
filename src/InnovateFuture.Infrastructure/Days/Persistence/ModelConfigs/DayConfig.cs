@@ -14,8 +14,10 @@ public class DayConfig : IEntityTypeConfiguration<Day>
         builder.Property(d => d.Id).HasColumnType("uuid").IsRequired();
         builder.Property(d => d.OrgId).HasColumnType("uuid").IsRequired();
         builder.Property(d => d.TourId).HasColumnType("uuid").IsRequired();
-        builder.Property(d => d.Title).HasMaxLength(100).IsRequired();
-        builder.Property(d => d.Description).HasMaxLength(500).IsRequired(false); 
+        builder.Property(a => a.Title).HasMaxLength(255).IsRequired();
+        builder.Property(a => a.Comment).HasMaxLength(500).IsRequired(false); 
+        builder.Property(a => a.Summary).HasMaxLength(500).IsRequired(false); 
+        builder.Property(a => a.Text).HasColumnType("text").IsRequired(false); 
         builder.Property(d => d.CoverImgUrl).HasMaxLength(500).IsRequired(false);
         builder.Property(d => d.Status).HasColumnType("tour_status_enum").IsRequired();
         builder.Property(d => d.CreatedAt).HasColumnType("timestamptz").IsRequired();
