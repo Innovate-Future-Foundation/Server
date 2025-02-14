@@ -12,9 +12,9 @@ public class DayConfig : IEntityTypeConfiguration<Day>
         
         // Column Mappings
         builder.Property(d => d.Id).HasColumnType("uuid").IsRequired();
+        builder.Property(d => d.OrgId).HasColumnType("uuid").IsRequired();
+        builder.Property(d => d.TourId).HasColumnType("uuid").IsRequired();
         builder.Property(d => d.Title).HasMaxLength(100).IsRequired();
-        builder.Property(d => d.OrgId).HasColumnType("uuid").HasMaxLength(500).IsRequired();
-        builder.Property(d => d.TourId).HasColumnType("uuid").HasMaxLength(500).IsRequired(false);
         builder.Property(d => d.Description).HasMaxLength(500).IsRequired(false); 
         builder.Property(d => d.CoverImgUrl).HasMaxLength(500).IsRequired(false);
         builder.Property(d => d.Status).HasColumnType("tour_status_enum").IsRequired();

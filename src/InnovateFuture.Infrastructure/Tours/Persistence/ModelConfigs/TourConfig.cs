@@ -12,9 +12,9 @@ public class TourConfig : IEntityTypeConfiguration<Tour>
         
         // Column Mappings
         builder.Property(t => t.Id).HasColumnType("uuid").IsRequired();
+        builder.Property(t => t.OrgId).HasColumnType("uuid").IsRequired();
+        builder.Property(t => t.Leader).HasColumnType("uuid").IsRequired(false);
         builder.Property(t => t.Title).HasMaxLength(100).IsRequired();
-        builder.Property(t => t.OrgId).HasColumnType("uuid").HasMaxLength(500).IsRequired();
-        builder.Property(t => t.Leader).HasColumnType("uuid").HasMaxLength(500).IsRequired(false);
         builder.Property(t => t.Description).HasMaxLength(500).IsRequired(false); 
         builder.Property(t => t.CoverImgUrl).HasMaxLength(500).IsRequired(false);
         builder.Property(t => t.Status).HasColumnType("tour_status_enum").IsRequired();

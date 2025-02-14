@@ -12,8 +12,8 @@ public class ActivityConfig : IEntityTypeConfiguration<Activity>
         
         // Column Mappings
         builder.Property(a => a.Id).HasColumnType("uuid").IsRequired();
+        builder.Property(a => a.OrgId).HasColumnType("uuid").IsRequired(); 
         builder.Property(a => a.Title).HasMaxLength(100).IsRequired();
-        builder.Property(a => a.OrgId).HasColumnType("uuid").HasMaxLength(500).IsRequired(); 
         builder.Property(a => a.Description).HasMaxLength(500).IsRequired(false); 
         builder.Property(a => a.Location).HasMaxLength(100).IsRequired(false);
         builder.Property(a => a.CoverImgUrl).HasMaxLength(500).IsRequired(false);
