@@ -25,6 +25,8 @@ public class Profile
     public ICollection<Activity>? AssignedActivities { get; private set; } = new List<Activity>();
     
     public ICollection<Tour>? LeadingTours { get; private set; } = new List<Tour>();
+    
+    public ICollection<Tour>? EnrolledTours { get; private set; } = new List<Tour>();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Profile() {}
@@ -68,7 +70,6 @@ public class Profile
         AvatarUrl = string.IsNullOrWhiteSpace(AvatarUrl)? AvatarUrl : avatarUrl;
         IsActive = isActive?? IsActive;
         IsConfirmed = isConfirmed?? IsConfirmed;
-        
     }
     // Methods to set navigation properties
     public void AddUser(User user)

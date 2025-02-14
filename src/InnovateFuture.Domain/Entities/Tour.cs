@@ -19,9 +19,11 @@ public class Tour
     public TourStatusEnum Status { get; private set; }
     public Guid? Leader { get; private set; }
     public Profile? LeaderProfile { get; private set; }
+    public Organisation Organisation { get; private set; }
     public ICollection<Day>? Days { get; private set; }=new List<Day>();
-    public DateTime CreateAt { get; private set; }
-    public DateTime UpdateAt { get; private set; }
+    public ICollection<Profile>? EnrolledStudents { get; private set; }=new List<Profile>();
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
     
     public Tour(){}
 
@@ -45,8 +47,8 @@ public class Tour
         StartDate= StartDate == default ? DateTime.UtcNow : startDate;
         EndDate= EndDate == default ? DateTime.UtcNow: endDate;
         Leader = leader;
-        CreateAt = DateTime.UtcNow;
-        UpdateAt = DateTime.UtcNow;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
     public void UpdateTour(
         string? title, 
@@ -65,7 +67,24 @@ public class Tour
         Leader = leader??leader;
         StartDate = startDate??StartDate;
         EndDate = endDate??EndDate;
-        UpdateAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void EnrollStudent(Profile profile)
+    {
+        if (profile == null)
+        {
+            throw new ArgumentNullException(nameof(profile));
+        }
+        EnrolledStudents?.Add(profile);
+    }
+    public void DropStudent(Profile profile)
+    {
+        if (profile == null)
+        {
+            throw new ArgumentNullException(nameof(profile));
+        }
+        EnrolledStudents?.Remove(profile);
     }
 
     public void AssignLeader(Profile teacher)
@@ -90,5 +109,10 @@ public class Tour
             throw new ArgumentNullException(nameof(day), "Day cannot be null.");
         }
         Days?.Remove(day);
+    }
+    public void AddOrganisation(Organisation organisation)
+    {
+        Organisation = organisation?? throw new ArgumentNullException(nameof(organisation), "Organisation cannot be null.");
+        OrgId = organisation.Id;
     }
 }

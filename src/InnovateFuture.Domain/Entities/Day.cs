@@ -8,18 +8,16 @@ public class Day
     public Guid Id { get; private set; }
     public Guid OrgId { get; private set; }
     public Guid TourId { get; private set; }
-    [MaxLength(50)]
     public string Title { get; private set; }
-    [MaxLength(255)]
     public string? Description { get; private set; }
-    [MaxLength(500)]
     public string? CoverImgUrl { get; private set; }
     public TourStatusEnum Status { get; private set; }
-    public DateTime CreateAt { get; private set; }
-    public DateTime UpdateAt { get; private set; }
-
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
+    public Organisation Organisation { get; private set; }
+    
+    public Tour Tour { get; private set; }
     public ICollection<Activity>? Activities { get; private set; }=new List<Activity>();
-    public ICollection<Profile>? TeachersAssigned { get; private set; } = new List<Profile>();
     public Day(){}
 
     public Day(
@@ -38,8 +36,8 @@ public class Day
         Description = description;
         Status = TourStatusEnum.Draft;
         CoverImgUrl = coverImgUrl;
-        CreateAt = DateTime.UtcNow;
-        UpdateAt = DateTime.UtcNow;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
     public void UpdateDay(
         string? title, 
@@ -52,26 +50,8 @@ public class Day
         Description = string.IsNullOrWhiteSpace(description)?Description:description;
         CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl)?CoverImgUrl:coverImgUrl;
         Status = status ?? TourStatusEnum.Draft;
-        UpdateAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
-
-    public void AssignTeacher(Profile teacher)
-    {
-        if (teacher == null)
-        {
-            throw new ArgumentNullException(nameof(teacher), "Teacher cannot be null.");
-        }
-        TeachersAssigned?.Add(teacher);
-    }
-    public void RemoveTeacher(Profile teacher)
-    {
-        if (teacher == null)
-        {
-            throw new ArgumentNullException(nameof(teacher), "Teacher cannot be null.");
-        }
-        TeachersAssigned?.Remove(teacher);
-    }
-
     public void AddActivity(Activity activity)
     {
         if (activity == null)
@@ -88,5 +68,16 @@ public class Day
             throw new ArgumentNullException(nameof(activity), "Activity cannot be null.");
         }
         Activities?.Remove(activity);
+    }
+
+    public void AddOrganisation(Organisation organisation)
+    {
+        Organisation = organisation?? throw new ArgumentNullException(nameof(organisation), "Organisation cannot be null.");
+        OrgId = organisation.Id;
+    }
+    public void AddTour(Tour tour)
+    {
+        Tour = tour?? throw new ArgumentNullException(nameof(tour), "Tour cannot be null.");
+        TourId = tour.Id;
     }
 }

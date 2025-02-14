@@ -18,6 +18,9 @@ public class Organisation
     // Navigation
     public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
     
+    public ICollection<Activity>? Activities { get; private set; } = new List<Activity>();
+    public ICollection<Day>? Days { get; private set; } = new List<Day>();
+    public ICollection<Tour>? Tours { get; private set; } = new List<Tour>();
     public Organisation(){}
     public Organisation(string orgName, Guid? id= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null)
     {
@@ -59,5 +62,33 @@ public class Organisation
             throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
         }
         Profiles?.Add(profile);
+    }
+
+    public void AddTour(Tour tour)
+    {
+        if (tour == null)
+        {
+            // to programmer
+            throw new ArgumentNullException(nameof(tour), "Tour cannot be null.");
+        }
+        Tours?.Add(tour);
+    }
+    public void AddDay(Day day)
+    {
+        if (day == null)
+        {
+            // to programmer
+            throw new ArgumentNullException(nameof(day), "Day cannot be null.");
+        }
+        Days?.Add(day);
+    }
+    public void AddActivity(Activity activity)
+    {
+        if (activity == null)
+        {
+            // to programmer
+            throw new ArgumentNullException(nameof(activity), "Activity cannot be null.");
+        }
+        Activities?.Add(activity);
     }
 }
