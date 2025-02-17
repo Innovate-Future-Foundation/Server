@@ -2,7 +2,7 @@ using MediatR;
 
 namespace InnovateFuture.Application.Services.Auth.ConfirmEmail;
 
-public class ConfirmEmailCommand: IRequest<bool>
+public class ConfirmEmailCommand: IRequest<string>
 {
     public string Email { get; set; }
     public string Token { get; set; }

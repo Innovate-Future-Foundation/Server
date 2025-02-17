@@ -13,6 +13,7 @@ using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Application.Services.Auth.ConfirmEmail;
+using InnovateFuture.Application.Services.Auth.Login;
 using InnovateFuture.Application.Services.Auth.Register;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
@@ -33,6 +34,7 @@ public class AutoMapperProfile: AMProfile
     {
         CreateMap<ConfirmEmailRequest, ConfirmEmailCommand>();
         CreateMap<RegisterOrganisationAdminRequest,RegisterOrganisationAdminCommand>();
+        CreateMap<LoginRequest, LoginCommand>();
         
         CreateMap<CreateUserRequest, CreateUserCommand>();
         /*

@@ -44,7 +44,7 @@ public class SendVerificationEmailHandler: IRequestHandler<SendVerificationEmail
         catch (Exception ex)
         {
             Console.WriteLine($"[Verification-Email-Sending-Error]: {ex.Message}");
-            return false;
+            throw;
         }
     }
 }

@@ -5,6 +5,5 @@ namespace InnovateFuture.Application.Services.Auth.UserService;
 public interface IUserService
 {
     Task CreateUserAsync(User user, string password, CancellationToken cancellationToken = default);
-    Task<string> GenerateEmailConfirmationTokenAsync(User user, CancellationToken cancellationToken = default);
     Task UpdateUserAsync(User user, CancellationToken cancellationToken = default);
 }

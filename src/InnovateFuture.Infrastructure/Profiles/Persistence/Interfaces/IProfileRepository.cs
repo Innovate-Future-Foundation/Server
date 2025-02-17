@@ -7,6 +7,9 @@ namespace InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 public interface IProfileRepository
 {
     Task AddAsync(Profile profile, CancellationToken cancellationToken = default);
+
+    Task CheckProfileExistByUserIdOrgIdRoleAsync(Guid userId, Guid orgId, RoleEnum role,
+        CancellationToken cancellationToken = default);
     Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task UpdateAsync();
     Task<(List<Profile> data, int totalItems)> GetAnyAsync(

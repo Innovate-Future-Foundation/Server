@@ -1,10 +1,6 @@
-using System.Text.Encodings.Web;
 using HandlebarsDotNet;
-using InnovateFuture.Application.Services.SendEmail;
 using MimeKit;
 using MailKit.Net.Smtp;
-using InnovateFuture.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
 namespace InnovateFuture.Application.Services.SendEmail;

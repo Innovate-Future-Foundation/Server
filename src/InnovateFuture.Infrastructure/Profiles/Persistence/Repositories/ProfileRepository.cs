@@ -6,6 +6,7 @@ using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Linq.Dynamic.Core;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace InnovateFuture.Infrastructure.Profiles.Persistence.Repositories;
 
@@ -21,6 +22,17 @@ public class ProfileRepository:IProfileRepository
     public async Task AddAsync(Profile profile, CancellationToken cancellationToken = default)
     {
         await _dbContext.Profiles.AddAsync(profile, cancellationToken);
+    }
+
+    public async Task CheckProfileExistByUserIdOrgIdRoleAsync(Guid userId, Guid orgId, RoleEnum role, CancellationToken cancellationToken = default)
+    {
+        var profile = await _dbContext.Profiles
+            .Where(p => p.UserId == userId && p.OrgId == orgId && p.Role == role)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (profile != null)
+        {
+            throw new IFConcurrencyException("Profile already exists.");
+        }
     }
 
     public async Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

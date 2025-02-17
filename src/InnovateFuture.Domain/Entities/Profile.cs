@@ -55,8 +55,8 @@ public class Profile
         Supervisor = supervisor;
         IsActive = true;
         IsConfirmed = false;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
     public void UpdateProfile(string? email, string? name, string? phone, string? avatarUrl, bool? isActive, bool? isConfirmed)
@@ -94,7 +94,7 @@ public class Profile
     public void ConfirmRole()
     {
         IsConfirmed = true;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
     public void AddStudentTourEnrollment(StudentTourEnrollment studentTourEnrollment)

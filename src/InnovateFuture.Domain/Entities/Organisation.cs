@@ -32,8 +32,8 @@ public class Organisation
         Email = email;
         Subscription = SubscriptionEnum.Free;
         OrgStatus = OrgStatusEnum.Pending;// initial status
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
     public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, SubscriptionEnum? subscription, OrgStatusEnum? status)
@@ -45,13 +45,13 @@ public class Organisation
         Email = string.IsNullOrWhiteSpace(email) ? Email : email;
         Subscription = subscription?? Subscription;
         OrgStatus = status??OrgStatus;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
     public void ChangeStatus(OrgStatusEnum orgStatus)
     {
         OrgStatus = orgStatus;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
     
     public void AddProfile(Profile profile)

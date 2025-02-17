@@ -1,4 +1,5 @@
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Domain.Exceptions;
 using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 using Microsoft.AspNetCore.Identity;
 
@@ -20,18 +21,8 @@ public class UserService: IUserService
         if (!result.Succeeded)
         {
             var errorDetails = result.Errors.Select(e => e.Description);
-            throw new Exception($"Failed to create user: {errorDetails}");
+            throw new IFBusinessRuleViolationException($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
-    }
-
-    public async Task<string> GenerateEmailConfirmationTokenAsync(User user, CancellationToken cancellationToken = default)
-    {
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        if (token == null)
-        {
-            throw new Exception($"Failed to create email confirmation token");
-        }
-        return token;
     }
 
     public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default)

@@ -21,14 +21,14 @@ public class StudentTourEnrollment
         TourId= tourId;
         EnrollmentDate= enrollmentDate;
         Status = EnrollmentStatusEnum.Enrolled;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
     public void UpdateStudentTourEnrollment(DateTime? withdrawalDate,EnrollmentStatusEnum? status)
     {
         WithdrawalDate= withdrawalDate??WithdrawalDate;
         Status = status??Status;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
     public void AddStudentToTourEnrollment(Profile student)

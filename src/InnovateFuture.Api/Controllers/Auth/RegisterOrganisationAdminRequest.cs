@@ -1,3 +1,4 @@
+
 namespace InnovateFuture.Api.Controllers.Auth;
 
 public class RegisterOrganisationAdminRequest

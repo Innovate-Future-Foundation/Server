@@ -49,8 +49,8 @@ public class Activity
         StartTime = startTime == default ? DateTime.UtcNow : startTime;
         EndTime = endTime == default ? DateTime.UtcNow : endTime;
         Location = location;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
     public void UpdateActivity(
         string? title, 
@@ -73,7 +73,7 @@ public class Activity
         CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl)?CoverImgUrl:coverImgUrl;
         Location = string.IsNullOrWhiteSpace(location)?Location:location;
         Status = status ?? TourStatusEnum.Draft;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
     public void AssignTeacher(Profile teacher)
