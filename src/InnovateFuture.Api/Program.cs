@@ -53,6 +53,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using Microsoft.Extensions.Configuration;
+using InnovateFuture.Application.Services.S3;
+using Amazon.S3;
 
 
 namespace InnovateFuture.Api
@@ -250,6 +253,12 @@ namespace InnovateFuture.Api
             builder.Services.AddValidatorsFromAssemblyContaining<CreateOrganisationCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateOrganisationCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetOrganisationsQueryValidator>();
+            #endregion
+
+            #region aws s3
+            builder.Services.Configure<AwsSettings>(builder.Configuration.GetSection("AWS"));
+            builder.Services.AddAWSService<IAmazonS3>();
+            builder.Services.AddScoped<S3Service>();
             #endregion
 
             #region NLog

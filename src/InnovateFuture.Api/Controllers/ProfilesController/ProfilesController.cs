@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
+using InnovateFuture.Application.Services.S3;
 
 
 namespace InnovateFuture.Api.Controllers.ProfilesController;
@@ -19,10 +20,12 @@ public class ProfilesController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
-    public ProfilesController(IMediator mediator,IMapper mapper)
+    private readonly S3Service _s3Service;
+    public ProfilesController(IMediator mediator,IMapper mapper, S3Service s3Service)
     {
         _mediator = mediator;
         _mapper = mapper;
+        _s3Service = s3Service;
     }
 
     /// <summary>
@@ -76,5 +79,20 @@ public class ProfilesController : ControllerBase
             : _mapper.Map<GetProfilePaginatedResponse>(paginatedProfiles);
         
         return Ok(profilesResponse);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("{id}")]
+    public async Task<IActionResult> UploadAvatar(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest("File is required.");
+        }
+
+        using var fileStream = file.OpenReadStream();
+        var url = await _s3Service.UploadAvatarAsync(fileStream, file.FileName);
+
+        return Ok(new { Url = url });
     }
 }
