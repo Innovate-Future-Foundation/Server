@@ -1,6 +1,7 @@
 using AutoMapper;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
+using InnovateFuture.Application.Profiles.Commands.UploadImage;
 using InnovateFuture.Application.Profiles.Queries.GetProfile;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
@@ -82,17 +83,19 @@ public class ProfilesController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpPost("{id}")]
-    public async Task<IActionResult> UploadAvatar(IFormFile file)
+    [HttpPost("{id}/UploadAvatar")]
+    public async Task<IActionResult> UploadAvatar(Guid id, IFormFile file)
     {
-        if (file == null || file.Length == 0)
+        var command = new UploadImageCommand
         {
-            return BadRequest("File is required.");
-        }
+            Id = id,
+            FileName = file.FileName,
+            ContentType = file.ContentType,
+            FileStream = file.OpenReadStream()
+        };
+        var imageUrl = await _mediator.Send(command);
 
-        using var fileStream = file.OpenReadStream();
-        var url = await _s3Service.UploadAvatarAsync(fileStream, file.FileName);
-
-        return Ok(new { Url = url });
+        return Ok(new { Url = imageUrl });
+        
     }
 }
