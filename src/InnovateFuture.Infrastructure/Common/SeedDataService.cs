@@ -160,28 +160,28 @@ public class SeedDataService:ISeedDataService
    
     public async Task InitializeAsync()
     {
-        // var organisations = GetOrganisations();
-        // await _dbContext.Organisations.AddRangeAsync(organisations);
-        // await _dbContext.SaveChangesAsync();
-        //
-        // var users = GetUsers();
-        // await _dbContext.Users.AddRangeAsync(users);
-        // await _dbContext.SaveChangesAsync();
-        //
-        // var profiles = GetProfiles(users, organisations);
-        // await _dbContext.Profiles.AddRangeAsync(profiles);
-        // await _dbContext.SaveChangesAsync();
-        //
-        // foreach (var user in users)
-        // {
-        //     var userProfiles = profiles.Where(p => p.UserId == user.Id).ToList();
-        //     if (userProfiles.Any())
-        //     {
-        //         user.UpdateDefaultProfile(userProfiles.First().Id);
-        //     }
-        // }
-        //
-        // await _dbContext.SaveChangesAsync();
+        var organisations = GetOrganisations();
+        await _dbContext.Organisations.AddRangeAsync(organisations);
+        await _dbContext.SaveChangesAsync();
+        
+        var users = GetUsers();
+        await _dbContext.Users.AddRangeAsync(users);
+        await _dbContext.SaveChangesAsync();
+        
+        var profiles = GetProfiles(users, organisations);
+        await _dbContext.Profiles.AddRangeAsync(profiles);
+        await _dbContext.SaveChangesAsync();
+        
+        foreach (var user in users)
+        {
+            var userProfiles = profiles.Where(p => p.UserId == user.Id).ToList();
+            if (userProfiles.Any())
+            {
+                user.UpdateDefaultProfile(userProfiles.First().Id);
+            }
+        }
+        
+        await _dbContext.SaveChangesAsync();
     }
     public async Task<bool> CanSeedAsync()
     {
