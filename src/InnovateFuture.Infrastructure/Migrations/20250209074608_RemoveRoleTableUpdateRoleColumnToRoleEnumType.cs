@@ -31,8 +31,8 @@ namespace InnovateFuture.Infrastructure.Migrations
                 name: "role_id",
                 table: "Profiles");
 
-            //migrationBuilder.AlterDatabase()
-            //    .Annotation("Npgsql:Enum:role_enum", "undefined_role,platform_admin,org_admin,org_manager,org_teacher,parent,student");
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:role_enum", "undefined_role,platform_admin,org_admin,org_manager,org_teacher,parent,student");
 
             migrationBuilder.AddColumn<RoleEnum>(
                 name: "role",
