@@ -21,7 +21,7 @@ public class OrgRepository:IOrgRepository
     
     public async Task AddAsync(Organisation organisation, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Organisations.AddAsync(organisation, cancellationToken);
+            await _dbContext.Organisations.AddAsync(organisation, cancellationToken);
     }
     
     

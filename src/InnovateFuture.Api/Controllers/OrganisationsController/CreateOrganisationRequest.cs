@@ -8,5 +8,5 @@ public class CreateOrganisationRequest
     public string? LogoUrl { get;  set; }
     public string? WebsiteUrl { get;  set; }
     public Address? Address { get;  set; }
-    public string? OrgEmail { get;  set; }
+    public string? Email { get;  set; }
 }

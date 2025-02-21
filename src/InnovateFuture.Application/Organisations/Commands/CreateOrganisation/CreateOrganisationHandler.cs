@@ -1,5 +1,6 @@
 using MediatR;
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Infrastructure.Exceptions;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 
@@ -30,7 +31,7 @@ public class CreateOrganisationHandler : IRequestHandler<CreateOrganisationComma
         // Save to database
         await _orgRepository.AddAsync(organisation, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
+            
         return organisation.Id;
     }
 }

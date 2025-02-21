@@ -21,5 +21,9 @@ public class OrganisationConfig : IEntityTypeConfiguration<Organisation>
         builder.Property(o => o.CreatedAt).HasColumnType("timestamp").IsRequired();
         builder.Property(o => o.UpdatedAt).HasColumnType("timestamp").IsRequired();
         builder.OwnsOne(o => o.Address, a => a.ToJson());
+        
+        // Add index
+        builder.HasIndex(o=>o.Email).IsUnique();
+        builder.HasIndex(o=>o.OrgName).IsUnique();
     }
 }
