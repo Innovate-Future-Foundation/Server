@@ -91,4 +91,17 @@ public class AuthController: ControllerBase
         });
         return Ok("login successful");
     }
+    
+    /// <summary>
+    /// user logout
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        Response.Cookies.Delete("access-token");
+        return Ok("logout successful");
+        // TODO
+        // return Redirect("http://frontend/dashboard");
+    }
 }
