@@ -10,7 +10,7 @@ public class UpdateOrganisationCommand : IRequest<Organisation>
     public string? OrgName { get; set; }
     public string? LogoUrl { get; set; }
     public string? WebsiteUrl { get; set; }
-    public string? Address { get; set; }
+    public Address? Address { get; set; }
     public string? Email { get; set; }
     public SubscriptionEnum? SubscriptionEnum { get; set; }
     public OrgStatusEnum? OrgStatusEnum { get; set; }

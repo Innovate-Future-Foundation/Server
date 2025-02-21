@@ -1,14 +1,21 @@
 using InnovateFuture.Domain.Enums;
 
 namespace InnovateFuture.Domain.Entities;
-
+public class Address
+{
+    public string? Street { get; set; }
+    public string? Suburb { get; set; }
+    public string? State { get; set; }
+    public string? PostCode { get; set; }
+    public string? Country { get; set; }
+}
 public class Organisation
 {
     public Guid Id { get; private set; }
     public string OrgName { get; private set; }
     public string? LogoUrl { get; private set; }
     public string? WebsiteUrl { get; private set; }
-    public string? Address { get; private set; }
+    public Address? Address { get; private set; }
     public string? Email { get; private set; }
     public SubscriptionEnum Subscription { get; private set; }
     public OrgStatusEnum OrgStatus { get; private set; }
@@ -22,7 +29,7 @@ public class Organisation
     public ICollection<Day>? Days { get; private set; } = new List<Day>();
     public ICollection<Tour>? Tours { get; private set; } = new List<Tour>();
     public Organisation(){}
-    public Organisation(string orgName, Guid? id= null, string? logoUrl=null, string? websiteUrl=null, string? address=null, string? email=null)
+    public Organisation(string orgName, Guid? id= null, string? logoUrl=null, string? websiteUrl=null, Address? address = null, string? email=null)
     {
         Id = id??Guid.NewGuid();
         OrgName = orgName;
@@ -36,12 +43,12 @@ public class Organisation
         UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
-    public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, string? address, string? email, SubscriptionEnum? subscription, OrgStatusEnum? status)
+    public void UpdateOrganisationDetails(string? orgName, string? logoUrl, string? websiteUrl, Address? address, string? email, SubscriptionEnum? subscription, OrgStatusEnum? status)
     {
         OrgName = string.IsNullOrWhiteSpace(orgName) ? OrgName : orgName;
         LogoUrl = string.IsNullOrWhiteSpace(logoUrl) ? LogoUrl : logoUrl;
         WebsiteUrl = string.IsNullOrWhiteSpace(websiteUrl) ? WebsiteUrl : websiteUrl;
-        Address = string.IsNullOrWhiteSpace(address) ? Address : address;
+        Address = address ?? Address;
         Email = string.IsNullOrWhiteSpace(email) ? Email : email;
         Subscription = subscription?? Subscription;
         OrgStatus = status??OrgStatus;
