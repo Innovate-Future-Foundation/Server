@@ -24,8 +24,8 @@ public class SeedDataService:ISeedDataService
             .RuleFor(o => o.WebsiteUrl, f => f.Internet.UrlWithPath())
             .RuleFor(o => o.OrgStatus, f => f.PickRandom<OrgStatusEnum>())
             .RuleFor(o => o.Subscription, f => f.PickRandom<SubscriptionEnum>())
-            .RuleFor(o => o.CreatedAt, f => DateTime.SpecifyKind(DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified), DateTimeKind.Unspecified))
-            .RuleFor(o => o.UpdatedAt, f => DateTime.SpecifyKind(DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified), DateTimeKind.Unspecified));
+            .RuleFor(o => o.CreatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(o => o.UpdatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified));
         
         return fakeOrganisations.Generate(10);
     }
