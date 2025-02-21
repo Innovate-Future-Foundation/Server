@@ -24,8 +24,8 @@ public class SeedDataService:ISeedDataService
             .RuleFor(o => o.WebsiteUrl, f => f.Internet.UrlWithPath())
             .RuleFor(o => o.OrgStatus, f => f.PickRandom<OrgStatusEnum>())
             .RuleFor(o => o.Subscription, f => f.PickRandom<SubscriptionEnum>())
-            .RuleFor(o => o.CreatedAt, f => DateTime.UtcNow )
-            .RuleFor(o => o.UpdatedAt, f => DateTime.UtcNow);
+            .RuleFor(o => o.CreatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(o => o.UpdatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified));
         
         return fakeOrganisations.Generate(10);
     }
@@ -40,8 +40,8 @@ public class SeedDataService:ISeedDataService
             .RuleFor(u => u.Email, (f, u) => f.Internet.Email(u.UserName))
             .RuleFor(u => u.PasswordHash, f => f.Internet.Password())
             .RuleFor(u => u.EmailConfirmed, f => f.Random.Bool())
-            .RuleFor(u => u.CreatedAt, f => DateTime.UtcNow)
-            .RuleFor(u => u.UpdatedAt, f => DateTime.UtcNow);
+            .RuleFor(u => u.CreatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(u => u.UpdatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified));
         
         return fakeUsers.Generate(50);
     }
@@ -55,8 +55,8 @@ public class SeedDataService:ISeedDataService
             .RuleFor(p => p.Email, f => f.Internet.Email())
             .RuleFor(p => p.Phone, f => f.Phone.PhoneNumber())
             .RuleFor(p => p.Role, f => f.PickRandom<RoleEnum>())
-            .RuleFor(p => p.CreatedAt, f => DateTime.UtcNow)
-            .RuleFor(p => p.UpdatedAt, f => DateTime.UtcNow)
+            .RuleFor(p => p.CreatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(p => p.UpdatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
             .RuleFor(p=>p.AvatarUrl, f => f.Internet.Avatar())
             .RuleFor(p=>p.IsActive, f => f.Random.Bool())
             .RuleFor(p=>p.IsConfirmed, f => f.Random.Bool());
@@ -187,6 +187,7 @@ public class SeedDataService:ISeedDataService
     {
         return !(await _dbContext.Users.AnyAsync() || 
                  await _dbContext.Profiles.AnyAsync() || 
-                 await _dbContext.Organisations.AnyAsync());
+                 await _dbContext.Organisations.AnyAsync()
+                 );
     }
 }
