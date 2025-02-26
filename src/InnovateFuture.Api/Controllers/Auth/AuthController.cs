@@ -61,6 +61,7 @@ public class AuthController: ControllerBase
         var command = _mapper.Map<ConfirmEmailCommand>(request);
         var accessToken = await _mediator.Send(command);
         
+        // Store token in HTTP-only Cookie
         Response.Cookies.Append("access-token", accessToken, new CookieOptions
         {
             HttpOnly = true,
@@ -83,6 +84,7 @@ public class AuthController: ControllerBase
         var command = _mapper.Map<LoginCommand>(request);
         var accessToken = await _mediator.Send(command);
         
+        // Store token in HTTP-only Cookie
         Response.Cookies.Append("access-token", accessToken, new CookieOptions
         {
             HttpOnly = true,
