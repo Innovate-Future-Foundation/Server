@@ -72,6 +72,13 @@ public class AuthController: ControllerBase
         });
         return Ok("Email verification successful!");
     }
+
+    //TODO: @xiaobao
+    // [HttpGet("get-me")]
+    // public async Task<IActionResult> GetMe()
+    // {
+    //     
+    // }
     
     /// <summary>
     /// User login by email and password
