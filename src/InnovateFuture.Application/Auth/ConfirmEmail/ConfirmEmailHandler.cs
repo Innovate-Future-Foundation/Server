@@ -68,6 +68,7 @@ public class ConfirmEmailHandler: IRequestHandler<ConfirmEmailCommand, string>
             
             // 4⃣️ Generate Token
             var accessToken = await _tokenService.GenerateJwtTokenAsync(command.ProfileId);
+            Console.WriteLine("accessToken",accessToken);
             return accessToken;
         }
         catch

@@ -8,11 +8,11 @@
   },
   "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=postgres",
   "JWTConfig": {
-    "SecretKey": "SecretKeyExample",
-    "Issuer": "innovateFuture Support",
-    "Audience": "innovateFuture",
-    "ExpireSeconds": 7200
-  },
+        "SecretKey": "f9X1zLrIMT6rOWTFbV7R9qlPjwD9LlA9K8UEtWmCp7U=",
+        "Issuer": "innovateFuture Support",
+        "Audience": "innovateFuture",
+        "ExpireSeconds": 7200
+      },
   "EmailSettings": {
     "SmtpServer": "smtp.gmail.com",
     "SmtpPort": 587,
