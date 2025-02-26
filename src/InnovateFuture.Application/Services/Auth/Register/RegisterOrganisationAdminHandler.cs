@@ -2,6 +2,7 @@ using InnovateFuture.Application.Services.Auth.UserService;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
 using InnovateFuture.Infrastructure.Exceptions;
+using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 using MediatR;
@@ -11,13 +12,15 @@ namespace InnovateFuture.Application.Services.Auth.Register;
 
 public class RegisterOrganisationAdminHandler : IRequestHandler<RegisterOrganisationAdminCommand, (Guid ProfileId, User User)?>
 {
+    private readonly IOrgRepository _organisationRepository;
     private readonly IProfileRepository _profileRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserService _userService;
     private readonly UserManager<User> _userManager;
     
-    public RegisterOrganisationAdminHandler(IProfileRepository profileRepository, IUnitOfWork unitOfWork, IUserService userService, UserManager<User> userManager)
+    public RegisterOrganisationAdminHandler( IOrgRepository organisationRepository, IProfileRepository profileRepository, IUnitOfWork unitOfWork, IUserService userService, UserManager<User> userManager)
     {
+        _organisationRepository = organisationRepository;
         _profileRepository = profileRepository;
         _unitOfWork = unitOfWork;
         _userService = userService;
@@ -30,6 +33,7 @@ public class RegisterOrganisationAdminHandler : IRequestHandler<RegisterOrganisa
         try
         {
             // 1⃣️ Create Organisation (EF Core will track relationships automatically)
+            await _organisationRepository.CheckIsExistByNameOrEmailAsync(command.OrgName, command.OrgEmail, cancellationToken);
             var organisation = new Organisation(
                 command.OrgName,
                 null,

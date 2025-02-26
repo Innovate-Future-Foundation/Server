@@ -23,7 +23,27 @@ public class OrgRepository:IOrgRepository
     {
             await _dbContext.Organisations.AddAsync(organisation, cancellationToken);
     }
-    
+
+    public async Task CheckIsExistByNameOrEmailAsync(string orgName, string? orgEmail,
+        CancellationToken cancellationToken = default)
+    {
+        var existingOrg = await _dbContext.Organisations
+            .Where(o => o.OrgName == orgName || (orgEmail != null && o.Email == orgEmail))
+            .Select(o => new { o.OrgName, o.Email })
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        if (existingOrg != null)
+        {
+            if (!string.IsNullOrWhiteSpace(orgEmail) && existingOrg.Email == orgEmail)
+            {
+                throw new IFConcurrencyException($"The organisation email {orgEmail} already exists.");
+            }
+            if (existingOrg.OrgName == orgName)
+            {
+                throw new IFConcurrencyException($"The organisation name {orgName} already exists.");
+            }
+        }
+    }
     
     
     public async Task<Organisation> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
