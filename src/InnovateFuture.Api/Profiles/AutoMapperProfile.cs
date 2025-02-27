@@ -100,8 +100,27 @@ public class AutoMapperProfile: AMProfile
         CreateMap<(List<Organisation> data, int totalItems), GetOrganisationPaginatedResponse>()
             .ForMember(desc=>desc.Data, opt=>opt.MapFrom(src=>src.data))
             .ForMember(desc=>desc.Meta,opt=>opt.MapFrom(src=>new Meta(){TotalItems = src.totalItems}));
+
+        /*
+        * Activity
+         */
+        CreateMap<CreateActivityRequest, CreateActivityCommand>();
+        CreateMap<UpdateActivityRequest, UpdateActivityCommand>()
+            .ForMember(dest => dest.Status,
+                opt => opt.MapFrom(src => 
+                    Enum.TryParse<TourStatusEnum>(src.Status, out var status) ? status : null));
+    
+        CreateMap<Activity, GetActivityResponse>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+    
+        CreateMap<(List<Activity> data, int totalItems), GetActivityPaginatedResponse>()
+            .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.data))
+            .ForMember(dest => dest.Meta, opt => opt.MapFrom(src => new Meta { TotalItems = src.totalItems }));
+        CreateMap<QueryActivityRequest, GetActivitiesQuery>();
+        CreateMap<QueryActivityFilters, Application.Activities.Queries.GetActivities.QueryActivityFilters>();
     }
 }
+
 
 public class RoleCodesToRoleEnumsResolver : IValueResolver<APIQueryProfileFilters, APPQueryProfileFilters, RoleEnum[]>
 {
