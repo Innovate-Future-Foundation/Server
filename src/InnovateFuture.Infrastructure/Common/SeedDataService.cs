@@ -141,6 +141,109 @@ public class SeedDataService:ISeedDataService
         return profiles;
     }
 
+    // Seed activities
+    private static List<Activity> GetActivities(List<Organisation> organisations)
+    {
+        var fakeActivityGenerator = new Faker<Activity>("en")
+            .RuleFor(a => a.Id, f => Guid.NewGuid())
+            .RuleFor(a => a.Title, f => f.Lorem.Paragraph())
+            .RuleFor(a => a.Comment, f => f.Lorem.Paragraph())
+            .RuleFor(a => a.Summary, f => f.Lorem.Paragraph())
+            .RuleFor(a => a.Text, f => f.Lorem.Sentence())
+            .RuleFor(a => a.Location, f => f.Address.FullAddress())
+            .RuleFor(a => a.CoverImgUrl, f => f.Image.PicsumUrl())
+            .RuleFor(a => a.Status, f => f.PickRandom<TourStatusEnum>())
+            .RuleFor(a => a.StartTime, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(a => a.EndTime, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(o => o.CreatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(o => o.UpdatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified));
+
+        var activities = new List<Activity>();
+        foreach (var organisation in organisations)
+        {
+            var orgActivities = fakeActivityGenerator.Clone()
+                .RuleFor(p => p.OrgId, _ => organisation.Id)
+                .Generate(200);
+            activities.AddRange(orgActivities);
+        }
+        return activities;
+    }
+    
+    // Seed days
+    private static List<Day> GetDays(List<Tour> tours)
+    {
+        var fakeDayGenerator = new Faker<Day>("en")
+            .RuleFor(a => a.Id, f => Guid.NewGuid())
+            .RuleFor(a => a.Title, f => f.Lorem.Paragraph())
+            .RuleFor(a => a.Comment, f => f.Lorem.Paragraph())
+            .RuleFor(a => a.Summary, f => f.Lorem.Paragraph())
+            .RuleFor(a => a.Text, f => f.Lorem.Sentence())
+            .RuleFor(a => a.CoverImgUrl, f => f.Image.PicsumUrl())
+            .RuleFor(a => a.Status, f => f.PickRandom<TourStatusEnum>())
+            .RuleFor(o => o.CreatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(o => o.UpdatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified));
+
+        var days = new List<Day>();
+        
+        foreach (var tour in tours)
+        {
+            var tourDays = fakeDayGenerator.Clone()
+                .RuleFor(d => d.OrgId, _ => tour.OrgId)
+                .RuleFor(d => d.TourId, _ => tour.Id)
+                .Generate(5);
+            days.AddRange(tourDays);
+        }
+        return days;
+    }
+    // Seed tours
+    private static List<Tour> GetTours(List<Organisation> organisations,List<Guid> teacherProfileIds)
+    {
+        var fakeTourGenerator = new Faker<Tour>("en")
+            .RuleFor(a => a.Id, f => Guid.NewGuid())
+            .RuleFor(a => a.Title, f => f.Lorem.Paragraph())
+            .RuleFor(a => a.Comment, f => f.Lorem.Paragraph())
+            .RuleFor(a => a.Summary, f => f.Lorem.Paragraph())
+            .RuleFor(a => a.Text, f => f.Lorem.Sentence())
+            .RuleFor(a => a.CoverImgUrl, f => f.Image.PicsumUrl())
+            .RuleFor(a => a.Status, f => f.PickRandom<TourStatusEnum>())
+            .RuleFor(a => a.Leader, f => f.PickRandom(teacherProfileIds))
+            .RuleFor(a => a.StartDate, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(a => a.EndDate, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(a => a.CreatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(a => a.UpdatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified));
+
+        var tours = new List<Tour>();
+        foreach (var organisation in organisations)
+        {
+            var orgTours = fakeTourGenerator.Clone()
+                .RuleFor(p => p.OrgId, _ => organisation.Id)
+                .Generate(100);
+            
+            tours.AddRange(orgTours);
+        }
+        return tours;
+    }
+
+    private static List<StudentTourEnrollment> GetStudentTourEnrollments(List<Guid> tourIds, List<Profile> studentsProfiles)
+    {
+        var fakeStudentTourEnrollmentGenerator = new Faker<StudentTourEnrollment>("en")
+            .RuleFor(s => s.Status, f => f.PickRandom<EnrollmentStatusEnum>())
+            .RuleFor(s => s.EnrollmentDate, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(s => s.TourId, f => f.PickRandom(tourIds))
+            .RuleFor(s => s.CreatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
+            .RuleFor(s => s.UpdatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified));
+
+        var studentTourEnrollments = new List<StudentTourEnrollment>();
+        foreach (var studentsProfile in studentsProfiles)
+        {
+            var studentTourEnrollment = fakeStudentTourEnrollmentGenerator.Clone()
+                .RuleFor(s => s.ProfileId, _ => studentsProfile.Id)
+                .Generate(1);
+            
+            studentTourEnrollments.AddRange(studentTourEnrollment);
+        }
+        return studentTourEnrollments;
+    }
     public static List<Guid> UniqueUserIdGenerator(int number, List<User> users)
     {
         if (users.Count < number) 

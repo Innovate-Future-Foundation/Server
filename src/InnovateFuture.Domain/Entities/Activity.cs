@@ -18,7 +18,6 @@ public class Activity
     public TourStatusEnum Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    
     public Organisation Organisation { get; private set; }
     public ICollection<Day> DaysBelong { get; private set; } = new List<Day>();
     public ICollection<Profile>? TeachersAssigned { get; private set; } = new List<Profile>();
