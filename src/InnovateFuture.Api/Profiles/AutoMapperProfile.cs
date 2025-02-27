@@ -35,6 +35,8 @@ public class AutoMapperProfile: AMProfile
         CreateMap<ConfirmEmailRequest, ConfirmEmailCommand>();
         CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
         CreateMap<LoginRequest, LoginCommand>();
+
+        CreateMap<GetMeDto,GetMeResponse>();
         
         CreateMap<CreateUserRequest, CreateUserCommand>();
         /*

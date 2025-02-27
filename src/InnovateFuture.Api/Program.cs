@@ -101,7 +101,7 @@ namespace InnovateFuture.Api
                         OnMessageReceived = context =>
                         {
                             // Read Jwt token from cookie
-                            var accessToken = context.Request.Query["access_token"];
+                            var accessToken = context.Request.Cookies["access_token"];
                             if (!string.IsNullOrEmpty(accessToken))
                             {
                                 context.Token = accessToken;
@@ -130,6 +130,7 @@ namespace InnovateFuture.Api
             builder.Services.AddMediatR(configuration =>
             {
                 configuration.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(GetMeQueryHandler).Assembly);
                 
                 configuration.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
@@ -273,6 +274,7 @@ namespace InnovateFuture.Api
                     policy.WithOrigins("http://localhost:5173")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
+                        // access-token in cookies
                         .AllowCredentials();
                 });
             });

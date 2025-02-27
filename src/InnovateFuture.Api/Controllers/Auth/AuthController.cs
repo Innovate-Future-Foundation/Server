@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AutoMapper;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Application.Auth.ConfirmEmail;
@@ -94,6 +95,23 @@ public class AuthController: ControllerBase
             Domain = _jwtConfig.Domain
         });
         return Ok("Login successful!");
+    }
+
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMe()
+    {
+        var profileIdClaim = User.FindFirst("ProfileId")?.Value;
+        if (string.IsNullOrEmpty(profileIdClaim))
+        {
+            return Unauthorized();
+        }
+        var profileId = Guid.Parse(profileIdClaim);
+        var getMeDto = await _mediator.Send(new GetMeQuery(profileId));
+        var getMeResponse = _mapper.Map<GetMeResponse>(getMeDto);
+        
+        return Ok(getMeResponse);
     }
     
     /// <summary>
