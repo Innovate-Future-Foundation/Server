@@ -119,6 +119,28 @@ public class AutoMapperProfile: AMProfile
         CreateMap<QueryActivityRequest, GetActivitiesQuery>();
         CreateMap<QueryActivityFilters, Application.Activities.Queries.GetActivities.QueryActivityFilters>();
     }
+
+     /*
+     * Tour
+     */
+    CreateMap<CreateTourRequest, CreateTourCommand>();
+    CreateMap<UpdateTourRequest, UpdateTourCommand>()
+        .ForMember(dest => dest.Status,
+            opt => opt.MapFrom(src => 
+                Enum.TryParse<TourStatusEnum>(src.Status, out var status) ? status : null));
+    
+    CreateMap<Tour, GetTourResponse>()
+        .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
+    CreateMap<QueryToursRequest, GetToursQuery>();
+    CreateMap<QueryToursFilters, Application.Tours.Queries.GetTours.QueryToursFilters>()
+        .ForMember(dest => dest.Status,
+            opt => opt.MapFrom(src => 
+                Enum.TryParse<TourStatusEnum>(src.Status, out var status) ? status : null));
+    
+    CreateMap<(List<Tour> data, int totalItems), GetTourPaginatedResponse>()
+        .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.data))
+        .ForMember(dest => dest.Meta, opt => opt.MapFrom(src => new Meta { TotalItems = src.totalItems }));
 }
 
 
