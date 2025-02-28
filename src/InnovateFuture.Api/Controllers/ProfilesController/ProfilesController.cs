@@ -5,7 +5,6 @@ using InnovateFuture.Application.Profiles.Queries.GetProfile;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 
 

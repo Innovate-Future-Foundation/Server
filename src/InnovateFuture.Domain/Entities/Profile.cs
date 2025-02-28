@@ -64,7 +64,7 @@ public class Profile
         Email = string.IsNullOrWhiteSpace(email)? Email : email;
         Name = string.IsNullOrWhiteSpace(name)? Name : name;
         Phone = string.IsNullOrWhiteSpace(phone)? Phone : phone;
-        AvatarUrl = string.IsNullOrWhiteSpace(AvatarUrl)? AvatarUrl : avatarUrl;
+        AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl)? AvatarUrl : avatarUrl;
         IsActive = isActive?? IsActive;
         IsConfirmed = isConfirmed?? IsConfirmed;
     }

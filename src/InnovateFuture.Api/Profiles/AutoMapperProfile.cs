@@ -63,7 +63,7 @@ public class AutoMapperProfile: AMProfile
 
         CreateMap<Profile, GetProfileResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
-
+        
         CreateMap<Profile, GetProfileWithDetailsResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
         
