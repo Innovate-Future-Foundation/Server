@@ -13,7 +13,7 @@ public class RegisterOrganisationAdminCommand: IRequest<(Guid ProfileId, User Us
     public string? OrgEmail { get; set; } 
     
     // User + Profile
-    public string UserName { get; set; } = null!;
+    public string UserName { get; set; }
     public string UserEmail { get; set; }
-    public string Password { get; set; } = null!;
+    public string Password { get; set; }
 }

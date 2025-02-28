@@ -26,10 +26,17 @@ public class RegisterOrganisationAdminValidator: AbstractValidator<RegisterOrgan
         RuleFor(x => x.UserEmail)
             .NotEmpty().WithMessage("User email is required.")
             .EmailAddress().WithMessage("Please enter a valid user email address.");
+        
         RuleFor(x => x.UserName)
             .NotEmpty().WithMessage("User name is required.")
             .MinimumLength(2).WithMessage("User name must be at least 2 characters.")
             .MaximumLength(100).WithMessage("User name must not exceed 100 characters.");
+        
+        RuleFor(x => x.Password)
+            .NotEmpty().WithMessage("Password is required.")
+            .MinimumLength(8).WithMessage("Password must be at least 8 characters long.")
+            .Matches(@"(?=.*[A-Z])").WithMessage("Password must contain at least one uppercase letter.")
+            .Matches(@"(?=.*[!@#$%^&*])").WithMessage("Password must contain at least one special character.");
     }
 
     private static bool BeAValidUrl(string? url)
