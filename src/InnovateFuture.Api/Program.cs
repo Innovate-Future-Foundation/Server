@@ -53,7 +53,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
-using Microsoft.Extensions.Configuration;
 using InnovateFuture.Application.Services.S3;
 using Amazon.S3;
 

@@ -4,10 +4,11 @@ using InnovateFuture.Application.Auth.ConfirmEmail;
 using InnovateFuture.Application.Auth.Login;
 using InnovateFuture.Application.Auth.Register;
 using InnovateFuture.Application.Auth.SendVerificationEmail;
+using InnovateFuture.Application.Services.Security.TokenService;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.Extensions.Options;
 
 namespace InnovateFuture.Api.Controllers.Auth;
 
@@ -18,11 +19,13 @@ public class AuthController: ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
+    private readonly JWTConfig _jwtConfig;
 
-    public AuthController(IMediator mediator, IMapper mapper)
+    public AuthController(IMediator mediator, IMapper mapper, IOptions<JWTConfig> jwtOptions)
     {
         _mediator = mediator;
         _mapper = mapper;
+        _jwtConfig = jwtOptions.Value;
     }
     
     /// <summary>
@@ -64,7 +67,7 @@ public class AuthController: ControllerBase
             Secure = true,
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddDays(3),
-            Domain = "localhost"
+            Domain = _jwtConfig.Domain
         });
         return Ok("Email verification successful!");
     }
@@ -86,7 +89,7 @@ public class AuthController: ControllerBase
             Secure = true,
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddDays(3),
-            Domain = "localhost"
+            Domain = _jwtConfig.Domain
         });
         return Ok("Login successful!");
     }
