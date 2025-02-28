@@ -18,7 +18,7 @@ public class Day
     public Organisation Organisation { get; private set; }
     
     public Tour Tour { get; private set; }
-    public ICollection<Activity>? Activities { get; private set; }=new List<Activity>();
+    public ICollection<ActivityDay>? Activities { get; private set; }=new List<ActivityDay>();
     public Day(){}
 
     public Day(
@@ -61,7 +61,7 @@ public class Day
         Status = status ?? TourStatusEnum.Draft;
         UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
-    public void AddActivity(Activity activity)
+    public void AddActivity(ActivityDay activity)
     {
         if (activity == null)
         {
@@ -70,7 +70,7 @@ public class Day
         Activities?.Add(activity);
     }
 
-    public void RemoveActivity(Activity activity)
+    public void RemoveActivity(ActivityDay activity)
     {
         if(activity == null)
         {

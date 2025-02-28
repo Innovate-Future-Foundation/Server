@@ -55,6 +55,8 @@ using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using InnovateFuture.Application.Services.S3;
 using Amazon.S3;
+using InnovateFuture.Infrastructure.ActivityDays.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.ActivityDays.Persistence.Repositories;
 
 
 namespace InnovateFuture.Api
@@ -159,6 +161,7 @@ namespace InnovateFuture.Api
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
             builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
             builder.Services.AddScoped<IDayRepository, DayRepository>();
+            builder.Services.AddScoped<IActivityDayRepository, ActivityDayRepository>();
             builder.Services.AddScoped<ITourRepository, TourRepository>();
             builder.Services.AddScoped<IStudentTourEnrollmentRepository, StudentTourEnrollmentRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();

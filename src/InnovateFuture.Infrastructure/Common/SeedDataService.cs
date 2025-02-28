@@ -13,6 +13,7 @@ public class SeedDataService:ISeedDataService
     {
         _dbContext = dbContext;
     }
+    
     // Seed organisations
     private static List<Organisation> GetOrganisations()
     {
@@ -146,10 +147,10 @@ public class SeedDataService:ISeedDataService
     {
         var fakeActivityGenerator = new Faker<Activity>("en")
             .RuleFor(a => a.Id, f => Guid.NewGuid())
-            .RuleFor(a => a.Title, f => f.Lorem.Paragraph())
-            .RuleFor(a => a.Comment, f => f.Lorem.Paragraph())
-            .RuleFor(a => a.Summary, f => f.Lorem.Paragraph())
-            .RuleFor(a => a.Text, f => f.Lorem.Sentence())
+            .RuleFor(a => a.Title, f => f.Lorem.Sentence())
+            .RuleFor(a => a.Comment, f => f.Lorem.Sentences())
+            .RuleFor(a => a.Summary, f => f.Lorem.Sentences())
+            .RuleFor(a => a.Text, f => f.Lorem.Paragraphs())
             .RuleFor(a => a.Location, f => f.Address.FullAddress())
             .RuleFor(a => a.CoverImgUrl, f => f.Image.PicsumUrl())
             .RuleFor(a => a.Status, f => f.PickRandom<TourStatusEnum>())
@@ -174,10 +175,10 @@ public class SeedDataService:ISeedDataService
     {
         var fakeDayGenerator = new Faker<Day>("en")
             .RuleFor(a => a.Id, f => Guid.NewGuid())
-            .RuleFor(a => a.Title, f => f.Lorem.Paragraph())
-            .RuleFor(a => a.Comment, f => f.Lorem.Paragraph())
-            .RuleFor(a => a.Summary, f => f.Lorem.Paragraph())
-            .RuleFor(a => a.Text, f => f.Lorem.Sentence())
+            .RuleFor(a => a.Title, f => f.Lorem.Sentence())
+            .RuleFor(a => a.Comment, f => f.Lorem.Sentences())
+            .RuleFor(a => a.Summary, f => f.Lorem.Sentences())
+            .RuleFor(a => a.Text, f => f.Lorem.Paragraphs())
             .RuleFor(a => a.CoverImgUrl, f => f.Image.PicsumUrl())
             .RuleFor(a => a.Status, f => f.PickRandom<TourStatusEnum>())
             .RuleFor(o => o.CreatedAt, f => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified))
@@ -195,15 +196,16 @@ public class SeedDataService:ISeedDataService
         }
         return days;
     }
+    
     // Seed tours
     private static List<Tour> GetTours(List<Organisation> organisations,List<Guid> teacherProfileIds)
     {
         var fakeTourGenerator = new Faker<Tour>("en")
             .RuleFor(a => a.Id, f => Guid.NewGuid())
-            .RuleFor(a => a.Title, f => f.Lorem.Paragraph())
-            .RuleFor(a => a.Comment, f => f.Lorem.Paragraph())
-            .RuleFor(a => a.Summary, f => f.Lorem.Paragraph())
-            .RuleFor(a => a.Text, f => f.Lorem.Sentence())
+            .RuleFor(a => a.Title, f => f.Lorem.Sentence())
+            .RuleFor(a => a.Comment, f => f.Lorem.Sentences())
+            .RuleFor(a => a.Summary, f => f.Lorem.Sentences())
+            .RuleFor(a => a.Text, f => f.Lorem.Paragraphs())
             .RuleFor(a => a.CoverImgUrl, f => f.Image.PicsumUrl())
             .RuleFor(a => a.Status, f => f.PickRandom<TourStatusEnum>())
             .RuleFor(a => a.Leader, f => f.PickRandom(teacherProfileIds))
@@ -244,6 +246,42 @@ public class SeedDataService:ISeedDataService
         }
         return studentTourEnrollments;
     }
+
+    private static List<ActivityDay> GetActivityDays(List<Activity> activities, List<Guid> dayIds)
+    {
+        var fakeActivityDayGenerator = new Faker<ActivityDay>("en")
+                .RuleFor(a=>a.DaysBelongId, f => f.PickRandom(dayIds));
+        
+        var activityDays = new List<ActivityDay>();
+        
+        foreach (var activity in activities)
+        {
+            var activityDay =fakeActivityDayGenerator.Clone()
+                .RuleFor(a=>a.ActivitiesId, _ => activity.Id)
+                .Generate(1);
+            
+            activityDays.AddRange(activityDay);
+        }
+        return activityDays;
+    }
+
+    private static List<ActivityProfile> GetActivityProfiles(List<Activity> activities, List<Guid> teacherIds)
+    {
+        var fakeActivityProfileGenerator = new Faker<ActivityProfile>("en")
+            .RuleFor(a=>a.TeachersAssignedId, f => f.PickRandom(teacherIds));
+        
+        var activityProfiles = new List<ActivityProfile>();
+        
+        foreach (var activity in activities)
+        {
+            var activityProfile = fakeActivityProfileGenerator.Clone()
+                .RuleFor(a => a.AssignedActivitiesId, _ => activity.Id)
+                .Generate(1);
+            activityProfiles.AddRange(activityProfile);
+        }
+        return activityProfiles;
+    }
+    
     public static List<Guid> UniqueUserIdGenerator(int number, List<User> users)
     {
         if (users.Count < number) 
@@ -283,14 +321,50 @@ public class SeedDataService:ISeedDataService
                 user.UpdateDefaultProfile(userProfiles.First().Id);
             }
         }
-        
+
         await _dbContext.SaveChangesAsync();
-    }
-    public async Task<bool> CanSeedAsync()
+        
+        var teacherProfileIds = profiles.Where(p=>p.Role==RoleEnum.OrgTeacher).Select(p => p.Id).ToList();
+        var studentProfiles= profiles.Where(p => p.Role == RoleEnum.Student).ToList();
+        
+        var activities = GetActivities(organisations);
+        await _dbContext.Activities.AddRangeAsync(activities);
+        await _dbContext.SaveChangesAsync();
+        
+        var tours = GetTours(organisations,teacherProfileIds);
+        await _dbContext.Tours.AddRangeAsync(tours);
+        await _dbContext.SaveChangesAsync();
+        
+        var days = GetDays(tours);
+        await _dbContext.Days.AddRangeAsync(days);
+        await _dbContext.SaveChangesAsync();
+
+        var tourIds = tours.Select(t => t.Id).ToList();
+        var dayIds = days.Select(d => d.Id).ToList();
+        
+        var studentTourEnrollments = GetStudentTourEnrollments(tourIds, studentProfiles);
+        await _dbContext.StudentTourEnrollments.AddRangeAsync(studentTourEnrollments);
+        await _dbContext.SaveChangesAsync();
+        
+        var activityProfiles= GetActivityProfiles (activities,teacherProfileIds);
+        await _dbContext.ActivityProfiles.AddRangeAsync(activityProfiles);
+        await _dbContext.SaveChangesAsync();
+        
+        var activityDays = GetActivityDays(activities,dayIds);
+        await _dbContext.ActivityDays.AddRangeAsync(activityDays);
+        await _dbContext.SaveChangesAsync();
+    } 
+    public async Task<bool> CanSeedAsync() 
     {
         return !(await _dbContext.Users.AnyAsync() || 
                  await _dbContext.Profiles.AnyAsync() || 
-                 await _dbContext.Organisations.AnyAsync()
+                 await _dbContext.Organisations.AnyAsync() ||
+                 await _dbContext.Activities.AnyAsync() ||
+                 await _dbContext.Days.AnyAsync() ||
+                 await _dbContext.Tours.AnyAsync() ||
+                 await _dbContext.StudentTourEnrollments.AnyAsync() ||
+                 await _dbContext.ActivityDays.AnyAsync() ||
+                 await _dbContext.ActivityProfiles.AnyAsync()
                  );
     }
 }

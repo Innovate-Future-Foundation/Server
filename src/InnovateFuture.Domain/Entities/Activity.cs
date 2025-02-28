@@ -19,8 +19,8 @@ public class Activity
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Organisation Organisation { get; private set; }
-    public ICollection<Day> DaysBelong { get; private set; } = new List<Day>();
-    public ICollection<Profile>? TeachersAssigned { get; private set; } = new List<Profile>();
+    public ICollection<ActivityDay> DaysBelong { get; private set; } = new List<ActivityDay>();
+    public ICollection<ActivityProfile>? TeachersAssigned { get; private set; } = new List<ActivityProfile>();
     
     public Activity(){}
 
@@ -75,7 +75,7 @@ public class Activity
         UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
-    public void AssignTeacher(Profile teacher)
+    public void AssignTeacher(ActivityProfile teacher)
     {
         if (teacher == null)
         {
@@ -83,7 +83,7 @@ public class Activity
         }
         TeachersAssigned?.Add(teacher);
     }
-    public void RemoveTeacher(Profile teacher)
+    public void RemoveTeacher(ActivityProfile teacher)
     {
         if (teacher == null)
         {
@@ -92,7 +92,7 @@ public class Activity
         TeachersAssigned?.Remove(teacher);
     }
 
-    public void AddDay(Day day)
+    public void AddDay(ActivityDay day)
     {
         if (day == null)
         {
@@ -100,7 +100,7 @@ public class Activity
         }
         DaysBelong?.Add(day);
     }
-    public void RemoveDay(Day day)
+    public void RemoveDay(ActivityDay day)
     {
         if (day == null)
         {

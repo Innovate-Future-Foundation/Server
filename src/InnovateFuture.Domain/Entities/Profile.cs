@@ -21,7 +21,7 @@ public class Profile
     public bool IsActive { get; private set; }
     public bool IsConfirmed { get; private set; }
     
-    public ICollection<Activity>? AssignedActivities { get; private set; } = new List<Activity>();
+    public ICollection<ActivityProfile>? AssignedActivities { get; private set; } = new List<ActivityProfile>();
     public ICollection<Tour>? LeadingTours { get; private set; } = new List<Tour>();
     public ICollection<StudentTourEnrollment>? StudentTourEnrollments { get; private set; } = new List<StudentTourEnrollment>();
     public DateTime CreatedAt { get; private set; }

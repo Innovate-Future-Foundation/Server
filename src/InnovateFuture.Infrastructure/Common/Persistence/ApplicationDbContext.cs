@@ -10,6 +10,9 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public virtual DbSet<Organisation> Organisations { get; set; }
     public virtual DbSet<Profile> Profiles { get; set; }
     public virtual DbSet<Activity> Activities { get; set; }
+    
+    public virtual DbSet<ActivityDay> ActivityDays { get; set; }
+    public virtual DbSet<ActivityProfile> ActivityProfiles { get; set; }
     public virtual DbSet<Day> Days { get; set; }
     public virtual DbSet<Tour> Tours { get; set; }
     public virtual DbSet<StudentTourEnrollment> StudentTourEnrollments { get; set; }
