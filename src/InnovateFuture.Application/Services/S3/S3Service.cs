@@ -12,7 +12,7 @@ namespace InnovateFuture.Application.Services.S3
         private readonly IAmazonS3 _s3Client;
         private readonly string _bucketName;
 
-        public S3Service(IOptions<AwsSettings> awsOptions)
+        public S3Service(IOptions<AWSSettings> awsOptions)
         {
             var settings = awsOptions.Value;
 

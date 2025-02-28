@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace InnovateFuture.Domain.Entities
+﻿namespace InnovateFuture.Application.Services.S3
 {
-    public class AwsSettings
+    public class AWSSettings
     {
         public string AccessKey { get; set; }
         public string SecretKey { get; set; }

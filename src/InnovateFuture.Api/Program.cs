@@ -256,7 +256,7 @@ namespace InnovateFuture.Api
             #endregion
 
             #region aws s3
-            builder.Services.Configure<AwsSettings>(builder.Configuration.GetSection("AWS"));
+            builder.Services.Configure<AWSSettings>(builder.Configuration.GetSection("AWS"));
             builder.Services.AddAWSService<IAmazonS3>();
             builder.Services.AddScoped<S3Service>();
             #endregion
