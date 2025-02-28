@@ -19,5 +19,11 @@
     "SenderName": "Innovate-feature",
     "SenderEmail": "xiaobaoxue1@gmail.com",
     "SenderPassword": "tdlw ervs xwdf yuyo"
+  },
+  "AWS":{
+    "AccessKey":"***",
+    "SecretKey":"***",
+    "BucketName":"***",
+    "Region":"***"
   }
 }

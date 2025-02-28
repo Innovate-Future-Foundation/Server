@@ -1,5 +1,6 @@
 using System.Text.Json;
 using InnovateFuture.Api.Models;
+using InnovateFuture.Application.Exceptions;
 using InnovateFuture.Domain.Exceptions;
 using InnovateFuture.Infrastructure.Exceptions;
 

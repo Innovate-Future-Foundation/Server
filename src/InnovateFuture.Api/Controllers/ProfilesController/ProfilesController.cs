@@ -1,14 +1,11 @@
 using AutoMapper;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
-using InnovateFuture.Application.Profiles.Commands.UploadImage;
 using InnovateFuture.Application.Profiles.Queries.GetProfile;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
-using InnovateFuture.Application.Services.S3;
 
 
 namespace InnovateFuture.Api.Controllers.ProfilesController;
@@ -21,12 +18,10 @@ public class ProfilesController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
-    private readonly S3Service _s3Service;
-    public ProfilesController(IMediator mediator,IMapper mapper, S3Service s3Service)
+    public ProfilesController(IMediator mediator,IMapper mapper)
     {
         _mediator = mediator;
         _mapper = mapper;
-        _s3Service = s3Service;
     }
 
     /// <summary>
@@ -80,22 +75,5 @@ public class ProfilesController : ControllerBase
             : _mapper.Map<GetProfilePaginatedResponse>(paginatedProfiles);
         
         return Ok(profilesResponse);
-    }
-
-    [AllowAnonymous]
-    [HttpPost("{id}/UploadAvatar")]
-    public async Task<IActionResult> UploadAvatar(Guid id, IFormFile file)
-    {
-        var command = new UploadImageCommand
-        {
-            Id = id,
-            FileName = file.FileName,
-            ContentType = file.ContentType,
-            FileStream = file.OpenReadStream()
-        };
-        var imageUrl = await _mediator.Send(command);
-
-        return Ok(new { Url = imageUrl });
-        
     }
 }
