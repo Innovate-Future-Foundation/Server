@@ -7,36 +7,26 @@ public class UpdateOrganisationCommandValidator : AbstractValidator<UpdateOrgani
 {
     public UpdateOrganisationCommandValidator()
     {
-        // Organisation ID is the only required field as we need to know which organisation to update
         RuleFor(x => x.OrgId)
             .NotEmpty()
             .WithMessage("Organisation ID is required.");
 
-        // If organisation name is provided, it must not exceed 100 characters
-        When(x => !string.IsNullOrEmpty(x.OrgName), () =>
-        {
-            RuleFor(x => x.OrgName)
-                .MaximumLength(100)
-                .WithMessage("Organisation name must not exceed 100 characters.");
-        });
+        RuleFor(x => x.OrgName)
+            .MinimumLength(2)
+            .WithMessage("Organisation name must at least 2 characters.")
+            .MaximumLength(200)
+            .WithMessage("Organisation name must not exceed 200 characters.")
+            .When(x => !string.IsNullOrEmpty(x.OrgName?.Trim()));
 
-        // If email is provided, it must be in a valid email format
-        // Example: example@domain.com
-        When(x => !string.IsNullOrEmpty(x.Email), () =>
-        {
-            RuleFor(x => x.Email)
-                .EmailAddress()
-                .WithMessage("Invalid email format.");
-        });
+        RuleFor(x => x.Email)
+            .EmailAddress()
+            .WithMessage("Invalid email format.")
+            .When(x => !string.IsNullOrEmpty(x.Email?.Trim()));
 
-        // If website URL is provided, it must be in a valid URL format
-        // Example: https://www.example.com
-        When(x => !string.IsNullOrEmpty(x.WebsiteUrl), () =>
-        {
-            RuleFor(x => x.WebsiteUrl)
-                .Must(BeAValidUrl)
-                .WithMessage("Invalid website URL format.");
-        });
+        RuleFor(x => x.WebsiteUrl)
+            .Must(BeAValidUrl)
+            .WithMessage("Invalid website URL format.")
+            .When(x => !string.IsNullOrEmpty(x.WebsiteUrl?.Trim()));
     }
 
     // Helper method to validate URL format

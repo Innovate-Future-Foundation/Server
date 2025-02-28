@@ -33,7 +33,7 @@ public class AutoMapperProfile: AMProfile
     public AutoMapperProfile()
     {
         CreateMap<ConfirmEmailRequest, ConfirmEmailCommand>();
-        CreateMap<RegisterOrganisationAdminRequest,RegisterOrganisationAdminCommand>();
+        CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
         CreateMap<LoginRequest, LoginCommand>();
         
         CreateMap<CreateUserRequest, CreateUserCommand>();
