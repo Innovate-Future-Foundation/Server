@@ -30,25 +30,25 @@ public class Activity
         string title,
         DateTime startTime, 
         DateTime endTime, 
-        Guid? id=null, 
-        string? comment=null, 
-        string? summary=null,
-        string? text=null,
-        string? coverImgUrl=null,
-        string? location=null
-        )
+        Guid? id = null, 
+        string? comment = null, 
+        string? summary = null,
+        string? text = null,
+        string? coverImgUrl = null,
+        string? location = null
+    )
     {
-        Id = id?? Guid.NewGuid();
+        Id = id ?? Guid.NewGuid();
         OrgId = orgId;
         Title = title;
-        Comment = comment;
-        Summary = summary;
-        Text = text;
+        Comment = string.IsNullOrWhiteSpace(comment) ? null : comment;
+        Summary = string.IsNullOrWhiteSpace(summary) ? null : summary;
+        Text = string.IsNullOrWhiteSpace(text) ? null : text;
         Status = TourStatusEnum.Draft;
-        CoverImgUrl = coverImgUrl;
+        CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl) ? null : coverImgUrl;
         StartTime = startTime == default ? DateTime.UtcNow : startTime;
         EndTime = endTime == default ? DateTime.UtcNow : endTime;
-        Location = location;
+        Location = string.IsNullOrWhiteSpace(location) ? null : location;
         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
         UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }

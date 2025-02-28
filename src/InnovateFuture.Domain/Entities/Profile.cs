@@ -38,21 +38,19 @@ public class Profile
         string? email = null,
         string? phone = null,
         string? avatarUrl = null,
-        Guid? id=null
+        Guid? id = null
     )
     {
-        Id = id?? Guid.NewGuid();
+        Id = id ?? Guid.NewGuid();
         UserId = userId;
         Role = role;
         OrgId = orgId;
         Inviter = inviter;
         Supervisor = supervisor;
-        Name = name;
-        Email = email;
-        Phone = phone;
-        AvatarUrl = avatarUrl;
-        Inviter = inviter;
-        Supervisor = supervisor;
+        Name = string.IsNullOrWhiteSpace(name) ? null : name;
+        Email = string.IsNullOrWhiteSpace(email) ? null : email;
+        Phone = string.IsNullOrWhiteSpace(phone) ? null : phone;
+        AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? null : avatarUrl;
         IsActive = true;
         IsConfirmed = false;
         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);

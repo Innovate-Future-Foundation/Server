@@ -30,25 +30,25 @@ public class Tour
         string title,
         DateTime startDate,
         DateTime endDate,
-        Guid? leader=null,
-        Guid? id=null, 
-        string? comment=null, 
-        string? summary=null,
-        string? text=null,
-        string? coverImgUrl=null
-        )
+        Guid? leader = null,
+        Guid? id = null, 
+        string? comment = null, 
+        string? summary = null,
+        string? text = null,
+        string? coverImgUrl = null
+    )
     {
-        Id = id?? Guid.NewGuid();
+        Id = id ?? Guid.NewGuid();
         OrgId = orgId;
         Title = title;
-        Comment = comment;
-        Summary = summary;
-        Text = text;
+        Comment = string.IsNullOrWhiteSpace(comment) ? null : comment;
+        Summary = string.IsNullOrWhiteSpace(summary) ? null : summary;
+        Text = string.IsNullOrWhiteSpace(text) ? null : text;
         Status = TourStatusEnum.Draft;
-        CoverImgUrl = coverImgUrl;
+        CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl) ? null : coverImgUrl;
         StartDate = startDate == default ? DateTime.UtcNow : startDate;
         EndDate = endDate == default ? DateTime.UtcNow : endDate;
-        Leader = leader ?? Leader;
+        Leader = leader;
         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
         UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }

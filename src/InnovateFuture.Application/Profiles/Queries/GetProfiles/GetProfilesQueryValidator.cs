@@ -7,7 +7,7 @@ public class GetProfilesQueryValidator : AbstractValidator<GetProfilesQuery>
     { 
         RuleFor(x => x.SearchKey)
             .MaximumLength(100).WithMessage("Search content must not exceed 100 characters.")
-            .When(x => !string.IsNullOrEmpty(x.SearchKey));
+            .When(x => !string.IsNullOrEmpty(x.SearchKey?.Trim()));
 
         RuleFor(x => x.Limit)
             .GreaterThan(0).WithMessage("Limit must be greater than zero.");
@@ -15,6 +15,5 @@ public class GetProfilesQueryValidator : AbstractValidator<GetProfilesQuery>
         RuleFor(x => x.Offset)
             .GreaterThanOrEqualTo(0).WithMessage("Offset must be zero or greater.")
             .When(x=>x.Offset.HasValue);
-        
     }
 }

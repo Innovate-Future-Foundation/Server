@@ -25,22 +25,22 @@ public class Day
         Guid orgId, 
         Guid tourId, 
         string title, 
-        Guid? id=null, 
-        string? comment=null,
-        string? summary=null,
-        string? text=null,
-        string? coverImgUrl=null
-        )
+        Guid? id = null, 
+        string? comment = null,
+        string? summary = null,
+        string? text = null,
+        string? coverImgUrl = null
+    )
     {
-        Id = id?? Guid.NewGuid();
+        Id = id ?? Guid.NewGuid();
         OrgId = orgId;
         TourId = tourId;
         Title = title;
-        Comment = comment;
-        Summary = summary;
-        Text = text;
+        Comment = string.IsNullOrWhiteSpace(comment) ? null : comment;
+        Summary = string.IsNullOrWhiteSpace(summary) ? null : summary;
+        Text = string.IsNullOrWhiteSpace(text) ? null : text;
         Status = TourStatusEnum.Draft;
-        CoverImgUrl = coverImgUrl;
+        CoverImgUrl = string.IsNullOrWhiteSpace(coverImgUrl) ? null : coverImgUrl;
         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
         UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }

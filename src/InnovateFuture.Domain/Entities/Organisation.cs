@@ -3,11 +3,11 @@ using InnovateFuture.Domain.Enums;
 namespace InnovateFuture.Domain.Entities;
 public class Address
 {
-    public string? Street { get; set; }
-    public string? Suburb { get; set; }
-    public string? State { get; set; }
-    public string? PostCode { get; set; }
-    public string? Country { get; set; }
+    public string? Street { get; private set; }
+    public string? Suburb { get; private set; }
+    public string? State { get; private set; }
+    public string? PostCode { get;private set; }
+    public string? Country { get; private set; }
 }
 public class Organisation
 {
@@ -24,21 +24,20 @@ public class Organisation
     
     // Navigation
     public ICollection<Profile>? Profiles { get; private set; } = new List<Profile>();
-    
     public ICollection<Activity>? Activities { get; private set; } = new List<Activity>();
     public ICollection<Day>? Days { get; private set; } = new List<Day>();
     public ICollection<Tour>? Tours { get; private set; } = new List<Tour>();
     public Organisation(){}
-    public Organisation(string orgName, Guid? id= null, string? logoUrl=null, string? websiteUrl=null, Address? address = null, string? email=null)
+    public Organisation(string orgName, Guid? id = null, string? logoUrl = null, string? websiteUrl = null, Address? address = null, string? email = null)
     {
-        Id = id??Guid.NewGuid();
+        Id = id ?? Guid.NewGuid();
         OrgName = orgName;
-        LogoUrl = logoUrl;
-        WebsiteUrl = websiteUrl;
+        LogoUrl = string.IsNullOrWhiteSpace(logoUrl) ? null : logoUrl;
+        WebsiteUrl = string.IsNullOrWhiteSpace(websiteUrl) ? null : websiteUrl;
+        Email = string.IsNullOrWhiteSpace(email) ? null : email;
         Address = address;
-        Email = email;
         Subscription = SubscriptionEnum.Free;
-        OrgStatus = OrgStatusEnum.Pending;// initial status
+        OrgStatus = OrgStatusEnum.Pending; // Initial status
         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
         UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }

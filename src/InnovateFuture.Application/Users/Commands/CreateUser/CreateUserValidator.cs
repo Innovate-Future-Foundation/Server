@@ -6,7 +6,8 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
     public CreateUserCommandValidator()
     {
-        RuleFor(x => x.UserName)
+        RuleFor(x => x.UserName.Trim())
+            .NotEmpty().WithMessage("User name is required.")
             .MinimumLength(2).WithMessage("Username must be at least 2 characters.")
             .MaximumLength(100).WithMessage("User name must not exceed 100 characters.");
         
@@ -21,7 +22,5 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 
         RuleFor(x => x.OrgId)
             .NotEmpty().WithMessage("Organisation Id is required.");
-        
-        // Password already handle in Identity package
     }
 }

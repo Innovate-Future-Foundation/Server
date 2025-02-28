@@ -6,26 +6,29 @@ public class RegisterOrganisationAdminValidator: AbstractValidator<RegisterOrgan
 {
     public RegisterOrganisationAdminValidator()
     {
-        RuleFor(x => x.OrgName)
+        RuleFor(x => x.OrgName.Trim())
             .NotEmpty().WithMessage("Organisation name is required.")
+            .MinimumLength(2).WithMessage("Organisation name must be at least 2 characters.")
             .MaximumLength(200).WithMessage("Organisation name must not exceed 200 characters.");
         
         RuleFor(x => x.LogoUrl)
             .Must(BeAValidUrl).WithMessage("Please enter a valid logo URL.")
-            .When(x => !string.IsNullOrEmpty(x.LogoUrl));
+            .When(x => !string.IsNullOrEmpty(x.LogoUrl?.Trim()));
         
         RuleFor(x => x.WebsiteUrl)
             .Must(BeAValidUrl).WithMessage("Please enter a valid website URL.")
-            .When(x => !string.IsNullOrEmpty(x.WebsiteUrl));
+            .When(x => !string.IsNullOrEmpty(x.WebsiteUrl?.Trim()));
         
         RuleFor(x => x.OrgEmail)
             .EmailAddress().WithMessage("Please enter a valid organisation email address.")
-            .When(x => !string.IsNullOrEmpty(x.OrgEmail));
-        
+            .When(x => !string.IsNullOrEmpty(x.OrgEmail?.Trim()));
+
         RuleFor(x => x.UserEmail)
-            .EmailAddress().WithMessage("Please enter a valid user email address.")
-            .When(x => !string.IsNullOrEmpty(x.UserEmail));
+            .NotEmpty().WithMessage("User email is required.")
+            .EmailAddress().WithMessage("Please enter a valid user email address.");
         RuleFor(x => x.UserName)
+            .NotEmpty().WithMessage("User name is required.")
+            .MinimumLength(2).WithMessage("User name must be at least 2 characters.")
             .MaximumLength(100).WithMessage("User name must not exceed 100 characters.");
     }
 
