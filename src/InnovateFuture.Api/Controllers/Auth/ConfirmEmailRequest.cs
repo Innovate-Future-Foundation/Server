@@ -1,5 +1,3 @@
-using InnovateFuture.Domain.Enums;
-
 namespace InnovateFuture.Api.Controllers.Auth;
 
 public class ConfirmEmailRequest

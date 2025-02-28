@@ -1,13 +1,14 @@
 using AutoMapper;
 using InnovateFuture.Api.Configs;
-using InnovateFuture.Application.Services.Auth.ConfirmEmail;
-using InnovateFuture.Application.Services.Auth.Login;
-using InnovateFuture.Application.Services.Auth.Register;
-using InnovateFuture.Application.Services.Auth.SendVerificationEmail;
+using InnovateFuture.Application.Auth.ConfirmEmail;
+using InnovateFuture.Application.Auth.Login;
+using InnovateFuture.Application.Auth.Register;
+using InnovateFuture.Application.Auth.SendVerificationEmail;
+using InnovateFuture.Application.Services.Security.TokenService;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.Extensions.Options;
 
 namespace InnovateFuture.Api.Controllers.Auth;
 
@@ -18,11 +19,13 @@ public class AuthController: ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
+    private readonly JWTConfig _jwtConfig;
 
-    public AuthController(IMediator mediator, IMapper mapper)
+    public AuthController(IMediator mediator, IMapper mapper, IOptions<JWTConfig> jwtOptions)
     {
         _mediator = mediator;
         _mapper = mapper;
+        _jwtConfig = jwtOptions.Value;
     }
     
     /// <summary>
@@ -58,16 +61,15 @@ public class AuthController: ControllerBase
         var command = _mapper.Map<ConfirmEmailCommand>(request);
         var accessToken = await _mediator.Send(command);
         
-        // Store token in HTTP-only Cookie
         Response.Cookies.Append("access-token", accessToken, new CookieOptions
         {
-            HttpOnly = true, // prevent JS access
-            Secure = true,   // use https 
+            HttpOnly = true,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(3)
+            Expires = DateTime.UtcNow.AddDays(3),
+            Domain = _jwtConfig.Domain
         });
-        // TODO: Return dashboard page
-        return Redirect("http://frontend/dashboard");
+        return Ok("Email verification successful!");
     }
     
     /// <summary>
@@ -81,15 +83,15 @@ public class AuthController: ControllerBase
         var command = _mapper.Map<LoginCommand>(request);
         var accessToken = await _mediator.Send(command);
         
-        // Store token in HTTP-only Cookie
         Response.Cookies.Append("access-token", accessToken, new CookieOptions
         {
-            HttpOnly = true, // prevent JS access
-            Secure = true,   // use https 
+            HttpOnly = true,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(3)
+            Expires = DateTime.UtcNow.AddDays(3),
+            Domain = _jwtConfig.Domain
         });
-        return Ok("login successful");
+        return Ok("Login successful!");
     }
     
     /// <summary>
@@ -97,11 +99,9 @@ public class AuthController: ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public Task<IActionResult> Logout()
     {
         Response.Cookies.Delete("access-token");
-        return Ok("logout successful");
-        // TODO
-        // return Redirect("http://frontend/dashboard");
+        return Task.FromResult<IActionResult>(Ok("Logout successful"));
     }
 }
