@@ -1,0 +1,12 @@
+using MediatR;
+
+namespace InnovateFuture.Application.Auth.ConfirmEmail;
+
+public class ConfirmEmailCommand: IRequest<string>
+{
+    public string Email { get; set; }
+    public string Token { get; set; }
+    
+    // Get ProfileID from URL
+    public Guid ProfileId { get; set; }
+}

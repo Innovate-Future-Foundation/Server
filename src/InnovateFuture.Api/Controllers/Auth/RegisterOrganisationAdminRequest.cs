@@ -1,6 +1,5 @@
 
 using InnovateFuture.Domain.Entities;
-
 namespace InnovateFuture.Api.Controllers.Auth;
 
 public class RegisterOrganisationAdminRequest
