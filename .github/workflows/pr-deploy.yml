@@ -18,5 +18,6 @@ jobs:
     secrets:
       AWS_REGION: ${{ secrets.CENTRAL_ECR_REGION }}
       OIDC_ROLE_ARN : arn:aws:iam::${{ secrets.AWS_DEV_ACCOUNT }}:role/oidc-${{ vars.REPO_ORG_ABBR }}-${{ github.event.repository.name }}
+      ECR_REGISTRY: ${{ secrets.AWS_PROD_ACCOUNT }}
       ECR_REPO_BASE: ${{ secrets.CENTRAL_ECR_REPO_BASE }}
       ECR_REPO_PUBLISH: ${{ secrets.CENTRAL_ECR_REPO_PUBLISH }}

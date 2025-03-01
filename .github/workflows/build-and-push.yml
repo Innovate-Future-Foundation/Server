@@ -13,6 +13,8 @@ on:
         required: true
       OIDC_ROLE_ARN:
         required: true
+      ECR_REGISTRY:
+        required: true
       ECR_REPO_BASE:
         required: true
       ECR_REPO_PUBLISH:
@@ -36,6 +38,7 @@ jobs:
         name: Setup AWS ECR using oidc role
         uses: Innovate-Future-Foundation/common-action/setup-ecr@main
         with:
+          registry_account: ${{ secrets.ECR_REGISTRY }}
           oidc_role_arn: ${{ secrets.OIDC_ROLE_ARN }}
           region: ${{ secrets.AWS_REGION }}
 
