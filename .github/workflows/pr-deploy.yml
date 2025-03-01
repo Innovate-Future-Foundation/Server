@@ -1,0 +1,40 @@
+name: Deploy to PR Preview
+on:
+  pull_request:
+    branches:
+      - dev
+
+permissions:
+  id-token: write # This is required for requesting the JWT (OIDC)
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview_wrapper:
+    environment: Development
+    runs-on: ubuntu-22.04
+    outputs:
+      AWS_REGION: ${{ steps.get_env_secrets.outputs.AWS_REGION }}
+      OIDC_ROLE_ARN: ${{ steps.get_env_secrets.outputs.OIDC_ROLE_ARN }}
+      ECR_REPO_BASE: ${{ steps.get_env_secrets.outputs.ECR_REPO_BASE }}
+      ECR_REPO_PUBLISH: ${{ steps.get_env_secrets.outputs.ECR_REPO_PUBLISH }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: get_env_secrets
+        name: Retrieve Env specific secrets
+        run: |
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_OUTPUT
+          echo "OIDC_ROLE_ARN=arn:aws:iam::${{ secrets.AWS_DEV_ACCOUNT }}:role/oidc-${{ vars.REPO_ORG_ABBR }}-${{ github.event.repository.name }}" >> $GITHUB_OUTPUT
+          echo "ECR_REPO_BASE=${{ secrets.CENTRAL_ECR_REPO_BASE }}" >> $GITHUB_OUTPUT
+          echo "ECR_REPO_PUBLISH=${{ secrets.CENTRAL_ECR_REPO_PUBLISH }}" >> $GITHUB_OUTPUT
+        
+  ci-pipeline:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      environment: Development
+      pr_number: ${{ github.event.pull_request.number }}
+    secrets:
+      AWS_REGION: ${{ needs.preview_wrapper.outputs.AWS_REGION }}
+      OIDC_ROLE_ARN : ${{ needs.preview_wrapper.outputs.OIDC_ROLE_ARN }}
+      ECR_REPO_BASE: ${{ needs.preview_wrapper.outputs.ECR_REPO_BASE }}
+      ECR_REPO_PUBLISH: ${{ needs.preview_wrapper.outputs.ECR_REPO_PUBLISH }}
