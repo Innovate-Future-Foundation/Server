@@ -11,7 +11,8 @@
         "SecretKey": "f9X1zLrIMT6rOWTFbV7R9qlPjwD9LlA9K8UEtWmCp7U=",
         "Issuer": "innovateFuture Support",
         "Audience": "innovateFuture",
-        "ExpireSeconds": 7200
+        "ExpireSeconds": 7200,
+        "Domain": "localhost"
       },
   "EmailSettings": {
     "SmtpServer": "smtp.gmail.com",
@@ -26,4 +27,5 @@
     "BucketName": "***",
     "Region": "***"
   }
+  
 }
