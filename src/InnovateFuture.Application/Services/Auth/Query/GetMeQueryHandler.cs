@@ -17,9 +17,6 @@ public class GetMeQueryHandler: IRequestHandler<GetMeQuery, GetMeDto>
 
         return new GetMeDto
         {
-            Id = profile.User.Id,
-            UserName = profile.User.UserName,
-            UserEmail = profile.User.Email,
             DefaultProfile = profile
         };
     }
