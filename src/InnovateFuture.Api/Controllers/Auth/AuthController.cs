@@ -5,6 +5,7 @@ using InnovateFuture.Application.Auth.ConfirmEmail;
 using InnovateFuture.Application.Auth.Login;
 using InnovateFuture.Application.Auth.Register;
 using InnovateFuture.Application.Auth.SendVerificationEmail;
+using InnovateFuture.Application.Services.Auth.Query;
 using InnovateFuture.Application.Services.Security.TokenService;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;

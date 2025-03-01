@@ -55,6 +55,7 @@ using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using InnovateFuture.Application.Services.S3;
 using Amazon.S3;
+using InnovateFuture.Application.Services.Auth.Query;
 
 
 namespace InnovateFuture.Api

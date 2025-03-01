@@ -15,6 +15,7 @@ using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Application.Auth.ConfirmEmail;
 using InnovateFuture.Application.Auth.Login;
 using InnovateFuture.Application.Auth.Register;
+using InnovateFuture.Application.Services.Auth.Query;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
 using APIQueryProfileFilters = InnovateFuture.Api.Controllers.Profiles.QueryProfileFilters;
