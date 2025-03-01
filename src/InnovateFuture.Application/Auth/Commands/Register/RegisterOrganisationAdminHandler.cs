@@ -8,7 +8,7 @@ using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace InnovateFuture.Application.Auth.Register;
+namespace InnovateFuture.Application.Auth.Commands.Register;
 
 public class RegisterOrganisationAdminHandler : IRequestHandler<RegisterOrganisationAdminCommand, (Guid ProfileId, User User)?>
 {

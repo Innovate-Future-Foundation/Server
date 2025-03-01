@@ -4,7 +4,7 @@ using InnovateFuture.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace InnovateFuture.Application.Auth.SendVerificationEmail;
+namespace InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 
 public class SendVerificationEmailHandler: IRequestHandler<SendVerificationEmailCommand, bool>
 {
@@ -28,7 +28,7 @@ public class SendVerificationEmailHandler: IRequestHandler<SendVerificationEmail
             var encodedEmail = UrlEncoder.Default.Encode(command.User.Email);
             // link
             var verificationLink =
-                $"http://localhost:5173/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}";
+                $"http://localhost:5173/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}";
             // generate email body
             var emailData = new
             {

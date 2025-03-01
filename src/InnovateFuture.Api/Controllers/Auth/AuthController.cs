@@ -1,12 +1,14 @@
 using AutoMapper;
 using InnovateFuture.Api.Configs;
-using InnovateFuture.Application.Auth.ConfirmEmail;
-using InnovateFuture.Application.Auth.Login;
-using InnovateFuture.Application.Auth.Register;
-using InnovateFuture.Application.Auth.SendVerificationEmail;
+using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
+using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Register;
+using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
+using InnovateFuture.Application.Auth.Queries.GetMe;
 using InnovateFuture.Application.Services.Security.TokenService;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
@@ -61,6 +63,7 @@ public class AuthController: ControllerBase
         var command = _mapper.Map<ConfirmEmailCommand>(request);
         var accessToken = await _mediator.Send(command);
         
+        // Store token in HTTP-only Cookie
         Response.Cookies.Append("access-token", accessToken, new CookieOptions
         {
             HttpOnly = true,
@@ -83,6 +86,7 @@ public class AuthController: ControllerBase
         var command = _mapper.Map<LoginCommand>(request);
         var accessToken = await _mediator.Send(command);
         
+        // Store token in HTTP-only Cookie
         Response.Cookies.Append("access-token", accessToken, new CookieOptions
         {
             HttpOnly = true,
@@ -92,6 +96,27 @@ public class AuthController: ControllerBase
             Domain = _jwtConfig.Domain
         });
         return Ok("Login successful!");
+    }
+
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMe()
+    {
+        var profileIdClaim = User.FindFirst("ProfileId")?.Value;
+        if (string.IsNullOrEmpty(profileIdClaim))
+        {
+            return Unauthorized();
+        }
+
+        if (!Guid.TryParse(profileIdClaim, out var profileId))
+        {
+            return BadRequest("failed to parse profile Id");
+        }
+        var profile = await _mediator.Send(new GetMeQuery(profileId));
+        var getMeResponse = _mapper.Map<GetMeResponse>(profile);
+        
+        return Ok(getMeResponse);
     }
     
     /// <summary>

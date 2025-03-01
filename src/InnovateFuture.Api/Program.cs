@@ -4,9 +4,6 @@ using HealthChecks.UI.Client;
 using InnovateFuture.Api.Filters;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Api.Middleware;
-using InnovateFuture.Application.Auth.ConfirmEmail;
-using InnovateFuture.Application.Auth.Login;
-using InnovateFuture.Application.Auth.Register;
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Profiles.Queries.GetProfile;
@@ -20,7 +17,6 @@ using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Domain.Enums;
-using InnovateFuture.Application.Auth.SendVerificationEmail;
 using InnovateFuture.Application.Services.Security.TokenService;
 using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Application.Services.UserService;
@@ -55,6 +51,11 @@ using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using InnovateFuture.Application.Services.S3;
 using Amazon.S3;
+using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
+using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Register;
+using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
+using InnovateFuture.Application.Auth.Queries.GetMe;
 
 
 namespace InnovateFuture.Api
@@ -81,7 +82,13 @@ namespace InnovateFuture.Api
             
             // Configure JWT Authentication
             var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]);
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            builder.Services.AddAuthentication(options =>
+                {
+                    // Explicitly use JWT
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+                    // Prevents silent failures
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;   
+                })
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -92,25 +99,24 @@ namespace InnovateFuture.Api
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["JWTConfig:Issuer"],
                         ValidAudience = builder.Configuration["JWTConfig:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(key)
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]))
                     };
-                    
-                    // allow extracting JWT from cookies instead of header
+
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
                         {
-                            // Read Jwt token from cookie
-                            var accessToken = context.Request.Query["access_token"];
+                            var accessToken = context.Request.Cookies["access-token"]; 
+
                             if (!string.IsNullOrEmpty(accessToken))
                             {
                                 context.Token = accessToken;
                             }
-
                             return Task.CompletedTask;
                         }
                     };
                 });
+
             builder.Services.AddAuthorization();
             
             #region filter
@@ -130,6 +136,7 @@ namespace InnovateFuture.Api
             builder.Services.AddMediatR(configuration =>
             {
                 configuration.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(GetMeQueryHandler).Assembly);
                 
                 configuration.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
@@ -273,14 +280,14 @@ namespace InnovateFuture.Api
                     policy.WithOrigins("http://localhost:5173")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
+                        // access-token in cookies
                         .AllowCredentials();
                 });
             });
             
             var app = builder.Build();
             app.UseCors(policyName);
-
-
+            
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -295,11 +302,13 @@ namespace InnovateFuture.Api
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
             
-            app.UseCors(policyName);
+            app.UseRouting();
             
             app.UseAuthentication();
 
             app.UseAuthorization();
+            
+            app.UseCors(policyName);
 
             app.MapControllers();
             

@@ -1,7 +1,7 @@
 using InnovateFuture.Domain.Entities;
 using MediatR;
 
-namespace InnovateFuture.Application.Auth.Register;
+namespace InnovateFuture.Application.Auth.Commands.Register;
 
 public class RegisterOrganisationAdminCommand: IRequest<(Guid ProfileId, User User)?>
 {

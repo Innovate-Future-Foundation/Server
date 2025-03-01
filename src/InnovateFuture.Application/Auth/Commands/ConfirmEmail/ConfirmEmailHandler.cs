@@ -9,7 +9,7 @@ using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace InnovateFuture.Application.Auth.ConfirmEmail;
+namespace InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 
 public class ConfirmEmailHandler: IRequestHandler<ConfirmEmailCommand, string>
 {
@@ -68,6 +68,7 @@ public class ConfirmEmailHandler: IRequestHandler<ConfirmEmailCommand, string>
             
             // 4⃣️ Generate Token
             var accessToken = await _tokenService.GenerateJwtTokenAsync(command.ProfileId);
+            Console.WriteLine("accessToken",accessToken);
             return accessToken;
         }
         catch

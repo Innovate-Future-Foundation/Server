@@ -3,6 +3,9 @@ using AutoMapper;
 using InnovateFuture.Api.Controllers.Organisations;
 using InnovateFuture.Api.Controllers.Profiles;
 using InnovateFuture.Api.Controllers.Users;
+using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
+using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Register;
 using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Users.Commands.CreateUser;
@@ -12,9 +15,6 @@ using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
-using InnovateFuture.Application.Auth.ConfirmEmail;
-using InnovateFuture.Application.Auth.Login;
-using InnovateFuture.Application.Auth.Register;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
 using APIQueryProfileFilters = InnovateFuture.Api.Controllers.Profiles.QueryProfileFilters;
@@ -35,6 +35,8 @@ public class AutoMapperProfile: AMProfile
         CreateMap<ConfirmEmailRequest, ConfirmEmailCommand>();
         CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
         CreateMap<LoginRequest, LoginCommand>();
+
+        CreateMap<Profile,GetMeResponse>();
         
         CreateMap<CreateUserRequest, CreateUserCommand>();
         /*
