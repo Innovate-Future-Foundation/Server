@@ -62,10 +62,18 @@ jobs:
           echo "base=$img_base_uri_tag" >> $GITHUB_OUTPUT
           echo "publish=$img_publ_uri_tag" >> $GITHUB_OUTPUT
 
-      - id: tag_and_push_image
-        name: Tag images
+      - id: push_base_image
+        name: Tag and push base image
         run: |
-          echo "Tag backend images"
+          echo "Tag base image"
           docker tag inff-api-build:latest ${{ steps.conduct_image_uri_tag.outputs.base }}
+          echo "Push base image"
+          docker push ${{ steps.conduct_image_uri_tag.outputs.base }}
+
+      - id: push_publish_image
+        name: Tag and push publish image
+        run: |
+          echo "Tag publish image"
           docker tag inff-api-publish:latest ${{ steps.conduct_image_uri_tag.outputs.publish }}
-          
+          echo "Push publish image"
+          docker push ${{ steps.conduct_image_uri_tag.outputs.publish }}
