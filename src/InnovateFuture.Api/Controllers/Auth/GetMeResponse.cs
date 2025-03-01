@@ -1,8 +1,7 @@
-using InnovateFuture.Domain.Entities;
+using InnovateFuture.Api.Controllers.Profiles;
 
 namespace InnovateFuture.Api.Controllers.Auth;
 
-public class GetMeResponse
+public class GetMeResponse:GetProfileWithDetailsResponse
 {
-    public Profile DefaultProfile { get; set; }
 }

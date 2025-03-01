@@ -1,7 +1,7 @@
 using InnovateFuture.Domain.Entities;
 using MediatR;
 
-namespace InnovateFuture.Application.Auth.SendVerificationEmail;
+namespace InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 
 public class SendVerificationEmailCommand: IRequest<bool>
 {

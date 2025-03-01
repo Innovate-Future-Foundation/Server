@@ -35,7 +35,7 @@ public class ProfileRepository:IProfileRepository
         }
     }
 
-    public async Task<Profile> GetUserByProfileId(Guid profileId, CancellationToken cancellationToken = default)
+    public async Task<Profile> GetProfileByIdWithOrg(Guid profileId, CancellationToken cancellationToken = default)
     {
         var profile = await _dbContext.Profiles
             .Include(p => p.Organisation)
@@ -50,11 +50,11 @@ public class ProfileRepository:IProfileRepository
     public async Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var profile = await _dbContext.Profiles
-            .Include(p => p.User)
             .Include(p=>p.Organisation)
             .Include(p=>p.InviterProfile)
             .Include(p=>p.SupervisorProfile)
             .FirstOrDefaultAsync(p=>p.Id == id);
+        
         if (profile == null)
         {
             throw new IFEntityNotFoundException("Profile",id);
@@ -70,7 +70,6 @@ public class ProfileRepository:IProfileRepository
     public async Task<(List<Profile> data, int totalItems)> GetAnyAsync(Expression<Func<Profile, bool>>? predicate = null, int? limit = null, int offset = 0, string? queryOrderBy = null)
     {
         IQueryable<Profile> query =  _dbContext.Profiles
-            .Include(p => p.User)
             .Include(p => p.Organisation)
             .Include(p => p.InviterProfile)
             .Include(p => p.SupervisorProfile);

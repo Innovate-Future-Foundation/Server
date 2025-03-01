@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace InnovateFuture.Application.Auth.Register;
+namespace InnovateFuture.Application.Auth.Commands.Register;
 
 public class RegisterOrganisationAdminValidator: AbstractValidator<RegisterOrganisationAdminCommand>
 {

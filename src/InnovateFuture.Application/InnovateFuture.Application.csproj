@@ -24,6 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Auth\Commands\" />
+    <Folder Include="Auth\Queries\" />
     <Folder Include="Upload\Commands\" />
   </ItemGroup>
 

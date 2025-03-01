@@ -9,7 +9,7 @@ using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace InnovateFuture.Application.Auth.ConfirmEmail;
+namespace InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 
 public class ConfirmEmailHandler: IRequestHandler<ConfirmEmailCommand, string>
 {

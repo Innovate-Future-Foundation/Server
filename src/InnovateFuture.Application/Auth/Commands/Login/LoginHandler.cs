@@ -5,7 +5,7 @@ using InnovateFuture.Infrastructure.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace InnovateFuture.Application.Auth.Login;
+namespace InnovateFuture.Application.Auth.Commands.Login;
 
 public class LoginHandler: IRequestHandler<LoginCommand, string>
 {

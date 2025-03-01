@@ -11,7 +11,7 @@ public interface IProfileRepository
     Task CheckProfileExistByUserIdOrgIdRoleAsync(Guid userId, Guid orgId, RoleEnum role,
         CancellationToken cancellationToken = default);
     Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<Profile> GetUserByProfileId(Guid profileId, CancellationToken cancellationToken = default);
+    Task<Profile> GetProfileByIdWithOrg(Guid profileId, CancellationToken cancellationToken = default);
     Task UpdateAsync();
     Task<(List<Profile> data, int totalItems)> GetAnyAsync(
         Expression<Func<Profile, bool>>? predicate = null, int? limit = null, int offset = 0,

@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace InnovateFuture.Application.Auth.Login;
+namespace InnovateFuture.Application.Auth.Commands.Login;
 
 public class LoginCommand: IRequest<string>
 {

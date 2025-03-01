@@ -1,11 +1,10 @@
-using System.Security.Claims;
 using AutoMapper;
 using InnovateFuture.Api.Configs;
-using InnovateFuture.Application.Auth.ConfirmEmail;
-using InnovateFuture.Application.Auth.Login;
-using InnovateFuture.Application.Auth.Register;
-using InnovateFuture.Application.Auth.SendVerificationEmail;
-using InnovateFuture.Application.Services.Auth.Query;
+using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
+using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Register;
+using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
+using InnovateFuture.Application.Auth.Queries.GetMe;
 using InnovateFuture.Application.Services.Security.TokenService;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
@@ -114,8 +113,8 @@ public class AuthController: ControllerBase
         {
             return BadRequest("failed to parse profile Id");
         }
-        var getMeDto = await _mediator.Send(new GetMeQuery(profileId));
-        var getMeResponse = _mapper.Map<GetMeResponse>(getMeDto);
+        var profile = await _mediator.Send(new GetMeQuery(profileId));
+        var getMeResponse = _mapper.Map<GetMeResponse>(profile);
         
         return Ok(getMeResponse);
     }

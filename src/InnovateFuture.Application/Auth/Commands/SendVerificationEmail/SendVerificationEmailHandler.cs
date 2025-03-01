@@ -4,7 +4,7 @@ using InnovateFuture.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace InnovateFuture.Application.Auth.SendVerificationEmail;
+namespace InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 
 public class SendVerificationEmailHandler: IRequestHandler<SendVerificationEmailCommand, bool>
 {

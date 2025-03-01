@@ -4,9 +4,6 @@ using HealthChecks.UI.Client;
 using InnovateFuture.Api.Filters;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Api.Middleware;
-using InnovateFuture.Application.Auth.ConfirmEmail;
-using InnovateFuture.Application.Auth.Login;
-using InnovateFuture.Application.Auth.Register;
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Profiles.Queries.GetProfile;
@@ -20,7 +17,6 @@ using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Domain.Enums;
-using InnovateFuture.Application.Auth.SendVerificationEmail;
 using InnovateFuture.Application.Services.Security.TokenService;
 using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Application.Services.UserService;
@@ -55,7 +51,11 @@ using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using InnovateFuture.Application.Services.S3;
 using Amazon.S3;
-using InnovateFuture.Application.Services.Auth.Query;
+using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
+using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Register;
+using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
+using InnovateFuture.Application.Auth.Queries.GetMe;
 
 
 namespace InnovateFuture.Api
@@ -79,7 +79,6 @@ namespace InnovateFuture.Api
             #region JWT
             builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection("JWTConfig"));
             #endregion
-            
             
             // Configure JWT Authentication
             var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]);
@@ -288,8 +287,7 @@ namespace InnovateFuture.Api
             
             var app = builder.Build();
             app.UseCors(policyName);
-
-
+            
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -304,8 +302,6 @@ namespace InnovateFuture.Api
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
             
-
-
             app.UseRouting();
             
             app.UseAuthentication();
