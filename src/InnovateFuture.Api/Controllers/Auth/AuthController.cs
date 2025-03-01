@@ -8,6 +8,7 @@ using InnovateFuture.Application.Auth.SendVerificationEmail;
 using InnovateFuture.Application.Services.Security.TokenService;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
@@ -98,7 +99,7 @@ public class AuthController: ControllerBase
     }
 
 
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("me")]
     public async Task<IActionResult> GetMe()
     {
@@ -107,7 +108,11 @@ public class AuthController: ControllerBase
         {
             return Unauthorized();
         }
-        var profileId = Guid.Parse(profileIdClaim);
+
+        if (!Guid.TryParse(profileIdClaim, out var profileId))
+        {
+            return BadRequest("failed to parse profile Id");
+        }
         var getMeDto = await _mediator.Send(new GetMeQuery(profileId));
         var getMeResponse = _mapper.Map<GetMeResponse>(getMeDto);
         

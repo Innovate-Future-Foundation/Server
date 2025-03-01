@@ -79,9 +79,16 @@ namespace InnovateFuture.Api
             builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection("JWTConfig"));
             #endregion
             
+            
             // Configure JWT Authentication
             var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]);
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            builder.Services.AddAuthentication(options =>
+                {
+                    // Explicitly use JWT
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+                    // Prevents silent failures
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;   
+                })
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -92,25 +99,24 @@ namespace InnovateFuture.Api
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["JWTConfig:Issuer"],
                         ValidAudience = builder.Configuration["JWTConfig:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(key)
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]))
                     };
-                    
-                    // allow extracting JWT from cookies instead of header
+
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
                         {
-                            // Read Jwt token from cookie
-                            var accessToken = context.Request.Cookies["access_token"];
+                            var accessToken = context.Request.Cookies["access-token"]; 
+
                             if (!string.IsNullOrEmpty(accessToken))
                             {
                                 context.Token = accessToken;
                             }
-
                             return Task.CompletedTask;
                         }
                     };
                 });
+
             builder.Services.AddAuthorization();
             
             #region filter
@@ -297,11 +303,15 @@ namespace InnovateFuture.Api
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
             
-            app.UseCors(policyName);
+
+
+            app.UseRouting();
             
             app.UseAuthentication();
 
             app.UseAuthorization();
+            
+            app.UseCors(policyName);
 
             app.MapControllers();
             
