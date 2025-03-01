@@ -76,4 +76,17 @@ public class ProfilesController : ControllerBase
         
         return Ok(profilesResponse);
     }
+    
+    [AllowAnonymous]
+    [HttpGet("Permissions")]
+    public async Task<IActionResult> GetPermissions()
+    {
+        var permissions = new
+        {
+            canEditOrganisationDetailForm = new[] { "PlatformAdmin", "OrgAdmin" },
+            canViewManagerScrollList = new[] { "PlatformAdmin", "OrgAdmin" },
+            needViewOrganisationOfUser = new[] { "PlatformAdmin" },
+        };
+        return Ok(permissions);
+    }
 }
