@@ -1,0 +1,82 @@
+name: Backend CI
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+    secrets:
+      AWS_REGION:
+        required: true
+      OIDC_ROLE_ARN:
+        required: true
+      ECR_REGISTRY:
+        required: true
+      ECR_REPO_BASE:
+        required: true
+      ECR_REPO_PUBLISH:
+        required: true
+      
+jobs:
+  build-and-push:
+    runs-on: ubuntu-22.04
+    environment: ${{ inputs.environment }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - id: checkout_latest
+        name: Checkout latest
+        uses: actions/checkout@v3
+      
+      - id: setup_ecr
+        name: Setup AWS ECR using oidc role
+        uses: Innovate-Future-Foundation/common-action/setup-ecr@main
+        with:
+          registry_account: ${{ secrets.ECR_REGISTRY }}
+          oidc_role_arn: ${{ secrets.OIDC_ROLE_ARN }}
+          region: ${{ secrets.AWS_REGION }}
+
+      - id: build_base_image
+        name: Build backend base
+        run: docker build -f Dockerfile.base -t inff-api-build .
+      
+      - id: run_test
+        name: Run test with base image
+        run: |
+          docker run --rm inff-api-build \
+          dotnet test --configuration Release --no-build --verbosity normal
+      
+      - id: build_publish_image
+        name: Build backend publish
+        run: docker build -f Dockerfile.api -t inff-api-publish .
+      
+      - id: conduct_image_uri_tag
+        name: Conduct image URI and tags
+        run: |
+          hash=$(git rev-parse --short HEAD)
+          img_base_uri_tag="${{ steps.setup_ecr.outputs.registry }}/${{ secrets.ECR_REPO_BASE }}:${hash}"
+          img_publ_uri_tag="${{ steps.setup_ecr.outputs.registry }}/${{ secrets.ECR_REPO_PUBLISH }}:${hash}"
+          echo "base=$img_base_uri_tag" >> $GITHUB_OUTPUT
+          echo "publish=$img_publ_uri_tag" >> $GITHUB_OUTPUT
+
+      - id: push_base_image
+        name: Tag and push base image
+        run: |
+          echo "Tag base image"
+          docker tag inff-api-build:latest ${{ steps.conduct_image_uri_tag.outputs.base }}
+          echo "Push base image"
+          docker push ${{ steps.conduct_image_uri_tag.outputs.base }}
+
+      - id: push_publish_image
+        name: Tag and push publish image
+        run: |
+          echo "Tag publish image"
+          docker tag inff-api-publish:latest ${{ steps.conduct_image_uri_tag.outputs.publish }}
+          echo "Push publish image"
+          docker push ${{ steps.conduct_image_uri_tag.outputs.publish }}
