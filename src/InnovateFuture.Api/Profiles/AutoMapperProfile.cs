@@ -36,7 +36,8 @@ public class AutoMapperProfile: AMProfile
         CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
         CreateMap<LoginRequest, LoginCommand>();
 
-        CreateMap<Profile,GetMeResponse>();
+        CreateMap<Profile,GetMeResponse>()
+            .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
         
         CreateMap<CreateUserRequest, CreateUserCommand>();
         /*

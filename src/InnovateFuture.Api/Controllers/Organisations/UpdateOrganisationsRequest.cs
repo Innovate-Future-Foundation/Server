@@ -4,7 +4,7 @@ namespace InnovateFuture.Api.Controllers.Organisations;
 
 public class UpdateOrganisationRequest
 {
-    public string OrgName { get;  set; }
+    public string? OrgName { get;  set; }
     public string? LogoUrl { get;  set; }
     public string? WebsiteUrl { get;  set; }
     public Address? Address { get;  set; }
