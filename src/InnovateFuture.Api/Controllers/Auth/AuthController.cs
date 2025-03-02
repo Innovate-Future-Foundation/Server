@@ -3,6 +3,7 @@ using InnovateFuture.Api.Configs;
 using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
 using InnovateFuture.Application.Auth.Commands.Register;
+using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 using InnovateFuture.Application.Auth.Queries.GetMe;
 using InnovateFuture.Application.Services.Security.TokenService;
@@ -73,6 +74,19 @@ public class AuthController: ControllerBase
             Domain = _jwtConfig.Domain
         });
         return Ok("Email verification successful!");
+    }
+
+    [AllowAnonymous]
+    [HttpPost("resend-verification-email")]
+    public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendVerficationEmailRequest request)
+    {
+        var command = _mapper.Map<ResendVerificationEmailCommand>(request);
+        var result = await _mediator.Send(command);
+        if (!result)
+        {
+            return BadRequest("Resend email verification failed!");
+        }
+        return Ok("Resend email verification successful!");
     }
     
     /// <summary>

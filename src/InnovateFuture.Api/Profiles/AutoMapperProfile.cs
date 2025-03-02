@@ -6,6 +6,7 @@ using InnovateFuture.Api.Controllers.Users;
 using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
 using InnovateFuture.Application.Auth.Commands.Register;
+using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Users.Commands.CreateUser;
@@ -33,6 +34,7 @@ public class AutoMapperProfile: AMProfile
     public AutoMapperProfile()
     {
         CreateMap<ConfirmEmailRequest, ConfirmEmailCommand>();
+        CreateMap<ResendVerficationEmailRequest,ResendVerificationEmailCommand>();
         CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
         CreateMap<LoginRequest, LoginCommand>();
 

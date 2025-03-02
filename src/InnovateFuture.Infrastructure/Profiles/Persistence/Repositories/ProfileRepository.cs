@@ -35,6 +35,19 @@ public class ProfileRepository:IProfileRepository
         }
     }
 
+    public async Task<User> GetUserByProfileId(Guid profileId, CancellationToken cancellationToken = default)
+    {
+        var profile = await _dbContext.Profiles
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == profileId, cancellationToken);
+
+        if (profile == null)
+        {
+            throw new IFEntityNotFoundException("Profile", profileId);
+        }
+        return profile.User;
+    }
+
     public async Task<Profile> GetProfileByIdWithOrg(Guid profileId, CancellationToken cancellationToken = default)
     {
         var profile = await _dbContext.Profiles
