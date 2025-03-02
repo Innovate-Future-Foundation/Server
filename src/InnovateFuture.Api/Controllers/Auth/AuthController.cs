@@ -2,6 +2,7 @@ using AutoMapper;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Password;
 using InnovateFuture.Application.Auth.Commands.Register;
 using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 using InnovateFuture.Application.Auth.Queries.GetMe;
@@ -117,6 +118,37 @@ public class AuthController: ControllerBase
         var getMeResponse = _mapper.Map<GetMeResponse>(profile);
         
         return Ok(getMeResponse);
+    }
+
+    /// <summary>
+    /// user reset password
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var profileIdClaim = User.FindFirst("ProfileId")?.Value;
+        if (string.IsNullOrEmpty(profileIdClaim))
+        {
+            return Unauthorized("Please login.");
+        }
+
+        if (!Guid.TryParse(profileIdClaim, out var profileId))
+        {
+            return BadRequest("failed to parse profile Id");
+        }
+
+        var resetPasswordCommand = _mapper.Map<ResetPasswordCommand>(request);
+        resetPasswordCommand.ProfileId = profileId;
+        
+        var success = await _mediator.Send(resetPasswordCommand);
+        if (!success)
+        {
+            return BadRequest("failed to reset password.");
+        }
+        return Ok("Password reset successful, please login again.");
     }
     
     /// <summary>

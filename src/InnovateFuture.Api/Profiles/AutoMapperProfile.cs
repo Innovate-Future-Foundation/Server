@@ -5,6 +5,7 @@ using InnovateFuture.Api.Controllers.Profiles;
 using InnovateFuture.Api.Controllers.Users;
 using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Password;
 using InnovateFuture.Application.Auth.Commands.Register;
 using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
@@ -35,6 +36,7 @@ public class AutoMapperProfile: AMProfile
         CreateMap<ConfirmEmailRequest, ConfirmEmailCommand>();
         CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
         CreateMap<LoginRequest, LoginCommand>();
+        CreateMap<ResetPasswordRequest, ResetPasswordCommand>();
 
         CreateMap<Profile,GetMeResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
