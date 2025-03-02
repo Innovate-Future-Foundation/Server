@@ -8,6 +8,14 @@ public class Address
     public string? State { get; private set; }
     public string? PostCode { get;private set; }
     public string? Country { get; private set; }
+    public Address(string? street, string? suburb, string? state, string? postCode, string? country)
+    {
+        Street = street;
+        Suburb = suburb;
+        State = state;
+        PostCode = postCode;
+        Country = country;
+    }
 }
 public class Organisation
 {
