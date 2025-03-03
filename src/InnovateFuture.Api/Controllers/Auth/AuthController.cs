@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.Extensions.Options;
 
 namespace InnovateFuture.Api.Controllers.Auth;
@@ -125,23 +126,10 @@ public class AuthController: ControllerBase
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {
-        var profileIdClaim = User.FindFirst("ProfileId")?.Value;
-        if (string.IsNullOrEmpty(profileIdClaim))
-        {
-            return Unauthorized("Please login.");
-        }
-
-        if (!Guid.TryParse(profileIdClaim, out var profileId))
-        {
-            return BadRequest("failed to parse profile Id");
-        }
-
         var resetPasswordCommand = _mapper.Map<ResetPasswordCommand>(request);
-        resetPasswordCommand.ProfileId = profileId;
         
         var success = await _mediator.Send(resetPasswordCommand);
         if (!success)
@@ -149,6 +137,20 @@ public class AuthController: ControllerBase
             return BadRequest("failed to reset password.");
         }
         return Ok("Password reset successful, please login again.");
+    }
+
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        var command = _mapper.Map<ForgotPasswordCommand>(request);
+        var result = await _mediator.Send(command);
+        if (!result)
+        {
+            return BadRequest("failed to reset password.");
+        }
+        
+        return Ok("Password reset link has been sent to your email.");
     }
     
     /// <summary>

@@ -139,6 +139,8 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetMeQueryHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(ResetPasswordHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(ForgetPasswordHandler).Assembly);
+                
                 
                 configuration.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);

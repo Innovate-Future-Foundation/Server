@@ -18,14 +18,15 @@ using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
+using Microsoft.AspNetCore.Identity.Data;
 using APIQueryProfileFilters = InnovateFuture.Api.Controllers.Profiles.QueryProfileFilters;
 using APPQueryProfileFilters = InnovateFuture.Application.Profiles.Queries.GetProfiles.QueryProfileFilters;
 using APIQueryOrganisationsFilters = InnovateFuture.Api.Controllers.Organisations.QueryOrganisationsFilters;
 using APPQueryOrganisationsFilters = InnovateFuture.Application.Organisations.Queries.GetOrganisations.QueryOrganisationsFilters;
 using AMProfile = AutoMapper.Profile;
+using LoginRequest = InnovateFuture.Api.Controllers.Auth.LoginRequest;
 using Profile = InnovateFuture.Domain.Entities.Profile;
-
-
+using ResetPasswordRequest = InnovateFuture.Api.Controllers.Auth.ResetPasswordRequest;
 
 
 namespace InnovateFuture.Api.Profiles;
@@ -37,6 +38,7 @@ public class AutoMapperProfile: AMProfile
         CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
         CreateMap<LoginRequest, LoginCommand>();
         CreateMap<ResetPasswordRequest, ResetPasswordCommand>();
+        CreateMap<ForgotPasswordRequest, ForgotPasswordCommand>();
 
         CreateMap<Profile,GetMeResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));

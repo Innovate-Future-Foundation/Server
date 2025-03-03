@@ -1,27 +1,24 @@
 using InnovateFuture.Application.Services.UserService;
-using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using MediatR;
 
 namespace InnovateFuture.Application.Auth.Commands.Password;
 
 public class ResetPasswordHandler: IRequestHandler<ResetPasswordCommand, bool>
 {
-    private readonly IProfileRepository _profileRepository;
     private readonly IUserService _userService;
 
-    public ResetPasswordHandler(IProfileRepository profileRepository, IUserService userService)
+    public ResetPasswordHandler(IUserService userService)
     {
-        _profileRepository = profileRepository;
         _userService = userService;
     }
     
     public async Task<bool> Handle(ResetPasswordCommand command, CancellationToken cancellationToken)
     {
-        // 1⃣️ get user by profileId
-        var user = await _profileRepository.GetUserByProfileId(command.ProfileId, cancellationToken);
+        // 1⃣️ get user by email
+        var user = await _userService.GetUserByEmailAsync(command.Email, cancellationToken);
         
         // 2⃣️ reset password
-        await _userService.ResetPasswordAsync(user, command.NewPassword, cancellationToken);
+        await _userService.ResetPasswordAsync(user, command.NewPassword, command.ResetPasswordToken,  cancellationToken);
         
         return true;
     }

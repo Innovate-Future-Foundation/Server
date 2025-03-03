@@ -36,11 +36,9 @@ public class UserService: IUserService
         }
     }
 
-
-    public async Task ResetPasswordAsync(User user, string newPassword, CancellationToken cancellationToken = default)
+    public async Task ResetPasswordAsync(User user, string newPassword, string resetPasswordToken, CancellationToken cancellationToken = default)
     {
-        var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
+        var result = await _userManager.ResetPasswordAsync(user, resetPasswordToken, newPassword);
         if (!result.Succeeded)
         {
             var errors = result.Errors.Select(e => e.Description).ToList();
@@ -55,5 +53,21 @@ public class UserService: IUserService
             }
             throw new Exception($"Failed to reset password: {string.Join(", ", errors)}");
         }
+    }
+    
+    public async Task<User> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new IFEntityNotFoundException("User", email);
+        }
+        return user;
+    }
+    
+    public async Task<string> GeneratePasswordResetTokenAsync(User user, CancellationToken cancellationToken = default)
+    {
+        var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        return resetToken;
     }
 }
