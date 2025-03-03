@@ -3,6 +3,7 @@ using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 
@@ -10,11 +11,13 @@ public class SendVerificationEmailHandler: IRequestHandler<SendVerificationEmail
 {
     private readonly IEmailService _emailService;
     private readonly UserManager<User> _userManager;
+    private IConfiguration _configuration;
 
-    public SendVerificationEmailHandler(IEmailService emailService, UserManager<User> userManager)
+    public SendVerificationEmailHandler(IEmailService emailService, UserManager<User> userManager, IConfiguration configuration)
     {
         _emailService = emailService;
         _userManager = userManager;
+        _configuration = configuration;
     }
 
     public async Task<bool> Handle(SendVerificationEmailCommand command, CancellationToken cancellationToken)
@@ -28,7 +31,7 @@ public class SendVerificationEmailHandler: IRequestHandler<SendVerificationEmail
             var encodedEmail = UrlEncoder.Default.Encode(command.User.Email);
             // link
             var verificationLink =
-                $"http://localhost:5173/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}";
+                $"{_configuration["FrontEndBaseUrl"]}/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}";
             // generate email body
             var emailData = new
             {

@@ -83,7 +83,7 @@ namespace InnovateFuture.Api
             #endregion
             
             // Configure JWT Authentication
-            var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]);
+            var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]!);
             builder.Services.AddAuthentication(options =>
                 {
                     // Explicitly use JWT
@@ -101,7 +101,7 @@ namespace InnovateFuture.Api
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["JWTConfig:Issuer"],
                         ValidAudience = builder.Configuration["JWTConfig:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(key)
                     };
 
                     options.Events = new JwtBearerEvents
@@ -284,7 +284,7 @@ namespace InnovateFuture.Api
             {
                 option.AddPolicy(policyName, policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173")
+                    policy.WithOrigins(builder.Configuration["FrontEndBaseUrl"]!)
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         // access-token in cookies
