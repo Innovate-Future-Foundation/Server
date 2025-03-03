@@ -2,6 +2,7 @@ using AutoMapper;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Password;
 using InnovateFuture.Application.Auth.Commands.Register;
 using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.Extensions.Options;
 
 namespace InnovateFuture.Api.Controllers.Auth;
@@ -127,6 +129,38 @@ public class AuthController: ControllerBase
         var getMeResponse = _mapper.Map<GetMeResponse>(profile);
         
         return Ok(getMeResponse);
+    }
+
+    /// <summary>
+    /// user reset password
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var resetPasswordCommand = _mapper.Map<ResetPasswordCommand>(request);
+        
+        var success = await _mediator.Send(resetPasswordCommand);
+        if (!success)
+        {
+            return BadRequest("failed to reset password.");
+        }
+        return Ok("Password reset successful, please login again.");
+    }
+
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        var command = _mapper.Map<ForgotPasswordCommand>(request);
+        var result = await _mediator.Send(command);
+        if (!result)
+        {
+            return BadRequest("failed to reset password.");
+        }
+        
+        return Ok("Password reset link has been sent to your email.");
     }
     
     /// <summary>
