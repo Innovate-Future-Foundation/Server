@@ -1,35 +1,36 @@
 using System.Text.Encodings.Web;
+using InnovateFuture.Application.Exceptions;
 using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Domain.Entities;
-using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
 namespace InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 
-public class ResendVerificationEmailHandler: IRequestHandler<ResendVerificationEmailCommand, bool>
+public class ResendVerificationEmailHandler: IRequestHandler<ResendVerificationEmailCommand,Unit>
 {
-    private readonly IProfileRepository _profileRepository;
     private readonly UserManager<User> _userManager;
     private readonly IEmailService _emailService;
 
-    public ResendVerificationEmailHandler(IProfileRepository profileRepository, UserManager<User> userManager, IEmailService emailService)
+    public ResendVerificationEmailHandler(UserManager<User> userManager, IEmailService emailService)
     {
-        _profileRepository = profileRepository;
         _userManager = userManager;
         _emailService = emailService;
     }
-
-
-    public async Task<bool> Handle(ResendVerificationEmailCommand command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(ResendVerificationEmailCommand command, CancellationToken cancellationToken)
     {
-        // 1⃣️ get user by profileId
-        var user = await _profileRepository.GetUserByProfileId(command.ProfileId, cancellationToken);
+        // 1⃣️ get user by email
+        var user = await _userManager.FindByEmailAsync(command.Email);
+        
+        if (user == null)
+        {
+            throw new IFApplicationNotFoundException($"User with email {command.Email} does not exist.");
+        }
         
         // 2⃣️ check if user already verified
-        if (user.EmailConfirmed)
+        if (user is { EmailConfirmed: true })
         {
-            return false;
+            throw new IFApplicationBusinessException($"User with email {command.Email} has already been verified.");
         }
         
         // 3⃣️ generate verification token by using Identity service
@@ -40,17 +41,19 @@ public class ResendVerificationEmailHandler: IRequestHandler<ResendVerificationE
         var encodedEmail = UrlEncoder.Default.Encode(user.Email!);
         // link
         var verificationLink =
-            $"http://localhost:5173/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}";
+            $"http://localhost:5173/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={user.DefaultProfileId}";
         // generate email body
         var emailData = new
         {
             userName = user.UserName,
-            verificationLink = verificationLink,
+            verificationLink,
         };
+        
         string emailBody = _emailService.RenderTemplate("Templates/RegisterEmailTemplate.hbs", emailData);
         // send email
         await _emailService.SendEmailAsync(user.Email!, "Welcome to Innovate future", emailBody,
             cancellationToken);
-        return true;
+        
+        return Unit.Value;
     }
 }

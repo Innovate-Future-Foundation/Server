@@ -81,11 +81,7 @@ public class AuthController: ControllerBase
     public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendVerficationEmailRequest request)
     {
         var command = _mapper.Map<ResendVerificationEmailCommand>(request);
-        var result = await _mediator.Send(command);
-        if (!result)
-        {
-            return BadRequest("Resend email verification failed!");
-        }
+        await _mediator.Send(command);
         return Ok("Resend email verification successful!");
     }
     

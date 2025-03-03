@@ -2,9 +2,7 @@ using MediatR;
 
 namespace InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 
-public class ResendVerificationEmailCommand: IRequest<bool>
+public class ResendVerificationEmailCommand: IRequest<Unit>
 {
     public string Email { get; set; }
-    
-    public Guid ProfileId { get; set; }
 }
