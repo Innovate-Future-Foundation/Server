@@ -54,6 +54,7 @@ using Amazon.S3;
 using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
 using InnovateFuture.Application.Auth.Commands.Register;
+using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 using InnovateFuture.Application.Auth.Queries.GetMe;
 
@@ -153,6 +154,8 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(ResendVerificationEmailHandler).Assembly);
+                
             });
                 
             // auto mapper instance
