@@ -9,9 +9,9 @@ public class EmailService: IEmailService
 {
     private readonly EmailSettings _emailSettings;
 
-    public EmailService(IOptions<EmailSettings> emailSettings)
+    public EmailService(EmailSettings emailSettings)
     {
-        _emailSettings = emailSettings.Value;
+        _emailSettings = emailSettings;
     }
 
     public async Task SendEmailAsync(string receiver, string subject, string body, CancellationToken cancellationToken)

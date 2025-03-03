@@ -58,6 +58,7 @@ using InnovateFuture.Application.Auth.Commands.Register;
 using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 using InnovateFuture.Application.Auth.Queries.GetMe;
+using DotNetEnv;
 
 
 namespace InnovateFuture.Api
@@ -70,20 +71,42 @@ namespace InnovateFuture.Api
             var policyName = "AllowLocalhost";
             
             var builder = WebApplication.CreateBuilder(args);
-            
-            var connectionString = builder.Configuration["DBConnection"];
 
-            #region Email Service Configuration
-            // bind EmailSettings from appsettings.Development.json
-            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+            #region Env configuration
+            Env.Load();
+            // DB
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            
+            // Front-End-URL
+            var frontEndBaseUrl = Environment.GetEnvironmentVariable("FRONT_END_BASE_URL");
+            
+            // Token
+            var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+            var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+            var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+            
+            // Email 
+            var emailSettings = new EmailSettings
+            {
+                SenderEmail = Environment.GetEnvironmentVariable("SENDER_EMAIL") ??
+                              throw new InvalidOperationException("Missing SENDER_EMAIL"),
+                SenderName = Environment.GetEnvironmentVariable("SENDER_NAME") ?? "Innovate Future",
+                SenderPassword = Environment.GetEnvironmentVariable("SENDER_PASSWORD") ??
+                                 throw new InvalidOperationException("Missing SENDER_PASSWORD"),
+                SmtpServer = Environment.GetEnvironmentVariable("SMTP_SERVER") ??
+                             throw new InvalidOperationException("Missing SMTP_SERVER"),
+                SmtpPort = int.TryParse(Environment.GetEnvironmentVariable("SMTP_PORT"), out var port) ? port : 587
+            };
+            builder.Services.AddSingleton(emailSettings);
             #endregion
+            
             
             #region JWT
             builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection("JWTConfig"));
             #endregion
             
             // Configure JWT Authentication
-            var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]);
+            var key = Encoding.UTF8.GetBytes(jwtKey!);
             builder.Services.AddAuthentication(options =>
                 {
                     // Explicitly use JWT
@@ -99,9 +122,9 @@ namespace InnovateFuture.Api
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["JWTConfig:Issuer"],
-                        ValidAudience = builder.Configuration["JWTConfig:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]))
+                        ValidIssuer = jwtIssuer,
+                        ValidAudience = jwtAudience,
+                        IssuerSigningKey = new SymmetricSecurityKey(key)
                     };
 
                     options.Events = new JwtBearerEvents
@@ -284,7 +307,7 @@ namespace InnovateFuture.Api
             {
                 option.AddPolicy(policyName, policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173")
+                    policy.WithOrigins(frontEndBaseUrl!)
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         // access-token in cookies
