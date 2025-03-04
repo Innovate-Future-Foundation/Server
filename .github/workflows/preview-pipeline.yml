@@ -18,9 +18,6 @@ permissions:
   id-token: write # This is required for requesting the JWT (OIDC)
   contents: read
   pull-requests: write
-env:
-  task_definition
-environment: UAT
 
 jobs:
   conduct_tag:
@@ -70,7 +67,7 @@ jobs:
       task_count: 1
     secrets:
       ECR_REGION: ${{ secrets.CENTRAL_ECR_REGION }}
-      ECS_REGION: "ap-southeast-2"
+      ECS_REGION: ${{ secrets.DEV_REGION }}
       OIDC_ROLE_ARN: arn:aws:iam::${{ secrets.AWS_DEV_ACCOUNT }}:role/oidc-${{ vars.REPO_ORG_ABBR }}-${{ vars.REPO_BACKEND }}
       ECR_REGISTRY: ${{ secrets.AWS_PROD_ACCOUNT }}
       ECR_REPO_BASE: ${{ secrets.CENTRAL_ECR_REPO_BASE }}
