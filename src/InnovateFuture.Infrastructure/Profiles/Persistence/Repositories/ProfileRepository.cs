@@ -6,6 +6,7 @@ using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore.DynamicLinq;
 using Microsoft.VisualBasic.CompilerServices;
 
 namespace InnovateFuture.Infrastructure.Profiles.Persistence.Repositories;
@@ -23,7 +24,7 @@ public class ProfileRepository:IProfileRepository
     {
         await _dbContext.Profiles.AddAsync(profile, cancellationToken);
     }
-
+    
     public async Task CheckProfileExistByUserIdOrgIdRoleAsync(Guid userId, Guid orgId, RoleEnum role, CancellationToken cancellationToken = default)
     {
         var profile = await _dbContext.Profiles
@@ -48,6 +49,20 @@ public class ProfileRepository:IProfileRepository
         return profile.User;
     }
 
+    public async Task<Guid> GetOrgIdByProfileIdAsync(Guid profileId, CancellationToken cancellationToken = default)
+    {
+        var profile = await _dbContext.Profiles
+            .Where(p => p.Id == profileId)
+            .Select(p => new { p.OrgId })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (profile == null || profile.OrgId == null)
+        {
+            throw new IFEntityNotFoundException("OrgId in Profile", profileId);
+        }
+        return profile.OrgId.Value;
+    }
+
     public async Task<Profile> GetProfileByIdWithOrg(Guid profileId, CancellationToken cancellationToken = default)
     {
         var profile = await _dbContext.Profiles
@@ -58,6 +73,20 @@ public class ProfileRepository:IProfileRepository
             throw new IFEntityNotFoundException("Profile",profileId);
         }
         return profile;
+    }
+
+    public async Task<bool> CheckRoleIsOrgAdminById(Guid id, CancellationToken cancellationToken = default)
+    {
+       var profileOnlyWithRole = await _dbContext.Profiles
+           .Where(p => p.Id == id)
+           .Select(p => new { p.Role })
+           .FirstOrDefaultAsync(cancellationToken);
+       
+       if (profileOnlyWithRole == null)
+       {
+           throw new IFEntityNotFoundException("ProfileRole", id);
+       }
+       return profileOnlyWithRole.Role != RoleEnum.Student;
     }
 
     public async Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

@@ -48,4 +48,22 @@ public class TokenService: ITokenService
         
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    public Guid? GetProfileIdFromToken(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+            return null;
+        }
+        
+        // read embedded claims from token
+        var header = new JwtSecurityTokenHandler();
+        var jwtToken = header.ReadJwtToken(token);
+        var profileClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "ProfileId");
+        if (profileClaim != null && Guid.TryParse(profileClaim.Value, out var profileId))
+        {
+            return profileId;
+        }
+        return null;
+    }
 }

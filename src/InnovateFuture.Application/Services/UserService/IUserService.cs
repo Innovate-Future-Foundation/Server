@@ -9,4 +9,6 @@ public interface IUserService
     Task ResetPasswordAsync(User user, string newPassword, string resetPasswordToken, CancellationToken cancellationToken = default);
     Task<User> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default);
     Task<string> GeneratePasswordResetTokenAsync(User user, CancellationToken cancellationToken = default);
+    Task CheckUserExistsAsync(string email, CancellationToken cancellationToken = default);
+    Task<string> GenerateTemperatePassword();
 }
