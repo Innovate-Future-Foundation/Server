@@ -32,7 +32,7 @@ jobs:
         name: Extract PR Info
         run: |
           short_hash=$(git rev-parse --short HEAD)
-          echo "tag=$short_hash_${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          echo "tag=${short_hash}_${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
 
     outputs:
       image_tag: ${{ inputs.image_tag || steps.create_tag.outputs.tag }}
