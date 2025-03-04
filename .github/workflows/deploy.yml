@@ -113,5 +113,5 @@ jobs:
           task-definition: ${{ steps.update_api_container.outputs.task-definition }}
           service: ${{ inputs.ecs_service }}
           cluster: ${{ inputs.ecs_cluster }}
-
+          desired-count: ${{ inputs.task_count }}
           wait-for-service-stability: true
