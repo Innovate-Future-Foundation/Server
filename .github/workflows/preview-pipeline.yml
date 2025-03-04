@@ -15,15 +15,34 @@ permissions:
   contents: read
   pull-requests: write
 
-jobs:   
-  ci-pipeline:
+jobs:
+  conduct_tag:
+    runs-on: ubuntu-22.04
+    steps:
+      - id: checkout_latest
+        name: Checkout latest
+        uses: actions/checkout@v4
+
+      - id: extract_pr_info
+        name: Extract PR Info
+        uses: Innovate-Future-Foundation/common-action/extract-pr-info@main
+        with:
+          github_token: ${{ github.token }}
+          pr_number: ${{ inputs.pr_number }}
+      
+    outputs:
+      image_tag: ${{ steps.extract_pr_info.outputs.tag }}
+
+  build-and-push:
     uses: ./.github/workflows/build-and-push.yml
     with:
       environment: Development
-      pr_number: ${{ inputs.pr_number || github.event.pull_request.number }}
+      image_tag: ${{ needs.conduct_tag.outputs.image_tag }}
     secrets:
-      AWS_REGION: ${{ secrets.CENTRAL_ECR_REGION }}
+      ECR_REGION: ${{ secrets.CENTRAL_ECR_REGION }}
       OIDC_ROLE_ARN : arn:aws:iam::${{ secrets.AWS_DEV_ACCOUNT }}:role/oidc-${{ vars.REPO_ORG_ABBR }}-${{ vars.REPO_BACKEND }}
       ECR_REGISTRY: ${{ secrets.AWS_PROD_ACCOUNT }}
       ECR_REPO_BASE: ${{ secrets.CENTRAL_ECR_REPO_BASE }}
       ECR_REPO_PUBLISH: ${{ secrets.CENTRAL_ECR_REPO_PUBLISH }}
+  # todo call cd-pipeline
+  
