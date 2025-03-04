@@ -38,8 +38,7 @@ jobs:
       image_tag: ${{ inputs.image_tag || steps.create_tag.outputs.tag }}
 
   ci:
-    # Skip ci for cd testing
-    if: needs.conduct_tag.outputs.image_tag == ''
+    if: needs.conduct_tag.outputs.image_tag != ''
     uses: ./.github/workflows/build-and-push.yml
     needs: conduct_tag
     with:
@@ -58,9 +57,7 @@ jobs:
     needs: [conduct_tag]
     with:
       environment: Development
-      # fix image for cd testing
-      # image_tag: ${{ needs.conduct_tag.outputs.image_tag }}
-      image_tag: 3de32ab_72
+      image_tag: ${{ needs.conduct_tag.outputs.image_tag }}
       task_definition: inff-api
       ecs_cluster: inff-backend
       ecs_service: dev-api-srv
