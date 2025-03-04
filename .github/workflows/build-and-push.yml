@@ -5,11 +5,12 @@ on:
       environment:
         required: true
         type: string
-      pr_number:
+      image_tag:
         required: true
         type: string
+
     secrets:
-      AWS_REGION:
+      ECR_REGION:
         required: true
       OIDC_ROLE_ARN:
         required: true
@@ -32,15 +33,15 @@ jobs:
     steps:
       - id: checkout_latest
         name: Checkout latest
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
-      - id: setup_ecr
+      - id: login_central_ecr
         name: Setup AWS ECR using oidc role
         uses: Innovate-Future-Foundation/common-action/setup-ecr@main
         with:
           registry_account: ${{ secrets.ECR_REGISTRY }}
           oidc_role_arn: ${{ secrets.OIDC_ROLE_ARN }}
-          region: ${{ secrets.AWS_REGION }}
+          region: ${{ secrets.ECR_REGION }}
 
       - id: build_base_image
         name: Build backend base
@@ -59,9 +60,8 @@ jobs:
       - id: conduct_image_uri_tag
         name: Conduct image URI and tags
         run: |
-          hash=$(git rev-parse --short HEAD)
-          img_base_uri_tag="${{ steps.setup_ecr.outputs.registry }}/${{ secrets.ECR_REPO_BASE }}:${hash}"
-          img_publ_uri_tag="${{ steps.setup_ecr.outputs.registry }}/${{ secrets.ECR_REPO_PUBLISH }}:${hash}"
+          img_base_uri_tag="${{ steps.login_central_ecr.outputs.registry }}/${{ secrets.ECR_REPO_BASE }}:${{ inputs.image_tag }}"
+          img_publ_uri_tag="${{ steps.login_central_ecr.outputs.registry }}/${{ secrets.ECR_REPO_PUBLISH }}:${{ inputs.image_tag }}"
           echo "base=$img_base_uri_tag" >> $GITHUB_OUTPUT
           echo "publish=$img_publ_uri_tag" >> $GITHUB_OUTPUT
 
