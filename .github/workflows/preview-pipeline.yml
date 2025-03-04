@@ -55,7 +55,7 @@ jobs:
   cd:
     if: needs.conduct_tag.outputs.image_tag != ''
     uses: ./.github/workflows/deploy.yml
-    needs: [conduct_tag, ci]
+    needs: [conduct_tag]
     with:
       environment: Development
       # fix image for cd testing
