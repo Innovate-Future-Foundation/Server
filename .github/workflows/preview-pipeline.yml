@@ -30,14 +30,15 @@ jobs:
       - id: create_tag
         if: inputs.image_tag == ''
         name: Extract PR Info
-        run:
+        run: |
           short_hash=$(git rev-parse --short HEAD)
           echo "tag=$short_hash_${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
 
     outputs:
       image_tag: ${{ inputs.image_tag || steps.create_tag.outputs.tag }}
 
-  build-and-push:
+  ci:
+    if: needs.conduct_tag.outputs.image_tag != ''
     uses: ./.github/workflows/build-and-push.yml
     needs: conduct_tag
     with:
