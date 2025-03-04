@@ -6,6 +6,7 @@
       "Microsoft.Hosting.Lifetime": "Information"
     }
   },
+  "FrontEndBaseUrl": "http://localhost:5173",
   "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=postgres",
   "JWTConfig": {
         "SecretKey": "f9X1zLrIMT6rOWTFbV7R9qlPjwD9LlA9K8UEtWmCp7U=",
