@@ -61,7 +61,7 @@ jobs:
       # fix image for cd testing
       # image_tag: ${{ needs.conduct_tag.outputs.image_tag }}
       image_tag: 3de32ab_72
-      task_definition: dev/backend-task-def-template.json
+      task_definition: inff-api
       ecs_cluster: inff-backend
       ecs_service: dev-api-srv
       task_count: 1

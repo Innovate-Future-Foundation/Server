@@ -65,15 +65,36 @@ jobs:
       - id: login_central_ecr
         name: Login Central ECR
         uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: ${{ secrets.ECR_REGISTRY }}
         env:
           AWS_DEFAULT_REGION: ${{ secrets.ECR_REGION }}
           AWS_REGION: ${{ secrets.ECR_REGION }}
+      
+      - id: retrieve_task_definition
+        name: Retrieve current task definition
+        run: |
+          aws ecs describe-task-definition \
+          --task-definition ${{ inputs.task_definition }} \
+          --include TAGS > task-definition.json
+
+          jq '
+            .taskDefinition.tags += [.tags[]] |
+            del(.tags) |
+            .taskDefinition |
+            del(.compatibilities,
+                .registeredAt,
+                .registeredBy,
+                .revision,
+                .requiresAttributes,
+                .status,
+                .taskDefinitionArn)' task-definition.json > clean-task-definition.json
 
       - id: update_migration_container
         name: Update migration container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ inputs.task_definition }}
+          task-definition: clean-task-definition.json
           container-name: ${{ env.migration }}
           image: ${{ steps.login_central_ecr.outputs.registry }}/${{ secrets.ECR_REPO_BASE }}:${{ inputs.image_tag }}
 
