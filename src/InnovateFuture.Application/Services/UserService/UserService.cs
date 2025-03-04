@@ -70,4 +70,33 @@ public class UserService: IUserService
         var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
         return resetToken;
     }
+    
+    public async Task CheckUserExistsAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var exists = await _userManager.FindByEmailAsync(email);
+        if (exists != null)
+        {
+            throw new IFConcurrencyException("User with this email already exists.");
+        }
+    }
+
+    public async Task<string> GenerateTemperatePassword()
+    {
+        while (true)
+        {
+            var password = GenerateRandomPassword(12);
+            var isTemperatePasswordValid = await _userManager.PasswordValidators[0].ValidateAsync(_userManager, null, password);
+
+            if (isTemperatePasswordValid.Succeeded)
+            {
+                return password;
+            }
+        }
+    }
+
+    private string GenerateRandomPassword(int length)
+    {
+        string allChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:',.<>?";
+        return new string(Enumerable.Repeat(allChars, length).Select(s => s[new Random().Next(0, s.Length)]).ToArray());
+    }
 }

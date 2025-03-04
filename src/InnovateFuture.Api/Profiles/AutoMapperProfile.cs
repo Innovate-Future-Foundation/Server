@@ -17,6 +17,7 @@ using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
+using InnovateFuture.Application.Services.Auth.Register;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
 using Microsoft.AspNetCore.Identity.Data;
@@ -35,6 +36,9 @@ public class AutoMapperProfile: AMProfile
 {
     public AutoMapperProfile()
     {
+        /*
+         * Auth
+         */
         CreateMap<ConfirmEmailRequest, ConfirmEmailCommand>();
         CreateMap<ResendVerficationEmailRequest,ResendVerificationEmailCommand>();
         CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
@@ -44,6 +48,10 @@ public class AutoMapperProfile: AMProfile
 
         CreateMap<Profile,GetMeResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
+        
+        CreateMap<RegisterNormalUserRequest, RegisterNormalUserCommand>()
+            .ForMember(dest => dest.RoleEnum,
+                opt => opt.MapFrom<RegisterNormalUserRoleCodeToRoleEnumResolver>());
         
         CreateMap<CreateUserRequest, CreateUserCommand>();
         /*
@@ -130,6 +138,15 @@ public class RoleCodesToRoleEnumsResolver : IValueResolver<APIQueryProfileFilter
             .Select(Guid.Parse)
             .ToArray()??[];
         return res;
+    }
+}
+
+public class RegisterNormalUserRoleCodeToRoleEnumResolver : IValueResolver<RegisterNormalUserRequest, RegisterNormalUserCommand, RoleEnum>
+{
+    public RoleEnum Resolve(RegisterNormalUserRequest source, RegisterNormalUserCommand destination, RoleEnum destMember,
+        ResolutionContext context)
+    {
+        return  Enum.TryParse<RoleEnum>(source.RoleCode.Trim(), out var roleEnum) ? roleEnum : default;
     }
 }
 

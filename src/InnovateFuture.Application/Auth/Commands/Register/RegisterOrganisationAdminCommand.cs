@@ -3,7 +3,7 @@ using MediatR;
 
 namespace InnovateFuture.Application.Auth.Commands.Register;
 
-public class RegisterOrganisationAdminCommand: IRequest<(Guid ProfileId, User User)?>
+public class RegisterOrganisationAdminCommand: IRequest<(Guid ProfileId, User User, string Token)?>
 {
     // Organisation
     public string OrgName { get; set; }

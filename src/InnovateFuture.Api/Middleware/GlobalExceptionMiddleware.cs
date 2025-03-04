@@ -50,6 +50,7 @@ public class GlobalExceptionMiddleware
             IFExternalServiceException => StatusCodes.Status503ServiceUnavailable,
             IFPolicyViolationException => StatusCodes.Status400BadRequest,
             IFUnauthorizedActionException => StatusCodes.Status403Forbidden,
+            UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             _ => StatusCodes.Status500InternalServerError // Catch-all for unhandled exceptions
         };
 

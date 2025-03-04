@@ -1,4 +1,5 @@
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Domain.Entities;
 using MediatR;
@@ -9,36 +10,41 @@ namespace InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 public class SendVerificationEmailHandler: IRequestHandler<SendVerificationEmailCommand, bool>
 {
     private readonly IEmailService _emailService;
-    private readonly UserManager<User> _userManager;
 
-    public SendVerificationEmailHandler(IEmailService emailService, UserManager<User> userManager)
+    public SendVerificationEmailHandler(IEmailService emailService)
     {
         _emailService = emailService;
-        _userManager = userManager;
     }
 
     public async Task<bool> Handle(SendVerificationEmailCommand command, CancellationToken cancellationToken)
     {
         try
         {
-            // generate verification token by using Identity service
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(command.User);
             // encode token and email
-            var encodedToken = UrlEncoder.Default.Encode(token);
+            var encodedToken = UrlEncoder.Default.Encode(command.Token);
             var encodedEmail = UrlEncoder.Default.Encode(command.User.Email);
             // link
-            var verificationLink =
-                $"http://localhost:5173/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}";
-            // generate email body
+            var verificationLink = command.TokenType switch
+            {
+                "email-verification" =>
+                    $"http://localhost:5173/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}",
+                "reset-password" =>
+                    $"http://localhost:5173/auth/reset-password?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}",
+                _ => throw new ArgumentException("Invalid token type")
+            };
+
+            var templatePath = command.RoleEnum != null
+                ? "Templates/InviteEmailTemplate.hbs"
+                : "Templates/RegisterEmailTemplate.hbs";
+
             var emailData = new
             {
                 userName = command.User.UserName,
                 verificationLink = verificationLink,
+                roleType = command.RoleEnum?.ToString(),
             };
-            string emailBody = _emailService.RenderTemplate("Templates/RegisterEmailTemplate.hbs", emailData);
-            // send email
-            await _emailService.SendEmailAsync(command.User.Email, "Welcome to Innovate future", emailBody,
-                cancellationToken);
+            string emailBody = _emailService.RenderTemplate(templatePath, emailData);
+            await _emailService.SendEmailAsync(command.User.Email, "Welcome to Innovate future", emailBody, cancellationToken);
             return true;
         }
         catch (Exception ex)

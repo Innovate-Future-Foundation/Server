@@ -56,8 +56,10 @@ using InnovateFuture.Application.Auth.Commands.Login;
 using InnovateFuture.Application.Auth.Commands.Password;
 using InnovateFuture.Application.Auth.Commands.Register;
 using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
+using InnovateFuture.Application.Auth.Commands.SendTemporaryPassword;
 using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 using InnovateFuture.Application.Auth.Queries.GetMe;
+using InnovateFuture.Application.Services.Auth.Register;
 
 
 namespace InnovateFuture.Api
@@ -70,6 +72,8 @@ namespace InnovateFuture.Api
             var policyName = "AllowLocalhost";
             
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddHttpContextAccessor();
             
             var connectionString = builder.Configuration["DBConnection"];
 
@@ -101,9 +105,10 @@ namespace InnovateFuture.Api
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["JWTConfig:Issuer"],
                         ValidAudience = builder.Configuration["JWTConfig:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(key)
                     };
-
+                    
+                    // allow extracting JWT from cookies instead of header
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
@@ -137,10 +142,17 @@ namespace InnovateFuture.Api
             #region service instances
             builder.Services.AddMediatR(configuration =>
             {
+                configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(RegisterNormalUserHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(ResendVerificationEmailHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetMeQueryHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(ResetPasswordHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(ForgetPasswordHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(SendTemporaryPasswordHandler).Assembly);
+                
                 
                 
                 configuration.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
@@ -158,7 +170,7 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(ResendVerificationEmailHandler).Assembly);
+
                 
             });
                 
@@ -181,6 +193,7 @@ namespace InnovateFuture.Api
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(RegisterOrganisationAdminValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(RegisterNormalUserValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(LoginValidator).Assembly);
             
             
@@ -234,27 +247,14 @@ namespace InnovateFuture.Api
             // Disable auto model validation
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
             
-
-            #region cors
-            // cors
-            builder.Services.AddCors(option =>
-            {
-                option.AddPolicy(policyName, policy =>
-                {
-
-                    policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                });
-            });
-            #endregion
-            
             // swagger config => see more details in swagger config extension
             builder.Services.AddSwaggerEXT();
 
             #region fluent validators
             // Auth
             builder.Services.AddValidatorsFromAssemblyContaining<RegisterOrganisationAdminValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<RegisterNormalUserValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
             // Users
             builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserCommandValidator>();
@@ -291,6 +291,20 @@ namespace InnovateFuture.Api
                         .AllowCredentials();
                 });
             });
+            
+            // #region cors
+            // // cors
+            // builder.Services.AddCors(option =>
+            // {
+            //     option.AddPolicy(policyName, policy =>
+            //     {
+            //
+            //         policy.AllowAnyOrigin()
+            //             .AllowAnyMethod()
+            //             .AllowAnyHeader();
+            //     });
+            // });
+            // #endregion
             
             var app = builder.Build();
             app.UseCors(policyName);
