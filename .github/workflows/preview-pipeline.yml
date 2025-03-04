@@ -2,13 +2,17 @@ name: PR Preview - Deployment
 on:
   workflow_dispatch:
     inputs:
-      pr_number:
+      image_tag:
         description: The Pull Request number
         required: true
         type: number
   pull_request:
     branches:
       - dev
+    paths: 
+      - .github/workflows/preview-pipeline.yml
+      - src/**
+      - Dockerfile*
 
 permissions:
   id-token: write # This is required for requesting the JWT (OIDC)
@@ -23,18 +27,19 @@ jobs:
         name: Checkout latest
         uses: actions/checkout@v4
 
-      - id: extract_pr_info
+      - id: create_tag
+        if: inputs.image_tag != ''
         name: Extract PR Info
-        uses: Innovate-Future-Foundation/common-action/extract-pr-info@main
-        with:
-          github_token: ${{ github.token }}
-          pr_number: ${{ inputs.pr_number }}
-      
+        run:
+          short_hash=$(git rev-parse --short HEAD)
+          echo "tag=$short_hash_${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+
     outputs:
-      image_tag: ${{ steps.extract_pr_info.outputs.tag }}
+      image_tag: ${{ inputs.image_tag || steps.create_tag.outputs.tag }}
 
   build-and-push:
     uses: ./.github/workflows/build-and-push.yml
+    needs: conduct_tag
     with:
       environment: Development
       image_tag: ${{ needs.conduct_tag.outputs.image_tag }}
