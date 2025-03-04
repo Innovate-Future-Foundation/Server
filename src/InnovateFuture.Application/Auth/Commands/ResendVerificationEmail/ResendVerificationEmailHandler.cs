@@ -2,8 +2,10 @@ using System.Text.Encodings.Web;
 using InnovateFuture.Application.Exceptions;
 using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 
@@ -11,11 +13,13 @@ public class ResendVerificationEmailHandler: IRequestHandler<ResendVerificationE
 {
     private readonly UserManager<User> _userManager;
     private readonly IEmailService _emailService;
+    private readonly IConfiguration _configuration;
 
-    public ResendVerificationEmailHandler(UserManager<User> userManager, IEmailService emailService)
+    public ResendVerificationEmailHandler(UserManager<User> userManager, IEmailService emailService, IConfiguration configuration)
     {
         _userManager = userManager;
         _emailService = emailService;
+        _configuration = configuration;
     }
     public async Task<Unit> Handle(ResendVerificationEmailCommand command, CancellationToken cancellationToken)
     {
@@ -41,7 +45,7 @@ public class ResendVerificationEmailHandler: IRequestHandler<ResendVerificationE
         var encodedEmail = UrlEncoder.Default.Encode(user.Email!);
         // link
         var verificationLink =
-            $"http://localhost:5173/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={user.DefaultProfileId}";
+            $"{_configuration["FrontEndBaseUrl"]}/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={user.DefaultProfileId}";
         // generate email body
         var emailData = new
         {

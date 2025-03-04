@@ -284,7 +284,7 @@ namespace InnovateFuture.Api
             {
                 option.AddPolicy(policyName, policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173")
+                    policy.WithOrigins($"{builder.Configuration["FrontEndBaseUrl"]}")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         // access-token in cookies

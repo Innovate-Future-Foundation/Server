@@ -4,16 +4,19 @@ using InnovateFuture.Application.Services.SendEmail;
 using InnovateFuture.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 
 public class SendVerificationEmailHandler: IRequestHandler<SendVerificationEmailCommand, bool>
 {
     private readonly IEmailService _emailService;
+    private readonly IConfiguration _configuration;
 
-    public SendVerificationEmailHandler(IEmailService emailService)
+    public SendVerificationEmailHandler(IEmailService emailService, IConfiguration configuration)
     {
         _emailService = emailService;
+        _configuration = configuration;
     }
 
     public async Task<bool> Handle(SendVerificationEmailCommand command, CancellationToken cancellationToken)
@@ -27,9 +30,9 @@ public class SendVerificationEmailHandler: IRequestHandler<SendVerificationEmail
             var verificationLink = command.TokenType switch
             {
                 "email-verification" =>
-                    $"http://localhost:5173/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}",
+                    $"{_configuration["FrontEndBaseUrl"]}/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}",
                 "reset-password" =>
-                    $"http://localhost:5173/auth/reset-password?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}",
+                    $"{_configuration["FrontEndBaseUrl"]}/auth/reset-password?token={encodedToken}&email={encodedEmail}&pid={command.ProfileId}",
                 _ => throw new ArgumentException("Invalid token type")
             };
 
