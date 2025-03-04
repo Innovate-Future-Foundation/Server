@@ -18,6 +18,9 @@ permissions:
   id-token: write # This is required for requesting the JWT (OIDC)
   contents: read
   pull-requests: write
+env:
+  task_definition
+environment: UAT
 
 jobs:
   conduct_tag:
@@ -50,5 +53,23 @@ jobs:
       ECR_REGISTRY: ${{ secrets.AWS_PROD_ACCOUNT }}
       ECR_REPO_BASE: ${{ secrets.CENTRAL_ECR_REPO_BASE }}
       ECR_REPO_PUBLISH: ${{ secrets.CENTRAL_ECR_REPO_PUBLISH }}
-  # todo call cd-pipeline
   
+  cd:
+    if: needs.conduct_tag.outputs.image_tag != ''
+    uses: ./.github/workflows/deploy.yml
+    needs: [conduct_tag, ci]
+    with:
+      environment: Development
+      image_tag: ${{ needs.conduct_tag.outputs.image_tag }}
+      task_definition: dev/backend-task-def-template.json
+      ecs_cluster: inff-backend
+      ecs_service: dev-api-srv
+      task_count: 1
+    secrets:
+      ECR_REGION: ${{ secrets.CENTRAL_ECR_REGION }}
+      ECS_REGION: "ap-southeast-2"
+      OIDC_ROLE_ARN: arn:aws:iam::${{ secrets.AWS_DEV_ACCOUNT }}:role/oidc-${{ vars.REPO_ORG_ABBR }}-${{ vars.REPO_BACKEND }}
+      ECR_REGISTRY: ${{ secrets.AWS_PROD_ACCOUNT }}
+      ECR_REPO_BASE: ${{ secrets.CENTRAL_ECR_REPO_BASE }}
+      ECR_REPO_PUBLISH: ${{ secrets.CENTRAL_ECR_REPO_PUBLISH }}
+      

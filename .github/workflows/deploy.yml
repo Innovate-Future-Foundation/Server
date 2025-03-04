@@ -1,0 +1,96 @@
+name: Backend CD
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      image_tag:
+        required: true
+        type: string
+      task_definition:
+        required: true
+        type: string
+      ecs_cluster:
+        required: true
+        type: string
+      ecs_service:
+        required: true
+        type: string
+      task_count:
+        required: false
+        type: number
+        default: 1
+
+    secrets:
+      ECR_REGION:
+        required: true
+      ECS_REGION:
+        required: true
+      OIDC_ROLE_ARN:
+        required: true
+      ECR_REGISTRY:
+        required: true
+      ECR_REPO_BASE:
+        required: true
+      ECR_REPO_PUBLISH:
+        required: true
+
+jobs:
+  deploy-to-ecs:
+    runs-on: ubuntu-22.04
+    environment: ${{ inputs.environment }}
+
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      migration: migration 
+      api: api
+    
+    steps:
+      - id: checkout_server_infra
+        name: Checkout Server infra
+        uses: actions/checkout@v4
+        with:
+          repository: Innovate-Future-Foundation/server-infrastructure
+      
+      - id: login_aws
+        name: Login AWS to ECS Region
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.ECS_REGION }}
+          role-to-assume: ${{ secrets.OIDC_ROLE_ARN }}
+
+      - id: login_central_ecr
+        name: Login Central ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.ECR_REGION }}
+          AWS_REGION: ${{ secrets.ECR_REGION }}
+
+      - id: update_migration_container
+        name: Update migration container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ inputs.task_definition }}
+          container-name: ${{ env.migration }}
+          image: ${{ steps.login_central_ecr.outputs.registry }}/${{ secrets.ECR_REPO_BASE }}:${{ inputs.image_tag }}
+
+      - id: update_api_container
+        name: Update api container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.update_migration_container.outputs.task-definition }}
+          container-name: ${{ env.api }}
+          image: ${{ steps.login_central_ecr.outputs.registry }}/${{ secrets.ECR_REPO_PUBLISH }}:${{ inputs.image_tag }}
+
+      - id: update_ecs_service
+        name: Update ECS Service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.update_api_container.outputs.task-definition }}
+          service: ${{ inputs.ecs_service }}
+          cluster: ${{ inputs.ecs_cluster }}
+
+          wait-for-service-stability: true
