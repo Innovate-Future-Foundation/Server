@@ -1,0 +1,24 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
+WORKDIR /
+
+# Install dotnet-ef tool and setup env path
+RUN dotnet tool install --global dotnet-ef --version 9.0.0
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Copy solution, project files and restore dependencies
+COPY ["InnovateFuture.sln", "../"]
+COPY ["src/InnovateFuture.Api/*.csproj", "src/InnovateFuture.Api/"]
+COPY ["src/InnovateFuture.Application/*.csproj", "src/InnovateFuture.Application/"]
+COPY ["src/InnovateFuture.Domain/*.csproj", "src/InnovateFuture.Domain/"]
+COPY ["src/InnovateFuture.Infrastructure/*.csproj", "src/InnovateFuture.Infrastructure/"]
+COPY ["tests/InnovateFuture.Api.Tests/*.csproj", "tests/InnovateFuture.Api.Tests/"]
+COPY ["tests/InnovateFuture.Application.Tests/*.csproj", "tests/InnovateFuture.Application.Tests/"]
+COPY ["tests/InnovateFuture.Domain.Tests/*.csproj", "tests/InnovateFuture.Domain.Tests/"]
+RUN dotnet restore
+
+# Copy all source code to allow builds
+COPY tests/ tests/
+COPY src/ src/
+
+# Build the entire project (to make DLLs available for following)
+RUN dotnet build "InnovateFuture.sln" -c Release

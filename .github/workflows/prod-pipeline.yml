@@ -1,0 +1,71 @@
+name: Prod - Deployment
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: The image tag
+        required: true
+        type: string
+  push:
+    branches:
+      - main
+    paths: 
+      - src/**
+      - Dockerfile*
+
+permissions:
+  id-token: write # This is required for requesting the JWT (OIDC)
+  contents: read
+  pull-requests: write
+
+jobs:
+  conduct_tag:
+    runs-on: ubuntu-22.04
+    steps:
+      - id: checkout_latest
+        name: Checkout latest
+        uses: actions/checkout@v4
+
+      - id: create_tag
+        if: inputs.image_tag == ''
+        name: Extract PR Info
+        run: |
+          short_hash=$(git rev-parse --short HEAD)
+          echo "tag=${short_hash}" >> $GITHUB_OUTPUT
+
+    outputs:
+      image_tag: ${{ inputs.image_tag || steps.create_tag.outputs.tag }}
+
+  ci:
+    if: needs.conduct_tag.outputs.image_tag != ''
+    uses: ./.github/workflows/build-and-push.yml
+    needs: conduct_tag
+    with:
+      environment: Production
+      image_tag: ${{ needs.conduct_tag.outputs.image_tag }}
+    secrets:
+      ECR_REGION: ${{ secrets.CENTRAL_ECR_REGION }}
+      OIDC_ROLE_ARN : arn:aws:iam::${{ secrets.AWS_PROD_ACCOUNT }}:role/oidc-${{ vars.REPO_ORG_ABBR }}-${{ vars.REPO_BACKEND }}
+      ECR_REGISTRY: ${{ secrets.AWS_PROD_ACCOUNT }}
+      ECR_REPO_BASE: ${{ secrets.CENTRAL_ECR_REPO_BASE }}
+      ECR_REPO_PUBLISH: ${{ secrets.CENTRAL_ECR_REPO_PUBLISH }}
+  
+  cd:
+    if: needs.conduct_tag.outputs.image_tag != ''
+    uses: ./.github/workflows/deploy.yml
+    needs: [conduct_tag, ci]
+    with:
+      environment: Production
+      image_tag: ${{ needs.conduct_tag.outputs.image_tag }}
+      task_definition: inff-prod-api
+      ecs_cluster: inff-prod-backend
+      ecs_service: api-srv
+      task_count: 1
+    secrets:
+      ECR_REGION: ${{ secrets.CENTRAL_ECR_REGION }}
+      ECS_REGION: ${{ secrets.PROD_REGION }}
+      OIDC_ROLE_ARN: arn:aws:iam::${{ secrets.AWS_PROD_ACCOUNT }}:role/oidc-${{ vars.REPO_ORG_ABBR }}-${{ vars.REPO_BACKEND }}
+      ECR_REGISTRY: ${{ secrets.AWS_PROD_ACCOUNT }}
+      ECR_REPO_BASE: ${{ secrets.CENTRAL_ECR_REPO_BASE }}
+      ECR_REPO_PUBLISH: ${{ secrets.CENTRAL_ECR_REPO_PUBLISH }}
+      

@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+**/logs/
+*.suo
+*.user
+*.sln.docstates
+
+# Ignore Git-related files
+.git
+.gitignore
+
+# Ignore log files
+**/*.log
+
+# Ignore any temporary files
+**/tmp/
