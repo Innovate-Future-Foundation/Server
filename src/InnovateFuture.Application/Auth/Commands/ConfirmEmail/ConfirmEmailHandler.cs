@@ -44,6 +44,7 @@ public class ConfirmEmailHandler: IRequestHandler<ConfirmEmailCommand, (string E
                 throw new IFEntityNotFoundException("User", nameof(command.Email));
             }
             var confirmEmailResult = await _userManager.ConfirmEmailAsync(user, command.Token);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             if (!confirmEmailResult.Succeeded)
             {
                 throw new IFBusinessRuleViolationException($"Invalid or expired token.");
@@ -62,6 +63,8 @@ public class ConfirmEmailHandler: IRequestHandler<ConfirmEmailCommand, (string E
                     organisation.ChangeStatus(OrgStatusEnum.Active);
                 }
                 
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitTransactionAsync();
                 // 4⃣️ Generate Token for directly to dashboard
                 var accessToken = await _tokenService.GenerateJwtTokenAsync(command.ProfileId);
                 return (user.Email,accessToken, true);
