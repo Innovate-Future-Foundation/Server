@@ -1,3 +1,4 @@
+using System.Text;
 using FluentValidation;
 using HealthChecks.UI.Client;
 using InnovateFuture.Api.Filters;
@@ -16,18 +17,24 @@ using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Domain.Enums;
-using InnovateFuture.Application.Services.Auth.ConfirmEmail;
-using InnovateFuture.Application.Services.Auth.Register;
-using InnovateFuture.Application.Services.Auth.SendVerificationEmail;
-using InnovateFuture.Application.Services.Auth.UserService;
+using InnovateFuture.Application.Services.Security.TokenService;
 using InnovateFuture.Application.Services.SendEmail;
+using InnovateFuture.Application.Services.UserService;
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Infrastructure.Activities.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Activities.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
+using InnovateFuture.Infrastructure.Days.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Days.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Profiles.Persistence.Repositories;
+using InnovateFuture.Infrastructure.StudentTourEnrollments.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.StudentTourEnrollments.Persistence.Repositories;
+using InnovateFuture.Infrastructure.Tours.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.Tours.Persistence.Repositories;
 using InnovateFuture.Infrastructure.Users.Persistence.Interfaces;
 using InnovateFuture.Infrastructure.Users.Persistence.Repositories;
 using MediatR;
@@ -38,9 +45,22 @@ using NLog;
 using NLog.Web;
 using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Repositiories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using InnovateFuture.Application.Services.S3;
+using Amazon.S3;
+using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
+using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Password;
+using InnovateFuture.Application.Auth.Commands.Register;
+using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
+using InnovateFuture.Application.Auth.Commands.SendTemporaryPassword;
+using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
+using InnovateFuture.Application.Auth.Queries.GetMe;
+using InnovateFuture.Application.Services.Auth.Register;
+
 
 namespace InnovateFuture.Api
 {
@@ -52,15 +72,59 @@ namespace InnovateFuture.Api
             var policyName = "AllowLocalhost";
             
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddHttpContextAccessor();
             
             var connectionString = builder.Configuration["DBConnection"];
 
             #region Email Service Configuration
             // bind EmailSettings from appsettings.Development.json
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-            // register EmailSettings as signleton
-            builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailSettings>>().Value);
             #endregion
+            
+            #region JWT
+            builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection("JWTConfig"));
+            #endregion
+            
+            // Configure JWT Authentication
+            var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]);
+            builder.Services.AddAuthentication(options =>
+                {
+                    // Explicitly use JWT
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+                    // Prevents silent failures
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;   
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["JWTConfig:Issuer"],
+                        ValidAudience = builder.Configuration["JWTConfig:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(key)
+                    };
+                    
+                    // allow extracting JWT from cookies instead of header
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Cookies["access-token"]; 
+
+                            if (!string.IsNullOrEmpty(accessToken))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+
+            builder.Services.AddAuthorization();
             
             #region filter
             builder.Services.AddControllers(option =>
@@ -78,6 +142,19 @@ namespace InnovateFuture.Api
             #region service instances
             builder.Services.AddMediatR(configuration =>
             {
+                configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(RegisterNormalUserHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(ResendVerificationEmailHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(GetMeQueryHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(ResetPasswordHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(ForgetPasswordHandler).Assembly);
+                configuration.RegisterServicesFromAssembly(typeof(SendTemporaryPasswordHandler).Assembly);
+                
+                
+                
                 configuration.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(GetUsersHandler).Assembly);
@@ -93,8 +170,10 @@ namespace InnovateFuture.Api
                 configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
                 configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
+
                 
             });
+                
             // auto mapper instance
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
@@ -104,11 +183,19 @@ namespace InnovateFuture.Api
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+            builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+            builder.Services.AddScoped<IDayRepository, DayRepository>();
+            builder.Services.AddScoped<ITourRepository, TourRepository>();
+            builder.Services.AddScoped<IStudentTourEnrollmentRepository, StudentTourEnrollmentRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(RegisterOrganisationAdminValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(RegisterNormalUserValidator).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(LoginValidator).Assembly);
+            
             
             builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
             builder.Services.AddValidatorsFromAssembly(typeof(UpdateUserCommandValidator).Assembly);
@@ -132,6 +219,8 @@ namespace InnovateFuture.Api
             dataSourceBuilder.MapEnum<RoleEnum>();
             dataSourceBuilder.MapEnum<SubscriptionEnum>();
             dataSourceBuilder.MapEnum<OrgStatusEnum>();
+            dataSourceBuilder.MapEnum<TourStatusEnum>();
+            dataSourceBuilder.MapEnum<EnrollmentStatusEnum>();
             
             var dataSource = dataSourceBuilder.Build();
             
@@ -158,29 +247,14 @@ namespace InnovateFuture.Api
             // Disable auto model validation
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
             
-            #region JWT
-            #endregion
-            
-            #region cors
-            // cors
-            builder.Services.AddCors(option =>
-            {
-                option.AddPolicy(policyName, policy =>
-                {
-
-                    policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                });
-            });
-            #endregion
-            
             // swagger config => see more details in swagger config extension
             builder.Services.AddSwaggerEXT();
 
             #region fluent validators
             // Auth
             builder.Services.AddValidatorsFromAssemblyContaining<RegisterOrganisationAdminValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<RegisterNormalUserValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
             // Users
             builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserCommandValidator>();
@@ -194,6 +268,12 @@ namespace InnovateFuture.Api
             builder.Services.AddValidatorsFromAssemblyContaining<GetOrganisationsQueryValidator>();
             #endregion
 
+            #region aws s3
+            builder.Services.Configure<AWSSettings>(builder.Configuration.GetSection("AWS"));
+            builder.Services.AddAWSService<IAmazonS3>();
+            builder.Services.AddScoped<S3Service>();
+            #endregion
+
             #region NLog
             // NLog: Setup NLog for Dependency injection
             builder.Logging.ClearProviders();
@@ -204,24 +284,38 @@ namespace InnovateFuture.Api
             {
                 option.AddPolicy(policyName, policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173")
+                    policy.WithOrigins($"{builder.Configuration["FrontEndBaseUrl"]}")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
+                        // access-token in cookies
                         .AllowCredentials();
                 });
             });
             
+            // #region cors
+            // // cors
+            // builder.Services.AddCors(option =>
+            // {
+            //     option.AddPolicy(policyName, policy =>
+            //     {
+            //
+            //         policy.AllowAnyOrigin()
+            //             .AllowAnyMethod()
+            //             .AllowAnyHeader();
+            //     });
+            // });
+            // #endregion
+            
             var app = builder.Build();
             app.UseCors(policyName);
-
-
+            
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwaggerEXT();
                 app.Services.SeedDataEXT();
             }
-            
+
             app.UseMiddleware<GlobalExceptionMiddleware>();
             
             app.MapHealthChecks("health",new HealthCheckOptions
@@ -229,11 +323,13 @@ namespace InnovateFuture.Api
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
             
-            app.UseCors(policyName);
+            app.UseRouting();
             
             app.UseAuthentication();
 
             app.UseAuthorization();
+            
+            app.UseCors(policyName);
 
             app.MapControllers();
             

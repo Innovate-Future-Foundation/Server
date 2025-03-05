@@ -1,16 +1,19 @@
 using MediatR;
 using InnovateFuture.Domain.Entities;
+using InnovateFuture.Infrastructure.Exceptions;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
+using InnovateFuture.Infrastructure.UnitOfWork.Persistence.Interface;
 
 namespace InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 
 public class CreateOrganisationHandler : IRequestHandler<CreateOrganisationCommand, Guid>
 {
     private readonly IOrgRepository _orgRepository;
-
-    public CreateOrganisationHandler(IOrgRepository orgRepository)
+    private readonly IUnitOfWork _unitOfWork;
+    public CreateOrganisationHandler(IOrgRepository orgRepository, IUnitOfWork unitOfWork)
     {
         _orgRepository = orgRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> Handle(CreateOrganisationCommand command, CancellationToken cancellationToken)
@@ -27,7 +30,8 @@ public class CreateOrganisationHandler : IRequestHandler<CreateOrganisationComma
         
         // Save to database
         await _orgRepository.AddAsync(organisation, cancellationToken);
-
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+            
         return organisation.Id;
     }
 }

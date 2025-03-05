@@ -21,10 +21,147 @@ namespace InnovateFuture.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "enrollment_status_enum", new[] { "undefined_enrollment", "enrolled", "dropped", "completed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "org_status_enum", new[] { "undefined_org_status", "pending", "active", "suspended" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "role_enum", new[] { "undefined_role", "platform_admin", "org_admin", "org_manager", "org_teacher", "parent", "student" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "subscription_enum", new[] { "undefined_subscription", "free", "basic", "premium" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "tour_status_enum", new[] { "undefined_tour", "draft", "published", "active", "updated", "completed", "canceled" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("ActivityDay", b =>
+                {
+                    b.Property<Guid>("ActivitiesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DaysBelongId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ActivitiesId", "DaysBelongId");
+
+                    b.HasIndex("DaysBelongId");
+
+                    b.ToTable("ActivityDay");
+                });
+
+            modelBuilder.Entity("ActivityProfile", b =>
+                {
+                    b.Property<Guid>("AssignedActivitiesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TeachersAssignedId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AssignedActivitiesId", "TeachersAssignedId");
+
+                    b.HasIndex("TeachersAssignedId");
+
+                    b.ToTable("ActivityProfile");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Activity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("CoverImgUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("OrgId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp");
+
+                    b.Property<TourStatusEnum>("Status")
+                        .HasColumnType("tour_status_enum");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrgId");
+
+                    b.ToTable("Activities");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Day", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("CoverImgUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp");
+
+                    b.Property<Guid>("OrgId")
+                        .HasColumnType("uuid");
+
+                    b.Property<TourStatusEnum>("Status")
+                        .HasColumnType("tour_status_enum");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid>("TourId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrgId");
+
+                    b.HasIndex("TourId");
+
+                    b.ToTable("Days");
+                });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>
                 {
@@ -32,12 +169,8 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -59,7 +192,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("subscription_enum");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("WebsiteUrl")
                         .HasMaxLength(500)
@@ -67,7 +200,13 @@ namespace InnovateFuture.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Organisations", (string)null);
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("OrgName")
+                        .IsUnique();
+
+                    b.ToTable("Organisations");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
@@ -81,7 +220,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -114,7 +253,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -135,7 +274,93 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Profiles_user_id_role_org_id");
 
-                    b.ToTable("Profiles", (string)null);
+                    b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.StudentTourEnrollment", b =>
+                {
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TourId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp");
+
+                    b.Property<DateTime>("EnrollmentDate")
+                        .HasColumnType("timestamp");
+
+                    b.Property<EnrollmentStatusEnum>("Status")
+                        .HasColumnType("enrollment_status_enum");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp");
+
+                    b.Property<DateTime?>("WithdrawalDate")
+                        .HasColumnType("timestamp");
+
+                    b.HasKey("ProfileId", "TourId");
+
+                    b.HasIndex("TourId");
+
+                    b.ToTable("StudentTourEnrollments");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Tour", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("CoverImgUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp");
+
+                    b.Property<Guid?>("Leader")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrgId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp");
+
+                    b.Property<TourStatusEnum>("Status")
+                        .HasColumnType("tour_status_enum");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Leader");
+
+                    b.HasIndex("OrgId");
+
+                    b.ToTable("Tours");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
@@ -152,7 +377,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<Guid?>("DefaultProfileId")
                         .HasColumnType("uuid");
@@ -199,7 +424,7 @@ namespace InnovateFuture.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -311,6 +536,101 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ActivityDay", b =>
+                {
+                    b.HasOne("InnovateFuture.Domain.Entities.Activity", null)
+                        .WithMany()
+                        .HasForeignKey("ActivitiesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InnovateFuture.Domain.Entities.Day", null)
+                        .WithMany()
+                        .HasForeignKey("DaysBelongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ActivityProfile", b =>
+                {
+                    b.HasOne("InnovateFuture.Domain.Entities.Activity", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedActivitiesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InnovateFuture.Domain.Entities.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("TeachersAssignedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Activity", b =>
+                {
+                    b.HasOne("InnovateFuture.Domain.Entities.Organisation", "Organisation")
+                        .WithMany("Activities")
+                        .HasForeignKey("OrgId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organisation");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Day", b =>
+                {
+                    b.HasOne("InnovateFuture.Domain.Entities.Organisation", "Organisation")
+                        .WithMany("Days")
+                        .HasForeignKey("OrgId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InnovateFuture.Domain.Entities.Tour", "Tour")
+                        .WithMany("Days")
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organisation");
+
+                    b.Navigation("Tour");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>
+                {
+                    b.OwnsOne("InnovateFuture.Domain.Entities.Address", "Address", b1 =>
+                        {
+                            b1.Property<Guid>("OrganisationId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Country")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("PostCode")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("State")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Street")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Suburb")
+                                .HasColumnType("text");
+
+                            b1.HasKey("OrganisationId");
+
+                            b1.ToTable("Organisations");
+
+                            b1.ToJson("Address");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrganisationId");
+                        });
+
+                    b.Navigation("Address");
+                });
+
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
                 {
                     b.HasOne("InnovateFuture.Domain.Entities.Profile", "InviterProfile")
@@ -341,6 +661,43 @@ namespace InnovateFuture.Infrastructure.Migrations
                     b.Navigation("SupervisorProfile");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.StudentTourEnrollment", b =>
+                {
+                    b.HasOne("InnovateFuture.Domain.Entities.Profile", "Student")
+                        .WithMany("StudentTourEnrollments")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InnovateFuture.Domain.Entities.Tour", "Tour")
+                        .WithMany("StudentTourEnrollments")
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Tour");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Tour", b =>
+                {
+                    b.HasOne("InnovateFuture.Domain.Entities.Profile", "LeaderProfile")
+                        .WithMany("LeadingTours")
+                        .HasForeignKey("Leader")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("InnovateFuture.Domain.Entities.Organisation", "Organisation")
+                        .WithMany("Tours")
+                        .HasForeignKey("OrgId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LeaderProfile");
+
+                    b.Navigation("Organisation");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>
@@ -380,7 +737,27 @@ namespace InnovateFuture.Infrastructure.Migrations
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.Organisation", b =>
                 {
+                    b.Navigation("Activities");
+
+                    b.Navigation("Days");
+
                     b.Navigation("Profiles");
+
+                    b.Navigation("Tours");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Profile", b =>
+                {
+                    b.Navigation("LeadingTours");
+
+                    b.Navigation("StudentTourEnrollments");
+                });
+
+            modelBuilder.Entity("InnovateFuture.Domain.Entities.Tour", b =>
+                {
+                    b.Navigation("Days");
+
+                    b.Navigation("StudentTourEnrollments");
                 });
 
             modelBuilder.Entity("InnovateFuture.Domain.Entities.User", b =>

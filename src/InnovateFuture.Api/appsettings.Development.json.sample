@@ -6,18 +6,27 @@
       "Microsoft.Hosting.Lifetime": "Information"
     }
   },
+  "FrontEndBaseUrl": "http://localhost:5173",
   "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=postgres",
   "JWTConfig": {
-      "SecretKey": "SecretKeyExample",
-      "Issuer": "innovateFuture Support",
-      "Audience": "innovateFuture",
-      "ExpireSeconds": 7200
-    },
+        "SecretKey": "f9X1zLrIMT6rOWTFbV7R9qlPjwD9LlA9K8UEtWmCp7U=",
+        "Issuer": "innovateFuture Support",
+        "Audience": "innovateFuture",
+        "ExpireSeconds": 7200,
+        "Domain": "localhost"
+      },
   "EmailSettings": {
     "SmtpServer": "smtp.gmail.com",
     "SmtpPort": 587,
     "SenderName": "Innovate-feature",
     "SenderEmail": "xiaobaoxue1@gmail.com",
     "SenderPassword": "tdlw ervs xwdf yuyo"
+  },
+  "AWS": {
+    "AccessKey": "***",
+    "SecretKey": "***",
+    "BucketName": "***",
+    "Region": "***"
   }
+  
 }

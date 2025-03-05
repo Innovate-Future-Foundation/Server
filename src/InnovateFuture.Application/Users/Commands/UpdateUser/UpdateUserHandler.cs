@@ -13,20 +13,20 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, Guid>
 
     public async Task<Guid> Handle(UpdateUserCommand command, CancellationToken cancellationToken)
     { 
-    //     // get existing user by id
-    //     User user = await _UserRepository.GetByIdAsync(command.UserId);
-    //     
-    //     // update
-    //     user.UpdateUserDetails(
-    //         command.CognitoUuid,
-    //         command.DefaultProfile, 
-    //         command.Email,
-    //         command.FullName, 
-    //         command.Phone,
-    //         command.Birthday
-    //         );
-    //     
-    //     await _UserRepository.UpdateAsync();
+    // // get existing user by id
+    // User user = await _UserRepository.GetByIdAsync(command.UserId);
+    //
+    // // update
+    // user.UpdateUserDetails(
+    //     command.CognitoUuid,
+    //     command.DefaultProfile, 
+    //     command.Email,
+    //     command.FullName, 
+    //     command.Phone,
+    //     command.Birthday
+    //     );
+    //
+    // await _UserRepository.UpdateAsync();
     //     
     return new Guid();
     }

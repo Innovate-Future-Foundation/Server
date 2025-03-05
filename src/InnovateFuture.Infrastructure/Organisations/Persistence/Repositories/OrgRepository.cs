@@ -5,6 +5,7 @@ using InnovateFuture.Infrastructure.Exceptions;
 using InnovateFuture.Infrastructure.Organisations.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore.DynamicLinq;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace InnovateFuture.Infrastructure.Organisations.Persistence.Repositories;
@@ -21,11 +22,39 @@ public class OrgRepository:IOrgRepository
     
     public async Task AddAsync(Organisation organisation, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Organisations.AddAsync(organisation, cancellationToken);
+            await _dbContext.Organisations.AddAsync(organisation, cancellationToken);
     }
-    
-    
-    
+
+    public async Task CheckIsExistByOrgIdAsync(Guid orgId, CancellationToken cancellationToken = default)
+    {
+        var isExist = await _dbContext.Organisations.AnyAsync(o => o.Id == orgId, cancellationToken);
+        if (!isExist)
+        {
+            throw new IFEntityNotFoundException("Organisation", orgId);
+        }
+    }
+
+    public async Task CheckIsExistByNameOrEmailAsync(string orgName, string? orgEmail,
+        CancellationToken cancellationToken = default)
+    {
+        var existingOrg = await _dbContext.Organisations
+            .Where(o => o.OrgName == orgName || (orgEmail != null && o.Email == orgEmail))
+            .Select(o => new { o.OrgName, o.Email })
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        if (existingOrg != null)
+        {
+            if (!string.IsNullOrWhiteSpace(orgEmail) && existingOrg.Email == orgEmail)
+            {
+                throw new IFConcurrencyException($"The organisation email {orgEmail} already exists.");
+            }
+            if (existingOrg.OrgName == orgName)
+            {
+                throw new IFConcurrencyException($"The organisation name {orgName} already exists.");
+            }
+        }
+    }
+
     public async Task<Organisation> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var org = await _dbContext.Organisations

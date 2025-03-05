@@ -14,12 +14,16 @@ public class OrganisationConfig : IEntityTypeConfiguration<Organisation>
         builder.Property(o => o.Id).HasColumnType("uuid").IsRequired();
         builder.Property(o => o.OrgName).HasMaxLength(100).IsRequired();
         builder.Property(o => o.LogoUrl).HasMaxLength(500).IsRequired(false); 
-        builder.Property(o => o.WebsiteUrl).HasMaxLength(500).IsRequired(false); 
-        builder.Property(o => o.Address).HasMaxLength(255).IsRequired(false);
+        builder.Property(o => o.WebsiteUrl).HasMaxLength(500).IsRequired(false);
         builder.Property(o => o.Email).HasMaxLength(100).IsRequired(false);
         builder.Property(o => o.Subscription).HasColumnType("subscription_enum").IsRequired();
         builder.Property(o => o.OrgStatus).HasColumnType("org_status_enum").IsRequired();
-        builder.Property(o => o.CreatedAt).HasColumnType("timestamptz").IsRequired();
-        builder.Property(o => o.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+        builder.Property(o => o.CreatedAt).HasColumnType("timestamp").IsRequired();
+        builder.Property(o => o.UpdatedAt).HasColumnType("timestamp").IsRequired();
+        builder.OwnsOne(o => o.Address, a => a.ToJson());
+        
+        // Add index
+        builder.HasIndex(o=>o.Email).IsUnique();
+        builder.HasIndex(o=>o.OrgName).IsUnique();
     }
 }

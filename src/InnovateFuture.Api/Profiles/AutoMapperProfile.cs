@@ -1,8 +1,13 @@
 using InnovateFuture.Api.Controllers.Auth;
 using AutoMapper;
-using InnovateFuture.Api.Controllers.ProfilesController;
-using InnovateFuture.Api.Controllers.UsersController;
-using InnovateFuture.Api.Controllers.OrganisationsController;
+using InnovateFuture.Api.Controllers.Organisations;
+using InnovateFuture.Api.Controllers.Profiles;
+using InnovateFuture.Api.Controllers.Users;
+using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
+using InnovateFuture.Application.Auth.Commands.Login;
+using InnovateFuture.Application.Auth.Commands.Password;
+using InnovateFuture.Application.Auth.Commands.Register;
+using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Users.Commands.CreateUser;
@@ -12,18 +17,18 @@ using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
 using InnovateFuture.Application.Organisations.Commands.UpdateOrganisation;
 using InnovateFuture.Application.Organisations.Queries.GetOrganisations;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
-using InnovateFuture.Application.Services.Auth.ConfirmEmail;
 using InnovateFuture.Application.Services.Auth.Register;
 using InnovateFuture.Domain.Entities;
 using InnovateFuture.Domain.Enums;
-using APIQueryProfileFilters = InnovateFuture.Api.Controllers.ProfilesController.QueryProfileFilters;
+using Microsoft.AspNetCore.Identity.Data;
+using APIQueryProfileFilters = InnovateFuture.Api.Controllers.Profiles.QueryProfileFilters;
 using APPQueryProfileFilters = InnovateFuture.Application.Profiles.Queries.GetProfiles.QueryProfileFilters;
-using APIQueryOrganisationsFilters = InnovateFuture.Api.Controllers.OrganisationsController.QueryOrganisationsFilters;
+using APIQueryOrganisationsFilters = InnovateFuture.Api.Controllers.Organisations.QueryOrganisationsFilters;
 using APPQueryOrganisationsFilters = InnovateFuture.Application.Organisations.Queries.GetOrganisations.QueryOrganisationsFilters;
 using AMProfile = AutoMapper.Profile;
+using LoginRequest = InnovateFuture.Api.Controllers.Auth.LoginRequest;
 using Profile = InnovateFuture.Domain.Entities.Profile;
-
-
+using ResetPasswordRequest = InnovateFuture.Api.Controllers.Auth.ResetPasswordRequest;
 
 
 namespace InnovateFuture.Api.Profiles;
@@ -31,8 +36,22 @@ public class AutoMapperProfile: AMProfile
 {
     public AutoMapperProfile()
     {
+        /*
+         * Auth
+         */
         CreateMap<ConfirmEmailRequest, ConfirmEmailCommand>();
-        CreateMap<RegisterOrganisationAdminRequest,RegisterOrganisationAdminCommand>();
+        CreateMap<ResendVerficationEmailRequest,ResendVerificationEmailCommand>();
+        CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
+        CreateMap<LoginRequest, LoginCommand>();
+        CreateMap<ResetPasswordRequest, ResetPasswordCommand>();
+        CreateMap<ForgotPasswordRequest, ForgotPasswordCommand>();
+
+        CreateMap<Profile,GetMeResponse>()
+            .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
+        
+        CreateMap<RegisterNormalUserRequest, RegisterNormalUserCommand>()
+            .ForMember(dest => dest.RoleEnum,
+                opt => opt.MapFrom<RegisterNormalUserRoleCodeToRoleEnumResolver>());
         
         CreateMap<CreateUserRequest, CreateUserCommand>();
         /*
@@ -57,11 +76,11 @@ public class AutoMapperProfile: AMProfile
                 APPQueryProfileFilters>()
             .ForMember(dest => dest.RoleEnums, opt => opt.MapFrom<RoleCodesToRoleEnumsResolver>())
             .ForMember(dest => dest.Supervisors, opt => opt.MapFrom(src => 
-                RoleCodesToRoleEnumsResolver.ConvertStringToGuidArr(src.Supervisors)));
+                RoleCodesToRoleEnumsResolver.ConvertStringToGuidArr(src.Supervisors??"")));
 
         CreateMap<Profile, GetProfileResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
-
+        
         CreateMap<Profile, GetProfileWithDetailsResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));
         
@@ -112,13 +131,22 @@ public class RoleCodesToRoleEnumsResolver : IValueResolver<APIQueryProfileFilter
             .Where(roleEnum => roleEnum != default)
             .ToArray()??[];
     }
-    public static Guid[] ConvertStringToGuidArr(string s=""){
-        var res = s.Split(',', StringSplitOptions.RemoveEmptyEntries)
+    public static Guid[] ConvertStringToGuidArr(string combinedString=""){
+        var res = combinedString.Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(s => s.Trim())
             .Where(s => Guid.TryParse(s, out _))
             .Select(Guid.Parse)
             .ToArray()??[];
         return res;
+    }
+}
+
+public class RegisterNormalUserRoleCodeToRoleEnumResolver : IValueResolver<RegisterNormalUserRequest, RegisterNormalUserCommand, RoleEnum>
+{
+    public RoleEnum Resolve(RegisterNormalUserRequest source, RegisterNormalUserCommand destination, RoleEnum destMember,
+        ResolutionContext context)
+    {
+        return  Enum.TryParse<RoleEnum>(source.RoleCode.Trim(), out var roleEnum) ? roleEnum : default;
     }
 }
 

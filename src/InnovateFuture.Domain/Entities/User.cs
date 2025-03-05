@@ -27,14 +27,14 @@ public class User: IdentityUser<Guid>
         Email = email ?? throw new ArgumentNullException(nameof(email));
         DefaultProfileId = defaultProfileId;
         IdpSubject = idpSubject;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
 
     public void UpdateDefaultProfile(Guid profileId)
     {
         DefaultProfileId = profileId;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     }
     
     public void AddProfile(Profile profile)

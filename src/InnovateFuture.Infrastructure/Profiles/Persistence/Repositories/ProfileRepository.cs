@@ -6,6 +6,8 @@ using InnovateFuture.Infrastructure.Profiles.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore.DynamicLinq;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace InnovateFuture.Infrastructure.Profiles.Persistence.Repositories;
 
@@ -22,15 +24,79 @@ public class ProfileRepository:IProfileRepository
     {
         await _dbContext.Profiles.AddAsync(profile, cancellationToken);
     }
+    
+    public async Task CheckProfileExistByUserIdOrgIdRoleAsync(Guid userId, Guid orgId, RoleEnum role, CancellationToken cancellationToken = default)
+    {
+        var profile = await _dbContext.Profiles
+            .Where(p => p.UserId == userId && p.OrgId == orgId && p.Role == role)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (profile != null)
+        {
+            throw new IFConcurrencyException("Profile already exists.");
+        }
+    }
+
+    public async Task<User> GetUserByProfileId(Guid profileId, CancellationToken cancellationToken = default)
+    {
+        var profile = await _dbContext.Profiles
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == profileId, cancellationToken);
+
+        if (profile == null)
+        {
+            throw new IFEntityNotFoundException("Profile", profileId);
+        }
+        return profile.User;
+    }
+
+    public async Task<Guid> GetOrgIdByProfileIdAsync(Guid profileId, CancellationToken cancellationToken = default)
+    {
+        var profile = await _dbContext.Profiles
+            .Where(p => p.Id == profileId)
+            .Select(p => new { p.OrgId })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (profile == null || profile.OrgId == null)
+        {
+            throw new IFEntityNotFoundException("OrgId in Profile", profileId);
+        }
+        return profile.OrgId.Value;
+    }
+
+    public async Task<Profile> GetProfileByIdWithOrg(Guid profileId, CancellationToken cancellationToken = default)
+    {
+        var profile = await _dbContext.Profiles
+            .Include(p => p.Organisation)
+            .FirstOrDefaultAsync(p => p.Id == profileId, cancellationToken);
+        if (profile == null)
+        {
+            throw new IFEntityNotFoundException("Profile",profileId);
+        }
+        return profile;
+    }
+
+    public async Task<bool> CheckRoleIsOrgAdminById(Guid id, CancellationToken cancellationToken = default)
+    {
+       var profileOnlyWithRole = await _dbContext.Profiles
+           .Where(p => p.Id == id)
+           .Select(p => new { p.Role })
+           .FirstOrDefaultAsync(cancellationToken);
+       
+       if (profileOnlyWithRole == null)
+       {
+           throw new IFEntityNotFoundException("ProfileRole", id);
+       }
+       return profileOnlyWithRole.Role != RoleEnum.Student;
+    }
 
     public async Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var profile = await _dbContext.Profiles
-            .Include(p => p.User)
             .Include(p=>p.Organisation)
             .Include(p=>p.InviterProfile)
             .Include(p=>p.SupervisorProfile)
             .FirstOrDefaultAsync(p=>p.Id == id);
+        
         if (profile == null)
         {
             throw new IFEntityNotFoundException("Profile",id);
@@ -46,7 +112,6 @@ public class ProfileRepository:IProfileRepository
     public async Task<(List<Profile> data, int totalItems)> GetAnyAsync(Expression<Func<Profile, bool>>? predicate = null, int? limit = null, int offset = 0, string? queryOrderBy = null)
     {
         IQueryable<Profile> query =  _dbContext.Profiles
-            .Include(p => p.User)
             .Include(p => p.Organisation)
             .Include(p => p.InviterProfile)
             .Include(p => p.SupervisorProfile);

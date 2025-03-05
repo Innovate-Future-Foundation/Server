@@ -1,5 +1,6 @@
 using System.Text.Json;
 using InnovateFuture.Api.Models;
+using InnovateFuture.Application.Exceptions;
 using InnovateFuture.Domain.Exceptions;
 using InnovateFuture.Infrastructure.Exceptions;
 
@@ -44,9 +45,12 @@ public class GlobalExceptionMiddleware
             IFDatabaseException => StatusCodes.Status500InternalServerError,
             IFDomainValidationException => StatusCodes.Status400BadRequest,
             IFEntityNotFoundException => StatusCodes.Status404NotFound,
+            IFApplicationNotFoundException => StatusCodes.Status404NotFound,
+            IFApplicationBusinessException=>StatusCodes.Status400BadRequest,
             IFExternalServiceException => StatusCodes.Status503ServiceUnavailable,
             IFPolicyViolationException => StatusCodes.Status400BadRequest,
             IFUnauthorizedActionException => StatusCodes.Status403Forbidden,
+            UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             _ => StatusCodes.Status500InternalServerError // Catch-all for unhandled exceptions
         };
 

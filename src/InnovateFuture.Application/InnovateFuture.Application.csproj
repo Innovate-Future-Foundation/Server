@@ -11,6 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.400" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.415" />
     <PackageReference Include="Handlebars.Net" Version="2.1.6" />
     <PackageReference Include="MailKit" Version="4.10.0" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
@@ -19,6 +21,12 @@
     <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Auth\Queries\" />
+    <Folder Include="Upload\Commands\" />
+    <Folder Include="Upload\Commands\" />
   </ItemGroup>
 
 </Project>
