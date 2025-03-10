@@ -38,7 +38,6 @@ public static class InfrastructureDependencyInjection
                 .EnableDetailedErrors()
         );
         #endregion
-
         return services;
     }
 }
