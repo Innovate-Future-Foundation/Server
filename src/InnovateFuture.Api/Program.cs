@@ -1,14 +1,11 @@
 using HealthChecks.UI.Client;
-using InnovateFuture.Api.Filters;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Api.Middleware;
 using InnovateFuture.Application.Common;
-using InnovateFuture.Domain.Enums;
 using InnovateFuture.Infrastructure.Common;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Mvc;
 using NLog;
 using NLog.Web;
 
