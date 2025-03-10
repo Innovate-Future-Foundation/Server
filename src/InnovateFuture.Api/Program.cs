@@ -84,8 +84,7 @@ namespace InnovateFuture.Api
             
             #region JWT
             builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection("JWTConfig"));
-            #endregion
-            
+           
             // Configure JWT Authentication
             var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]);
             builder.Services.AddAuthentication(options =>
@@ -125,6 +124,7 @@ namespace InnovateFuture.Api
                 });
 
             builder.Services.AddAuthorization();
+            #endregion
             
             #region filter
             builder.Services.AddControllers(option =>
@@ -243,7 +243,6 @@ namespace InnovateFuture.Api
                 .AddDefaultTokenProviders();
             #endregion
             
-            
             // Disable auto model validation
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
             
@@ -291,23 +290,8 @@ namespace InnovateFuture.Api
                         .AllowCredentials();
                 });
             });
-            
-            // #region cors
-            // // cors
-            // builder.Services.AddCors(option =>
-            // {
-            //     option.AddPolicy(policyName, policy =>
-            //     {
-            //
-            //         policy.AllowAnyOrigin()
-            //             .AllowAnyMethod()
-            //             .AllowAnyHeader();
-            //     });
-            // });
-            // #endregion
-            
+
             var app = builder.Build();
-            app.UseCors(policyName);
             
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

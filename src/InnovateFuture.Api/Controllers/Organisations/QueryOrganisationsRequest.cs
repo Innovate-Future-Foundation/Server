@@ -4,6 +4,9 @@ using InnovateFuture.Domain.Enums;
 namespace InnovateFuture.Api.Controllers.Organisations;
 
 
+/// <summary>
+/// QueryOrganisationsRequest
+/// </summary>
 public class QueryOrganisationsRequest :IPaginatedRequest<QueryOrganisationsFilters> {
     public QueryOrganisationsFilters? Filters { get; set; }
     public string? SearchKey { get; set; }
