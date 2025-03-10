@@ -3,7 +3,7 @@ using FluentValidation;
 using HealthChecks.UI.Client;
 using InnovateFuture.Api.Filters;
 using InnovateFuture.Api.Configs;
-using InnovateFuture.Api.Middleware;
+using InnovateFuture.Api.Middleware; 
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Profiles.Queries.GetProfile;
@@ -59,6 +59,7 @@ using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
 using InnovateFuture.Application.Auth.Commands.SendTemporaryPassword;
 using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 using InnovateFuture.Application.Auth.Queries.GetMe;
+using InnovateFuture.Application.Common;
 using InnovateFuture.Application.Services.Auth.Register;
 
 
@@ -72,59 +73,12 @@ namespace InnovateFuture.Api
             var policyName = "AllowLocalhost";
             
             var builder = WebApplication.CreateBuilder(args);
-
+            
+            builder.Services.AddApplicationservices(builder.Configuration);
+            // builder.Services.AddInfrastructureLayer(builder.Configuration);
+            // builder.Services.AddPresentationLayer();
+            
             builder.Services.AddHttpContextAccessor();
-            
-            var connectionString = builder.Configuration["DBConnection"];
-
-            #region Email Service Configuration
-            // bind EmailSettings from appsettings.Development.json
-            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-            #endregion
-            
-            #region JWT
-            builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection("JWTConfig"));
-           
-            // Configure JWT Authentication
-            var key = Encoding.UTF8.GetBytes(builder.Configuration["JWTConfig:SecretKey"]);
-            builder.Services.AddAuthentication(options =>
-                {
-                    // Explicitly use JWT
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
-                    // Prevents silent failures
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;   
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["JWTConfig:Issuer"],
-                        ValidAudience = builder.Configuration["JWTConfig:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(key)
-                    };
-                    
-                    // allow extracting JWT from cookies instead of header
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = context =>
-                        {
-                            var accessToken = context.Request.Cookies["access-token"]; 
-
-                            if (!string.IsNullOrEmpty(accessToken))
-                            {
-                                context.Token = accessToken;
-                            }
-                            return Task.CompletedTask;
-                        }
-                    };
-                });
-
-            builder.Services.AddAuthorization();
-            #endregion
             
             #region filter
             builder.Services.AddControllers(option =>
@@ -139,80 +93,13 @@ namespace InnovateFuture.Api
             });
             #endregion
             
-            #region service instances
-            builder.Services.AddMediatR(configuration =>
-            {
-                configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(RegisterNormalUserHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(ResendVerificationEmailHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(GetMeQueryHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(ResetPasswordHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(ForgetPasswordHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(SendTemporaryPasswordHandler).Assembly);
-                
-                
-                
-                configuration.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(GetUsersHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(GetUserHandler).Assembly);
-                
-                configuration.RegisterServicesFromAssembly(typeof(UpdateProfileHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(GetProfileHandler).Assembly);
-                
-                configuration.RegisterServicesFromAssembly(typeof(CreateOrganisationHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(UpdateOrganisationHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
             
-                configuration.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
-                configuration.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
-
-                
-            });
-                
-            // auto mapper instance
-            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            // customized instances
-            builder.Services.AddScoped<ISeedDataService, SeedDataService>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IOrgRepository, OrgRepository>();
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
-            builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
-            builder.Services.AddScoped<IDayRepository, DayRepository>();
-            builder.Services.AddScoped<ITourRepository, TourRepository>();
-            builder.Services.AddScoped<IStudentTourEnrollmentRepository, StudentTourEnrollmentRepository>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<ITokenService, TokenService>();
-
-
-            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-            builder.Services.AddValidatorsFromAssembly(typeof(RegisterOrganisationAdminValidator).Assembly);
-            builder.Services.AddValidatorsFromAssembly(typeof(RegisterNormalUserValidator).Assembly);
-            builder.Services.AddValidatorsFromAssembly(typeof(LoginValidator).Assembly);
-            
-            
-            builder.Services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
-            builder.Services.AddValidatorsFromAssembly(typeof(UpdateUserCommandValidator).Assembly);
-            builder.Services.AddValidatorsFromAssembly(typeof(GetUsersQueryValidator).Assembly);
-            
-            builder.Services.AddValidatorsFromAssembly(typeof(UpdateProfileCommandValidator).Assembly);
-
-            builder.Services.AddValidatorsFromAssembly(typeof(CreateOrganisationCommandValidator).Assembly);
-            builder.Services.AddValidatorsFromAssembly(typeof(UpdateOrganisationCommandValidator).Assembly);
-            builder.Services.AddValidatorsFromAssembly(typeof(GetOrganisationsQueryValidator).Assembly);
-
+            var connectionString = builder.Configuration["DBConnection"];
+            #region DB connection
             builder.Services.AddHealthChecks()
                 .AddNpgSql(connectionString)
                 .AddDbContextCheck<ApplicationDbContext>();
-            #endregion
             
-            #region DB connection
             builder.Services.Configure<DBConnectionConfig>(builder.Configuration);
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
             // register enums
@@ -236,42 +123,13 @@ namespace InnovateFuture.Api
             );
             #endregion
             
-            #region Identity 
-            builder.Services.AddIdentity<User, IdentityRole<Guid>>()
-                .AddEntityFrameworkStores<ApplicationDbContext>() 
-                .AddTokenProvider<DataProtectorTokenProvider<User>>("InnovateFuture")
-                .AddDefaultTokenProviders();
-            #endregion
             
             // Disable auto model validation
             builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
             
             // swagger config => see more details in swagger config extension
             builder.Services.AddSwaggerEXT();
-
-            #region fluent validators
-            // Auth
-            builder.Services.AddValidatorsFromAssemblyContaining<RegisterOrganisationAdminValidator>();
-            builder.Services.AddValidatorsFromAssemblyContaining<RegisterNormalUserValidator>();
-            builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
-            // Users
-            builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
-            builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserCommandValidator>();
-            builder.Services.AddValidatorsFromAssemblyContaining<GetUsersQueryValidator>();
-            // Profiles
-            builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileCommandValidator>();
-            builder.Services.AddValidatorsFromAssemblyContaining<GetProfilesQueryValidator>();
-            // Organisations
-            builder.Services.AddValidatorsFromAssemblyContaining<CreateOrganisationCommandValidator>();
-            builder.Services.AddValidatorsFromAssemblyContaining<UpdateOrganisationCommandValidator>();
-            builder.Services.AddValidatorsFromAssemblyContaining<GetOrganisationsQueryValidator>();
-            #endregion
-
-            #region aws s3
-            builder.Services.Configure<AWSSettings>(builder.Configuration.GetSection("AWS"));
-            builder.Services.AddAWSService<IAmazonS3>();
-            builder.Services.AddScoped<S3Service>();
-            #endregion
+            
 
             #region NLog
             // NLog: Setup NLog for Dependency injection
