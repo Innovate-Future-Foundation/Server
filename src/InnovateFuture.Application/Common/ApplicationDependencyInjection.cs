@@ -65,13 +65,10 @@ public static class ApplicationDependencyInjection
         #region JWT
         services.Configure<JWTConfig>(configuration.GetSection("JWTConfig"));
            
-        // Configure JWT Authentication
         var key = Encoding.UTF8.GetBytes(configuration["JWTConfig:SecretKey"]);
         services.AddAuthentication(options =>
             {
-                // Explicitly use JWT
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
-                // Prevents silent failures
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;   
             })
             .AddJwtBearer(options =>
@@ -87,7 +84,6 @@ public static class ApplicationDependencyInjection
                     IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
                     
-                // allow extracting JWT from cookies instead of header
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
@@ -151,7 +147,7 @@ public static class ApplicationDependencyInjection
             });
                 
             // auto mapper instance
-            // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // customized instances
             services.AddScoped<ISeedDataService, SeedDataService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
