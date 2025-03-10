@@ -55,7 +55,7 @@ namespace InnovateFuture.Application.Common;
 
 public static class ApplicationDependencyInjection
 {
-    public static IServiceCollection AddApplicationservices(this IServiceCollection services,IConfiguration configuration)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services,IConfiguration configuration)
     {
         #region Email Service Configuration
         // bind EmailSettings from appsettings.Development.json
