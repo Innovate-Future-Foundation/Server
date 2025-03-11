@@ -1,10 +1,12 @@
 using HealthChecks.UI.Client;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Api.Middleware;
+using InnovateFuture.Application.Auth.Consumers;
 using InnovateFuture.Application.Common;
 using InnovateFuture.Infrastructure.Common;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
+using MassTransit;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using NLog;
 using NLog.Web;

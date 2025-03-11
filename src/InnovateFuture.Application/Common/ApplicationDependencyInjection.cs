@@ -4,9 +4,6 @@ using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
 using InnovateFuture.Application.Auth.Commands.Password;
 using InnovateFuture.Application.Auth.Commands.Register;
-using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
-using InnovateFuture.Application.Auth.Commands.SendTemporaryPassword;
-using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 using InnovateFuture.Application.Auth.Queries.GetMe;
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
@@ -120,14 +117,10 @@ public static class ApplicationDependencyInjection
             {
                 cfg.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(RegisterNormalUserHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(ResendVerificationEmailHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetMeQueryHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(ResetPasswordHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(ForgetPasswordHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(SendTemporaryPasswordHandler).Assembly);
                 
                 cfg.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
@@ -142,7 +135,6 @@ public static class ApplicationDependencyInjection
                 cfg.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
             
                 cfg.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
             });
                 
