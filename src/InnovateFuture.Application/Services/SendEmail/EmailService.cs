@@ -14,7 +14,7 @@ public class EmailService: IEmailService
         _emailSettings = emailSettings.Value;
     }
 
-    public async Task SendEmailAsync(string receiver, string subject, string body, CancellationToken cancellationToken)
+    public async Task SendEmailAsync(string receiver, string subject, string body)
     {
         var senderEmail = _emailSettings.SenderEmail;
         var senderName = _emailSettings.SenderName;
@@ -38,12 +38,11 @@ public class EmailService: IEmailService
             try
             {
                 // Connect to SMTP Server
-                await smtpClient.ConnectAsync(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls,
-                    cancellationToken);
+                await smtpClient.ConnectAsync(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
                 // Authentication
-                await smtpClient.AuthenticateAsync(senderEmail, senderPassword, cancellationToken);
+                await smtpClient.AuthenticateAsync(senderEmail, senderPassword);
                 // Send email
-                await smtpClient.SendAsync(emailMessage, cancellationToken);
+                await smtpClient.SendAsync(emailMessage);
             }
             catch (Exception ex)
             {
@@ -53,7 +52,7 @@ public class EmailService: IEmailService
             finally
             {
                 // Disconnect
-                await smtpClient.DisconnectAsync(true, cancellationToken);
+                await smtpClient.DisconnectAsync(true);
             }
         }
 

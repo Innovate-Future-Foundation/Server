@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace InnovateFuture.Application.Services.Auth.Register;
 
-public class RegisterNormalUserHandler: IRequestHandler<RegisterNormalUserCommand, (Guid ProfileId, User User, string Token, RoleEnum RoleEnum)?>
+public class RegisterNormalUserHandler: IRequestHandler<RegisterNormalUserCommand, (string UserName, string UserEmail, Guid ProfileId, string Token, RoleEnum RoleEnum)?>
 {
     private readonly IOrgRepository _orgRepository;
     private readonly IProfileRepository _profileRepository;
@@ -30,24 +30,18 @@ public class RegisterNormalUserHandler: IRequestHandler<RegisterNormalUserComman
         _userManager = userManager;
     }
     
-    public async Task<(Guid ProfileId, User User, string Token, RoleEnum RoleEnum)?> Handle(RegisterNormalUserCommand command, CancellationToken cancellationToken)
+    public async Task<(string UserName, string UserEmail, Guid ProfileId, string Token, RoleEnum RoleEnum)?> Handle(RegisterNormalUserCommand command, CancellationToken cancellationToken)
     {
-        // 1⃣️ check Inviter user is OrgAdmin by using InviterProfileId
         if (await _profileRepository.CheckRoleIsOrgAdminById(command.InviterProfileId, cancellationToken))
         {
-            // get orgId by profileId
             var orgId = await _profileRepository.GetOrgIdByProfileIdAsync(command.InviterProfileId, cancellationToken);
             
-            // 2⃣️ check organisation exist
             await _orgRepository.CheckIsExistByOrgIdAsync(orgId, cancellationToken);
             
-            // 3⃣️ check user exist
             await _userService.CheckUserExistsAsync(command.Email, cancellationToken);
             
-            // 4⃣️ generate temperate password
             string temperatePassword = await _userService.GenerateTemperatePassword();
             
-            // 5⃣️ ACID transaction for user table, profile table
             using var transactions = await _unitOfWork.BeginTransactionAsync(cancellationToken);
             try
             {
@@ -73,7 +67,7 @@ public class RegisterNormalUserHandler: IRequestHandler<RegisterNormalUserComman
                 await _unitOfWork.CommitTransactionAsync();
     
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                return (profile.Id, user, token, command.RoleEnum);
+                return (user.UserName, user.Email, profile.Id, token, command.RoleEnum);
             }
             catch (Exception ex)
             {

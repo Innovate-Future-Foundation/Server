@@ -7,7 +7,7 @@ using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
 using InnovateFuture.Application.Auth.Commands.Password;
 using InnovateFuture.Application.Auth.Commands.Register;
-using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
+using InnovateFuture.Application.Auth.Events;
 using InnovateFuture.Application.Common.Models;
 using InnovateFuture.Application.Profiles.Commands.UpdateProfile;
 using InnovateFuture.Application.Users.Commands.CreateUser;
@@ -40,11 +40,11 @@ public class AutoMapperProfile: AMProfile
          * Auth
          */
         CreateMap<ConfirmEmailRequest, ConfirmEmailCommand>();
-        CreateMap<ResendVerficationEmailRequest,ResendVerificationEmailCommand>();
+        CreateMap<ResendVerficationEmailRequest,ResendUserRegisteredEvent>();
         CreateMap<RegisterOrganisationAdminRequest, RegisterOrganisationAdminCommand>();
         CreateMap<LoginRequest, LoginCommand>();
         CreateMap<ResetPasswordRequest, ResetPasswordCommand>();
-        CreateMap<ForgotPasswordRequest, ForgotPasswordCommand>();
+        CreateMap<ForgotPasswordRequest, ForgotPasswordEvent>();
 
         CreateMap<Profile,GetMeResponse>()
             .ForMember(dest => dest.RoleCode, opt => opt.MapFrom(src => src.Role.ToString()));

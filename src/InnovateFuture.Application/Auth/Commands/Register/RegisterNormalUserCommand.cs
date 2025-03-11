@@ -4,7 +4,7 @@ using MediatR;
 
 namespace InnovateFuture.Application.Services.Auth.Register;
 
-public class RegisterNormalUserCommand: IRequest<(Guid ProfileId, User User, string Token, RoleEnum RoleEnum)?>
+public class RegisterNormalUserCommand: IRequest<(string UserName, string UserEmail, Guid ProfileId, string Token, RoleEnum RoleEnum)?>
 {
     public string Name { get; set; }
     public string Email { get; set; }
