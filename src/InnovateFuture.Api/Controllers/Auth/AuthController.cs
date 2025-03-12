@@ -52,7 +52,7 @@ public class AuthController: ControllerBase
         
         // publish event to RabbitMQ 
         var userRegisteredEvent = new UserRegisteredEvent(username, userEmail, profileId, token, "email-verification");
-        await _publishEndpoint.Publish(userRegisteredEvent);
+        await _publishEndpoint.Publish(userRegisteredEvent, context => context.SetRoutingKey("user.verification"));
 
         return Ok("Register organisation admin and send email successful");
     }
@@ -86,7 +86,7 @@ public class AuthController: ControllerBase
         else
         {
             var sendTempPasswordCommand = new TemporaryPasswordEvent(email, result);
-            await _publishEndpoint.Publish(sendTempPasswordCommand);
+            await _publishEndpoint.Publish(sendTempPasswordCommand, context => context.SetRoutingKey("user.temporary-password"));
         }
         return Ok("Email verification successful!");
     }
@@ -101,7 +101,7 @@ public class AuthController: ControllerBase
     public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendVerficationEmailRequest request)
     {
         var resendUserRegisteredEvent = _mapper.Map<ResendUserRegisteredEvent>(request);
-        await _publishEndpoint.Publish(resendUserRegisteredEvent);
+        await _publishEndpoint.Publish(resendUserRegisteredEvent, context => context.SetRoutingKey("user.resend-verification"));
         
         return Ok("Resend email verification successful!");
     }
@@ -178,7 +178,7 @@ public class AuthController: ControllerBase
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
         var forgotPasswordEvent = _mapper.Map<ForgotPasswordEvent>(request);
-        await _publishEndpoint.Publish(forgotPasswordEvent);
+        await _publishEndpoint.Publish(forgotPasswordEvent, context => context.SetRoutingKey("user.forgot-password"));
         
         return Ok("Password reset link has been sent to your email.");
     }
@@ -217,7 +217,7 @@ public class AuthController: ControllerBase
         
         // publish userRegisteredEvent
         var userRegisteredEvent = new UserRegisteredEvent(userName, userEmail,userProfileId, token, "email-verification", roleEnum);
-        await _publishEndpoint.Publish(userRegisteredEvent);
+        await _publishEndpoint.Publish(userRegisteredEvent, context => context.SetRoutingKey("user.verification"));
 
         return Ok("Invite user successful, please let user check email and confirm.");
     }

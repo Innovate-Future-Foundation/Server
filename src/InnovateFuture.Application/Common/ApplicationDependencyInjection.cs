@@ -55,7 +55,6 @@ public static class ApplicationDependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services,IConfiguration configuration)
     {
         #region Email Service Configuration
-        // bind EmailSettings from appsettings.Development.json
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
         #endregion
         

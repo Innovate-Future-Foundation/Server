@@ -18,16 +18,19 @@ public class SendTemporaryPasswordEventConsumer: IConsumer<TemporaryPasswordEven
 
     public async Task  Consume(ConsumeContext<TemporaryPasswordEvent> context)
     {
-        _logger.LogInformation($"[SENDING-TEMPORARY-EMAIL] [Start-Sending] {DateTime.UtcNow}");
-        var message = context.Message;
-        var emailData = new
+        if (context.RoutingKey() == "user.temporary-password")
         {
-            userName = message.UserEmail,
-            temporaryPassword = message.TemporaryPassword
-        };
+            _logger.LogInformation($"[SENDING-TEMPORARY-EMAIL] [Start-Sending] {DateTime.UtcNow}");
+            var message = context.Message;
+            var emailData = new
+            {
+                userName = message.UserEmail,
+                temporaryPassword = message.TemporaryPassword
+            };
         
-        string emailBody = _emailService.RenderTemplate("Templates/RandomPassword.hbs", emailData);
-        await _emailService.SendEmailAsync(message.UserEmail, "Your Temporary Password", emailBody);
-        _logger.LogInformation($"[SENDING-TEMPORARY-EMAIL] [End-Sending] {DateTime.UtcNow}");
+            string emailBody = _emailService.RenderTemplate("Templates/RandomPassword.hbs", emailData);
+            await _emailService.SendEmailAsync(message.UserEmail, "Your Temporary Password", emailBody);
+            _logger.LogInformation($"[SENDING-TEMPORARY-EMAIL] [End-Sending] {DateTime.UtcNow}");
+        }
     }
 }

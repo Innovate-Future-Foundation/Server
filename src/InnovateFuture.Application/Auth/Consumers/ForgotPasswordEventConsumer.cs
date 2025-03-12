@@ -25,23 +25,26 @@ public class ForgotPasswordEventConsumer: IConsumer<ForgotPasswordEvent>
 
     public async Task Consume(ConsumeContext<ForgotPasswordEvent> context)
     {
-        _logger.LogInformation($"[SENDING-FORGOTPASSWORD-EMAIL] [Start-Sending] {DateTime.UtcNow}");
-        var message = context.Message;
-        var user = await _userService.GetUserByEmailAsync(message.UserEmail);
-        
-        var resetPasswordToken = await _userService.GeneratePasswordResetTokenAsync(user);
-        
-        var encodedToken = UrlEncoder.Default.Encode(resetPasswordToken);
-        var encodedEmail = UrlEncoder.Default.Encode(message.UserEmail);
-        var verificationLink =  $"{_configuration["FrontEndBaseUrl"]}/auth/reset-password?token={encodedToken}&email={encodedEmail}";
-
-        var emailData = new
+        if (context.RoutingKey() == "user.forgot-password")
         {
-            userName = message.UserEmail,
-            verificationLink = verificationLink
-        };
-        string emailBody = _emailService.RenderTemplate("Templates/ResetPasswordEmailTemplate.hbs", emailData);
-        await _emailService.SendEmailAsync(message.UserEmail, "Reset you password", emailBody);
-        _logger.LogInformation($"[SENDING-FORGOTPASSWORD-EMAIL] [End-Sending] {DateTime.UtcNow}");
+            _logger.LogInformation($"[SENDING-FORGOTPASSWORD-EMAIL] [Start-Sending] {DateTime.UtcNow}");
+            var message = context.Message;
+            var user = await _userService.GetUserByEmailAsync(message.UserEmail);
+        
+            var resetPasswordToken = await _userService.GeneratePasswordResetTokenAsync(user);
+        
+            var encodedToken = UrlEncoder.Default.Encode(resetPasswordToken);
+            var encodedEmail = UrlEncoder.Default.Encode(message.UserEmail);
+            var verificationLink =  $"{_configuration["FrontEndBaseUrl"]}/auth/reset-password?token={encodedToken}&email={encodedEmail}";
+
+            var emailData = new
+            {
+                userName = message.UserEmail,
+                verificationLink = verificationLink
+            };
+            string emailBody = _emailService.RenderTemplate("Templates/ResetPasswordEmailTemplate.hbs", emailData);
+            await _emailService.SendEmailAsync(message.UserEmail, "Reset you password", emailBody);
+            _logger.LogInformation($"[SENDING-FORGOTPASSWORD-EMAIL] [End-Sending] {DateTime.UtcNow}");
+        }
     }
 }

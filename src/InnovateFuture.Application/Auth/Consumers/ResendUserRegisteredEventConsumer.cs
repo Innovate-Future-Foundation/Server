@@ -26,31 +26,34 @@ public class ResendUserRegisteredEventConsumer: IConsumer<ResendUserRegisteredEv
     }
     public async Task Consume(ConsumeContext<ResendUserRegisteredEvent> context)
     {
-        _logger.LogInformation($"[RESENDING-EMAIL] [Start-Sending] {DateTime.UtcNow}");
-        var message = context.Message;
-        var user = await _userManager.FindByEmailAsync(message.UserEmail);
-        if (user == null)
+        if (context.RoutingKey() == "user.resend-verification")
         {
-            throw new IFApplicationNotFoundException($"User with email {message.UserEmail} does not exist.");
-        }
-        if (user is { EmailConfirmed: true })
-        {
-            throw new IFApplicationBusinessException($"User with email {message.UserEmail} has already been verified.");
-        }
+            _logger.LogInformation($"[RESENDING-EMAIL] [Start-Sending] {DateTime.UtcNow}");
+            var message = context.Message;
+            var user = await _userManager.FindByEmailAsync(message.UserEmail);
+            if (user == null)
+            {
+                throw new IFApplicationNotFoundException($"User with email {message.UserEmail} does not exist.");
+            }
+            if (user is { EmailConfirmed: true })
+            {
+                throw new IFApplicationBusinessException($"User with email {message.UserEmail} has already been verified.");
+            }
         
         
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var encodedToken = UrlEncoder.Default.Encode(token);
-        var encodedEmail = UrlEncoder.Default.Encode(user.Email!);
-        var verificationLink =
-            $"{_configuration["FrontEndBaseUrl"]}/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={user.DefaultProfileId}";
-        var emailData = new
-        {
-            userName = user.UserName,
-            verificationLink,
-        };
-        string emailBody = _emailService.RenderTemplate("Templates/RegisterEmailTemplate.hbs", emailData);
-        await _emailService.SendEmailAsync(user.Email!, "Welcome to Innovate future", emailBody);
-        _logger.LogInformation($"[RESENDING-EMAIL] [End-Sending] {DateTime.UtcNow}");
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = UrlEncoder.Default.Encode(token);
+            var encodedEmail = UrlEncoder.Default.Encode(user.Email!);
+            var verificationLink =
+                $"{_configuration["FrontEndBaseUrl"]}/auth/signup/email-verification?token={encodedToken}&email={encodedEmail}&pid={user.DefaultProfileId}";
+            var emailData = new
+            {
+                userName = user.UserName,
+                verificationLink,
+            };
+            string emailBody = _emailService.RenderTemplate("Templates/RegisterEmailTemplate.hbs", emailData);
+            await _emailService.SendEmailAsync(user.Email!, "Welcome to Innovate future", emailBody);
+            _logger.LogInformation($"[RESENDING-EMAIL] [End-Sending] {DateTime.UtcNow}");
+        }
     }
 }

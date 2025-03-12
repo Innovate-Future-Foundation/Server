@@ -71,6 +71,12 @@ namespace InnovateFuture.Api
                         // one consumer instance can process 5 messages at once
                         e.ConcurrentMessageLimit = 5;
                         
+                        // bind queue to exchange with different routing keys
+                        e.Bind("email-exchange", x => x.RoutingKey = "user.verification");
+                        e.Bind("email-exchange", x => x.RoutingKey = "user.temporary-password");
+                        e.Bind("email-exchange", x => x.RoutingKey = "user.resend-verification");
+                        e.Bind("email-exchange", x => x.RoutingKey = "user.forgot-password");
+                        
                         e.ConfigureConsumer<SendVerificationEventConsumer>(context);
                         e.ConfigureConsumer<SendTemporaryPasswordEventConsumer>(context);
                         e.ConfigureConsumer<ResendUserRegisteredEventConsumer>(context);
