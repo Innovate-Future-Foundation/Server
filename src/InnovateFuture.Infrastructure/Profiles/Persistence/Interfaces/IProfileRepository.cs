@@ -9,7 +9,7 @@ public interface IProfileRepository
     Task AddAsync(Profile profile, CancellationToken cancellationToken = default);
     Task<User> GetUserByProfileId(Guid profileId, CancellationToken cancellationToken = default);
     Task<Guid> GetOrgIdByProfileIdAsync(Guid profileId, CancellationToken cancellationToken = default);
-    Task<bool> CheckRoleIsOrgAdminById(Guid id, CancellationToken cancellationToken = default);
+    Task<bool> CanInviteRole(Guid id, RoleEnum inviteeRoleEnum, CancellationToken cancellationToken = default);
     Task CheckProfileExistByUserIdOrgIdRoleAsync(Guid userId, Guid orgId, RoleEnum role,
         CancellationToken cancellationToken = default);
     Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);

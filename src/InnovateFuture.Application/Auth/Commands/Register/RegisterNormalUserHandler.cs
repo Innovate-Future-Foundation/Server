@@ -32,7 +32,7 @@ public class RegisterNormalUserHandler: IRequestHandler<RegisterNormalUserComman
     
     public async Task<(string UserName, string UserEmail, Guid ProfileId, string Token, RoleEnum RoleEnum)?> Handle(RegisterNormalUserCommand command, CancellationToken cancellationToken)
     {
-        if (await _profileRepository.CheckRoleIsOrgAdminById(command.InviterProfileId, cancellationToken))
+        if (await _profileRepository.CanInviteRole(command.InviterProfileId, command.RoleEnum, cancellationToken))
         {
             var orgId = await _profileRepository.GetOrgIdByProfileIdAsync(command.InviterProfileId, cancellationToken);
             

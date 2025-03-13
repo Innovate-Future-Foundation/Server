@@ -199,7 +199,7 @@ public class AuthController: ControllerBase
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "NotParentOrStudent")]
     [HttpPost("invite")]
     public async Task<IActionResult> RegisterNormalUser([FromBody] RegisterNormalUserRequest request)
     {

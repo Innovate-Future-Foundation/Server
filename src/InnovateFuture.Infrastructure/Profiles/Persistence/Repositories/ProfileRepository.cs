@@ -75,18 +75,25 @@ public class ProfileRepository:IProfileRepository
         return profile;
     }
 
-    public async Task<bool> CheckRoleIsOrgAdminById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<bool> CanInviteRole(Guid id, RoleEnum inviteeRoleEnum, CancellationToken cancellationToken = default)
     {
-       var profileOnlyWithRole = await _dbContext.Profiles
+       var inviter = await _dbContext.Profiles
            .Where(p => p.Id == id)
            .Select(p => new { p.Role })
            .FirstOrDefaultAsync(cancellationToken);
        
-       if (profileOnlyWithRole == null)
+       if (inviter == null)
        {
            throw new IFEntityNotFoundException("ProfileRole", id);
        }
-       return profileOnlyWithRole.Role != RoleEnum.Student;
+
+       return inviter.Role switch
+       {
+           RoleEnum.OrgAdmin => inviteeRoleEnum is RoleEnum.OrgManager or RoleEnum.OrgTeacher or RoleEnum.Parent or RoleEnum.Student,
+           RoleEnum.OrgManager => inviteeRoleEnum is RoleEnum.OrgTeacher or RoleEnum.Parent or RoleEnum.Student,
+           RoleEnum.OrgTeacher => inviteeRoleEnum is RoleEnum.Parent or RoleEnum.Student,
+           _ => false 
+       };
     }
 
     public async Task<Profile> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

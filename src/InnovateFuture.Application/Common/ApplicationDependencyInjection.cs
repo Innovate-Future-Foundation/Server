@@ -42,11 +42,9 @@ using FluentValidation;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Application.Services.S3;
 using InnovateFuture.Domain.Entities;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 
 namespace InnovateFuture.Application.Common;
 
@@ -58,45 +56,6 @@ public static class ApplicationDependencyInjection
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
         #endregion
         
-        #region JWT
-        services.Configure<JWTConfig>(configuration.GetSection("JWTConfig"));
-           
-        var key = Encoding.UTF8.GetBytes(configuration["JWTConfig:SecretKey"]);
-        services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;   
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = configuration["JWTConfig:Issuer"],
-                    ValidAudience = configuration["JWTConfig:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
-                };
-                    
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        var accessToken = context.Request.Cookies["access-token"]; 
-
-                        if (!string.IsNullOrEmpty(accessToken))
-                        {
-                            context.Token = accessToken;
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
-            });
-
-        services.AddAuthorization();
-        #endregion
         
         #region Identity 
         services.AddIdentity<User, IdentityRole<Guid>>()
