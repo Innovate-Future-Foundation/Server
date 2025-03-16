@@ -67,7 +67,7 @@ namespace InnovateFuture.Api
                 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host("rabbitmq://localhost");
+                    cfg.Host($"rabbitmq://{builder.Configuration["RabbitmqHost"]}");
                     
                     cfg.ReceiveEndpoint("email-queue", e =>
                     {
@@ -109,7 +109,7 @@ namespace InnovateFuture.Api
             
             // Enable Logging Middleware
             var logger = app.Services.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation("🚀 Application Starting..."); 
+            logger.LogInformation("Application Starting..."); 
             
             app.UseRouting();
             

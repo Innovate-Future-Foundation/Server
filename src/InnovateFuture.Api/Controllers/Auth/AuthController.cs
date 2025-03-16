@@ -27,13 +27,15 @@ public class AuthController: ControllerBase
     private readonly IMapper _mapper;
     private readonly JWTConfig _jwtConfig;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IMediator mediator, IMapper mapper, IOptions<JWTConfig> jwtOptions,  IPublishEndpoint publishEndpoint)
+    public AuthController(IMediator mediator, IMapper mapper, IOptions<JWTConfig> jwtOptions,  IPublishEndpoint publishEndpoint, ILogger<AuthController> logger)
     {
         _mediator = mediator;
         _mapper = mapper;
         _jwtConfig = jwtOptions.Value;
         _publishEndpoint = publishEndpoint;
+        _logger = logger;
     }
     
     /// <summary>
@@ -70,6 +72,7 @@ public class AuthController: ControllerBase
         var confirmResult = await _mediator.Send(command);
         
         var (email, result, isAdmin) = confirmResult;
+        _logger.LogInformation($"IMHERE{email} {result} {isAdmin}");
 
         if (isAdmin)
         {
