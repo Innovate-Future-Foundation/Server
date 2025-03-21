@@ -6,6 +6,7 @@
       "Microsoft.Hosting.Lifetime": "Information"
     }
   },
+  "RabbitmqHost": "localhost",
   "FrontEndBaseUrl": "http://localhost:5173",
   "DBConnection": "Host=localhost;Database=InnovateFuture;Username=postgres;Password=postgres",
   "JWTConfig": {
