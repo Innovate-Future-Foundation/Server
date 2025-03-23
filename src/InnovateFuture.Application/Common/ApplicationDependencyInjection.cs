@@ -4,9 +4,6 @@ using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
 using InnovateFuture.Application.Auth.Commands.Password;
 using InnovateFuture.Application.Auth.Commands.Register;
-using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
-using InnovateFuture.Application.Auth.Commands.SendTemporaryPassword;
-using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
 using InnovateFuture.Application.Auth.Queries.GetMe;
 using InnovateFuture.Application.Behaviors;
 using InnovateFuture.Application.Organisations.Commands.CreateOrganisation;
@@ -45,11 +42,9 @@ using FluentValidation;
 using InnovateFuture.Application.Profiles.Queries.GetProfiles;
 using InnovateFuture.Application.Services.S3;
 using InnovateFuture.Domain.Entities;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 
 namespace InnovateFuture.Application.Common;
 
@@ -58,49 +53,9 @@ public static class ApplicationDependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services,IConfiguration configuration)
     {
         #region Email Service Configuration
-        // bind EmailSettings from appsettings.Development.json
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
         #endregion
         
-        #region JWT
-        services.Configure<JWTConfig>(configuration.GetSection("JWTConfig"));
-           
-        var key = Encoding.UTF8.GetBytes(configuration["JWTConfig:SecretKey"]);
-        services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;   
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = configuration["JWTConfig:Issuer"],
-                    ValidAudience = configuration["JWTConfig:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
-                };
-                    
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        var accessToken = context.Request.Cookies["access-token"]; 
-
-                        if (!string.IsNullOrEmpty(accessToken))
-                        {
-                            context.Token = accessToken;
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
-            });
-
-        services.AddAuthorization();
-        #endregion
         
         #region Identity 
         services.AddIdentity<User, IdentityRole<Guid>>()
@@ -120,14 +75,10 @@ public static class ApplicationDependencyInjection
             {
                 cfg.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(RegisterNormalUserHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(ResendVerificationEmailHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetMeQueryHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(ResetPasswordHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(ForgetPasswordHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(SendTemporaryPasswordHandler).Assembly);
                 
                 cfg.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
@@ -142,7 +93,6 @@ public static class ApplicationDependencyInjection
                 cfg.RegisterServicesFromAssembly(typeof(GetOrganisationsHandler).Assembly);
             
                 cfg.RegisterServicesFromAssembly(typeof(RegisterOrganisationAdminHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(SendVerificationEmailHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(ConfirmEmailHandler).Assembly);
             });
                 

@@ -1,10 +1,16 @@
 using HealthChecks.UI.Client;
+using InnovateFuture.Api.Authorization;
 using InnovateFuture.Api.Configs;
 using InnovateFuture.Api.Middleware;
+using InnovateFuture.Application.Auth.Consumers;
 using InnovateFuture.Application.Common;
 using InnovateFuture.Infrastructure.Common;
 using InnovateFuture.Infrastructure.Common.Persistence;
 using InnovateFuture.Infrastructure.Configs;
+using MassTransit;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using NLog;
 using NLog.Web;
@@ -17,23 +23,74 @@ namespace InnovateFuture.Api
     {
         public static void Main(string[] args) 
         {
-            var logger = LogManager.Setup().LoadConfigurationFromFile("nLog.config").GetCurrentClassLogger();
+            // var logger = LogManager.Setup().LoadConfigurationFromFile("nLog.config").GetCurrentClassLogger();
             var policyName = "AllowLocalhost";
             
             var builder = WebApplication.CreateBuilder(args);
+
+            // Configure Logging
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();     
+            builder.Logging.AddDebug();     
+            builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace); 
+            builder.Configuration
+                .SetBasePath(Directory.GetCurrentDirectory())
+                // .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+
+
+            
             var connectionString = builder.Configuration["DBConnection"];
             
             builder.Services.AddAPIServices(builder.Configuration);
             builder.Services.AddApplicationServices(builder.Configuration);
             builder.Services.AddInfrastructureServices(builder.Configuration, connectionString);
             
+            builder.Services.AddScoped<IAuthorizationHandler, NotParentOrStudentHandler>();
+            
             
             builder.Services.AddHealthChecks()
                            .AddNpgSql(connectionString)
                            .AddDbContextCheck<ApplicationDbContext>(); 
             
-            builder.Logging.ClearProviders();
-            builder.Host.UseNLog();
+            // builder.Logging.ClearProviders();
+            // builder.Host.UseNLog();
+            
+            #region MassTransit configuration
+            builder.Services.AddMassTransit(x =>
+            {
+                x.AddConsumer<SendVerificationEventConsumer>();
+                x.AddConsumer<SendTemporaryPasswordEventConsumer>();
+                x.AddConsumer<ResendUserRegisteredEventConsumer>();
+                x.AddConsumer<ForgotPasswordEventConsumer>();
+                
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host($"rabbitmq://{builder.Configuration["RabbitmqHost"]}");
+                    
+                    cfg.ReceiveEndpoint("email-queue", e =>
+                    {
+                        // RabbitMQ sends 10 messages in advance to a consumer
+                        e.PrefetchCount = 10; 
+                        
+                        // one consumer instance can process 5 messages at once
+                        e.ConcurrentMessageLimit = 5;
+                        
+                        // bind queue to exchange with different routing keys
+                        e.Bind("email-exchange", x => x.RoutingKey = "user.verification");
+                        e.Bind("email-exchange", x => x.RoutingKey = "user.temporary-password");
+                        e.Bind("email-exchange", x => x.RoutingKey = "user.resend-verification");
+                        e.Bind("email-exchange", x => x.RoutingKey = "user.forgot-password");
+                        
+                        e.ConfigureConsumer<SendVerificationEventConsumer>(context);
+                        e.ConfigureConsumer<SendTemporaryPasswordEventConsumer>(context);
+                        e.ConfigureConsumer<ResendUserRegisteredEventConsumer>(context);
+                        e.ConfigureConsumer<ForgotPasswordEventConsumer>(context);
+                    });
+                });
+            });
+            #endregion
 
             var app = builder.Build();
             
@@ -50,16 +107,31 @@ namespace InnovateFuture.Api
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
             
+            // Enable Logging Middleware
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Application Starting..."); 
+            
             app.UseRouting();
+            
+            // Manually force authentication before authorization 
+            app.Use(async (context, next) =>
+            {
+                var result = await context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+                if (result.Succeeded && result.Principal != null)
+                {
+                    context.User = result.Principal; 
+                }
+                await next();
+            });
             
             app.UseAuthentication();
 
             app.UseAuthorization();
             
-            app.UseCors(policyName);
-
             app.MapControllers();
             
+            app.UseCors(policyName);
+
             app.Run();
         }
     }

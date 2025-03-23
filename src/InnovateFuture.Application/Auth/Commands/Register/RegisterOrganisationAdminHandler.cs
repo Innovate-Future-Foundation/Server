@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace InnovateFuture.Application.Auth.Commands.Register;
 
-public class RegisterOrganisationAdminHandler : IRequestHandler<RegisterOrganisationAdminCommand, (Guid ProfileId, User User, string Token)?>
+public class RegisterOrganisationAdminHandler : IRequestHandler<RegisterOrganisationAdminCommand, (string UserName, string Email, Guid ProfileId, string Token)?>
 {
     private readonly IOrgRepository _organisationRepository;
     private readonly IProfileRepository _profileRepository;
@@ -27,7 +27,7 @@ public class RegisterOrganisationAdminHandler : IRequestHandler<RegisterOrganisa
         _userManager = userManager;
     }
 
-    public async Task<(Guid ProfileId, User User, string Token)?> Handle(RegisterOrganisationAdminCommand command, CancellationToken cancellationToken)
+    public async Task<(string UserName, string Email, Guid ProfileId, string Token)?> Handle(RegisterOrganisationAdminCommand command, CancellationToken cancellationToken)
     {
         var transactions = await _unitOfWork.BeginTransactionAsync(cancellationToken);
         try
@@ -76,7 +76,7 @@ public class RegisterOrganisationAdminHandler : IRequestHandler<RegisterOrganisa
             await _unitOfWork.CommitTransactionAsync();
             
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            return (profile.Id, user, token);
+            return (user.UserName, user.Email, profile.Id, token);
         }
         catch (Exception ex)
         {

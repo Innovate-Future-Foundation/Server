@@ -1,0 +1,9 @@
+FROM rabbitmq:4-alpine
+
+# Create .erlang.cookie file and set permissions
+RUN echo 'v/Sy+/hAnjzv7QH0JOxGSRTW/Qzl6nNA1xLOZ7T1nF8=' > /var/lib/rabbitmq/.erlang.cookie \
+    && chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie \
+    && chmod 600 /var/lib/rabbitmq/.erlang.cookie
+
+# Set the command to start RabbitMQ
+CMD ["rabbitmq-server"]

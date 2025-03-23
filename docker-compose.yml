@@ -4,6 +4,21 @@ services:
       context: .
       dockerfile: Dockerfile.base
     image: inff-api-build
+    
+  rmq:
+    build:
+      context: .
+      dockerfile: Dockerfile.rmq
+    restart: always
+    ports:
+      - "5672:5672"   # RabbitMQ main service
+      - "15672:15672" # RabbitMQ management UI
+    networks:
+      - app-network  # Attach to the same network
+    healthcheck: # Add health check
+      test: [ "CMD", "rabbitmq-diagnostics", "check_running" ]
+      interval: 5s
+      retries: 5
 
   api:
     build:
@@ -13,10 +28,13 @@ services:
       - '5091:5091'
     environment:
       - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
+      - RabbitmqHost=${RABBITMQ_HOST}
       - JWTConfig__SecretKey=${JWT_SECRET}
       - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
       - ASPNETCORE_URLS=http://+:5091/
     depends_on:
+      rmq:
+        condition: service_healthy
       migration:
         condition: service_completed_successfully
       test:
@@ -46,7 +64,7 @@ services:
       --no-build"
     environment:
       - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
-      - JWTConfig__SecretKey=${JWT_SECRET}
+      - JWTConfig__SecretKey=123
       - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
     depends_on:
       - base

@@ -14,10 +14,7 @@ public class ResetPasswordHandler: IRequestHandler<ResetPasswordCommand, bool>
     
     public async Task<bool> Handle(ResetPasswordCommand command, CancellationToken cancellationToken)
     {
-        // 1⃣️ get user by email
         var user = await _userService.GetUserByEmailAsync(command.Email, cancellationToken);
-        
-        // 2⃣️ reset password
         await _userService.ResetPasswordAsync(user, command.NewPassword, command.ResetPasswordToken,  cancellationToken);
         
         return true;

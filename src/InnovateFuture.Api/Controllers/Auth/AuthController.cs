@@ -4,13 +4,11 @@ using InnovateFuture.Application.Auth.Commands.ConfirmEmail;
 using InnovateFuture.Application.Auth.Commands.Login;
 using InnovateFuture.Application.Auth.Commands.Password;
 using InnovateFuture.Application.Auth.Commands.Register;
-using InnovateFuture.Application.Auth.Commands.ResendVerificationEmail;
-using InnovateFuture.Application.Auth.Commands.SendTemporaryPassword;
-using InnovateFuture.Application.Auth.Commands.SendVerificationEmail;
+using InnovateFuture.Application.Auth.Events;
 using InnovateFuture.Application.Auth.Queries.GetMe;
-using InnovateFuture.Application.Auth.SendTemporaryPasswordEmail;
 using InnovateFuture.Application.Services.Auth.Register;
 using InnovateFuture.Application.Services.Security.TokenService;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,12 +26,16 @@ public class AuthController: ControllerBase
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
     private readonly JWTConfig _jwtConfig;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IMediator mediator, IMapper mapper, IOptions<JWTConfig> jwtOptions)
+    public AuthController(IMediator mediator, IMapper mapper, IOptions<JWTConfig> jwtOptions,  IPublishEndpoint publishEndpoint, ILogger<AuthController> logger)
     {
         _mediator = mediator;
         _mapper = mapper;
         _jwtConfig = jwtOptions.Value;
+        _publishEndpoint = publishEndpoint;
+        _logger = logger;
     }
     
     /// <summary>
@@ -45,14 +47,14 @@ public class AuthController: ControllerBase
     [HttpPost("register-organisation-admin")]
     public async Task<IActionResult> RegisterOrganisationAdmin([FromBody] RegisterOrganisationAdminRequest request)
     {
-        // 1⃣️ Update tables 
+        // Update tables 
         var registerCommand = _mapper.Map<RegisterOrganisationAdminCommand>(request);
         var registerResult = await _mediator.Send(registerCommand);
+        var (username, userEmail, profileId, token) = registerResult.Value;
         
-        var (profileId, user, token) = registerResult.Value;
-        // 2⃣️ Send Email in the Background (Non-blocking)
-        var sendVerificationEmailCommand = new SendVerificationEmailCommand(user, profileId, token, "email-verification");
-        _ = Task.Run(async () => await _mediator.Send(sendVerificationEmailCommand));
+        // publish event to RabbitMQ 
+        var userRegisteredEvent = new UserRegisteredEvent(username, userEmail, profileId, token, "email-verification");
+        await _publishEndpoint.Publish(userRegisteredEvent, context => context.SetRoutingKey("user.verification"));
 
         return Ok("Register organisation admin and send email successful");
     }
@@ -70,6 +72,7 @@ public class AuthController: ControllerBase
         var confirmResult = await _mediator.Send(command);
         
         var (email, result, isAdmin) = confirmResult;
+        _logger.LogInformation($"IMHERE{email} {result} {isAdmin}");
 
         if (isAdmin)
         {
@@ -85,18 +88,24 @@ public class AuthController: ControllerBase
         }
         else
         {
-            var sendTempPasswordCommand = new SendTemporaryPasswordCommand(email, result);
-            _ = Task.Run(async () => await _mediator.Send(sendTempPasswordCommand));
+            var sendTempPasswordCommand = new TemporaryPasswordEvent(email, result);
+            await _publishEndpoint.Publish(sendTempPasswordCommand, context => context.SetRoutingKey("user.temporary-password"));
         }
         return Ok("Email verification successful!");
     }
-
+    
+    /// <summary>
+    /// resend verification email for admin register
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [AllowAnonymous]
     [HttpPost("resend-verification-email")]
     public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendVerficationEmailRequest request)
     {
-        var command = _mapper.Map<ResendVerificationEmailCommand>(request);
-        await _mediator.Send(command);
+        var resendUserRegisteredEvent = _mapper.Map<ResendUserRegisteredEvent>(request);
+        await _publishEndpoint.Publish(resendUserRegisteredEvent, context => context.SetRoutingKey("user.resend-verification"));
+        
         return Ok("Resend email verification successful!");
     }
     
@@ -171,12 +180,8 @@ public class AuthController: ControllerBase
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
-        var command = _mapper.Map<ForgotPasswordCommand>(request);
-        var result = await _mediator.Send(command);
-        if (!result)
-        {
-            return BadRequest("failed to reset password.");
-        }
+        var forgotPasswordEvent = _mapper.Map<ForgotPasswordEvent>(request);
+        await _publishEndpoint.Publish(forgotPasswordEvent, context => context.SetRoutingKey("user.forgot-password"));
         
         return Ok("Password reset link has been sent to your email.");
     }
@@ -197,7 +202,7 @@ public class AuthController: ControllerBase
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "NotParentOrStudent")]
     [HttpPost("invite")]
     public async Task<IActionResult> RegisterNormalUser([FromBody] RegisterNormalUserRequest request)
     {
@@ -207,14 +212,15 @@ public class AuthController: ControllerBase
             return Unauthorized();
         }
         
+        // update database
         var registerCommand = _mapper.Map<RegisterNormalUserCommand>(request);
         registerCommand.InviterProfileId = profileId;
-        
         var registerResult = await _mediator.Send(registerCommand);
-        var (userProfileId, user, token, roleEnum) = registerResult.Value;
-        // Send Email in the Background (Non-blocking)
-        var sendVerificationEmailCommand = new SendVerificationEmailCommand(user, userProfileId, token, "email-verification", roleEnum);
-        _ = Task.Run(async () => await _mediator.Send(sendVerificationEmailCommand));
+        var (userName, userEmail, userProfileId, token, roleEnum) = registerResult.Value;
+        
+        // publish userRegisteredEvent
+        var userRegisteredEvent = new UserRegisteredEvent(userName, userEmail,userProfileId, token, "email-verification", roleEnum);
+        await _publishEndpoint.Publish(userRegisteredEvent, context => context.SetRoutingKey("user.verification"));
 
         return Ok("Invite user successful, please let user check email and confirm.");
     }
