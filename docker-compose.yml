@@ -6,11 +6,10 @@ services:
     image: inff-api-build
     
   rmq:
-    image: rabbitmq:3-management
+    build:
+      context: .
+      dockerfile: Dockerfile.rmq
     restart: always
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     ports:
       - "5672:5672"   # RabbitMQ main service
       - "15672:15672" # RabbitMQ management UI
@@ -65,7 +64,7 @@ services:
       --no-build"
     environment:
       - DBConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS};
-      - JWTConfig__SecretKey=${JWT_SECRET}
+      - JWTConfig__SecretKey=123
       - ASPNETCORE_ENVIRONMENT=${DEP_ENV}
     depends_on:
       - base
